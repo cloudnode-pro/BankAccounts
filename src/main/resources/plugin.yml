@@ -1,0 +1,4 @@
+name: BankAccounts
+version: '${project.version}'
+main: pro.cloudnode.smp.bankaccounts.BankAccounts
+api-version: "1.20"
