@@ -1,0 +1,22 @@
+# Database configuration
+# Only MariaDB is supported
+db:
+    # JDBC url
+    jdbc: jdbc:mariadb://localhost:3306/your_db_name
+    # Database user
+    user: root
+    # Database password
+    password: ChangeThis!
+
+    # Advanced configuration (do not touch unless you know what you are doing)
+    # HikariCP. Comment out any data source property to disable setting it.
+    cachePrepStmts: true
+    prepStmtCacheSize: 250
+    prepStmtCacheSqlLimit: 2048
+    useServerPrepStmts: true
+    useLocalSessionState: true
+    rewriteBatchedStatements: true
+    cacheResultSetMetadata: true
+    cacheServerConfiguration: true
+    elideSetAutoCommits: true
+    maintainTimeStats: false
