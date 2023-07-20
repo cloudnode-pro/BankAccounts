@@ -164,7 +164,7 @@ public class Account {
             stmt.setBigDecimal(8, balance);
             stmt.setBoolean(9, frozen);
 
-            stmt.execute();
+            stmt.executeUpdate();
         } catch (Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save account: " + id, e);
         }
