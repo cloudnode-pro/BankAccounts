@@ -2,11 +2,13 @@ package pro.cloudnode.smp.bankaccounts;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -31,6 +33,8 @@ public final class BankAccounts extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Could not initialize database.", e);
             getServer().getPluginManager().disablePlugin(this);
         }
+
+        createServerAccount();
         // Register events
         getServer().getPluginManager().registerEvents(new Join(), this);
     }
@@ -102,5 +106,20 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static BankAccounts getInstance() {
         return getPlugin(BankAccounts.class);
+    }
+
+    /**
+
+    /**
+     * Create server account, if enabled in config
+     */
+    private static void createServerAccount() {
+        if (getInstance().getConfig().getBoolean("server-account.enabled")) {
+            String name = getInstance().getConfig().getString("server-account.name");
+            Account.Type type = Account.getType(getInstance().getConfig().getInt("server-account.type"));
+            BigDecimal balance = getInstance().getConfig().getString("server-account.starting-balance").equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
+            OfflinePlayer server = getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            new Account(server, type, name, balance, false).save();
+        }
     }
 }
