@@ -1,6 +1,7 @@
 package pro.cloudnode.smp.bankaccounts;
 
 import org.bukkit.OfflinePlayer;
+import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -25,7 +26,7 @@ public class Account {
     /**
      * Account owner
      */
-    public final OfflinePlayer owner;
+    public final @NotNull OfflinePlayer owner;
     /**
      * Account type
      */
@@ -39,7 +40,7 @@ public class Account {
     /**
      * Account balance
      */
-    public BigDecimal balance;
+    public @Nullable BigDecimal balance;
     /**
      * Whether the account is frozen
      * <p>
@@ -56,7 +57,7 @@ public class Account {
      * @param balance Account balance
      * @param frozen Whether the account is frozen
      */
-    public Account(String id, OfflinePlayer owner, Type type, String name, BigDecimal balance, boolean frozen) {
+    public Account(String id, @NotNull OfflinePlayer owner, Type type, @Nullable String name, @Nullable BigDecimal balance, boolean frozen) {
         this.id = id;
         this.owner = owner;
         this.type = type;
@@ -70,9 +71,11 @@ public class Account {
      * @param owner Account owner
      * @param type Account type
      * @param name Account display name
+     * @param balance Account balance
+     * @param frozen Whether the account is frozen
      */
-    public Account(OfflinePlayer owner, Type type, String name) {
-        this(StringGenerator.generate(16), owner, type, name, BigDecimal.ZERO, false);
+    public Account(@NotNull OfflinePlayer owner, Type type, String name, BigDecimal balance, boolean frozen) {
+        this(StringGenerator.generate(16), owner, type, name, balance, frozen);
     }
 
     /**
