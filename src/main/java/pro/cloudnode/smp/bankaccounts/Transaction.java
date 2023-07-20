@@ -3,6 +3,7 @@ package pro.cloudnode.smp.bankaccounts;
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.util.Date;
+import java.util.Optional;
 
 /**
  * Bank account transaction
@@ -78,5 +79,19 @@ public class Transaction {
      */
     public Transaction(String from, String to, BigDecimal amount, @Nullable String description, @Nullable String instrument) {
         this(-1, from, to, amount, new Date(), description, instrument);
+    }
+
+    /**
+     * Get sender account
+     */
+    public Optional<Account> getFrom() {
+        return Account.getByID(from);
+    }
+
+    /**
+     * Get recipient account
+     */
+    public Optional<Account> getTo() {
+        return Account.getByID(to);
     }
 }
