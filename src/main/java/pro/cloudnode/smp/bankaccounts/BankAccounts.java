@@ -3,6 +3,7 @@ package pro.cloudnode.smp.bankaccounts;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.plugin.java.JavaPlugin;
+import pro.cloudnode.smp.bankaccounts.events.Join;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,6 +31,8 @@ public final class BankAccounts extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Could not initialize database.", e);
             getServer().getPluginManager().disablePlugin(this);
         }
+        // Register events
+        getServer().getPluginManager().registerEvents(new Join(), this);
     }
 
     @Override

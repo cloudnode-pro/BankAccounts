@@ -20,3 +20,7 @@ db:
     cacheServerConfiguration: true
     elideSetAutoCommits: true
     maintainTimeStats: false
+
+# Starting balance
+# Set to `null` to disable automatically creating a personal account on first join
+starting-balance: 0
