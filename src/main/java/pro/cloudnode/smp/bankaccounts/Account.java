@@ -169,6 +169,23 @@ public class Account {
     }
 
     /**
+     * Get all accounts
+     */
+    public static Account[] get() {
+        List<Account> accounts = new ArrayList<>();
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts`")) {
+            ResultSet rs = stmt.executeQuery();
+
+            while (rs.next()) accounts.add(new Account(rs));
+            return accounts.toArray(new Account[0]);
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts", e);
+            return new Account[0];
+        }
+    }
+
+    /**
      * Insert or update account into database
      */
     public void save() {
