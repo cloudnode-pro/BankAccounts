@@ -100,6 +100,28 @@ public class Account {
     }
 
     /**
+     * Create a new transaction/transfer
+     * @param to Recipient account
+     * @param amount Transaction amount Must be greater than zero.
+     * @param description Transaction description
+     * @param instrument Payment instrument used to facilitate the transaction
+     * @throws IllegalStateException If the sender or recipient account is frozen or the sender has insufficient funds
+     * @throws IllegalArgumentException If the amount is less than or equal to zero
+     */
+    public Transaction transfer(Account to, BigDecimal amount, @Nullable String description, @Nullable String instrument) {
+        if (frozen) throw new IllegalStateException("Your account is frozen");
+        if (to.frozen) throw new IllegalStateException("Recipient account is frozen");
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
+        if (balance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient funds");
+
+        Transaction transaction = new Transaction(this.id, to.id, amount, description, instrument);
+        transaction.save();
+        this.updateBalance(amount.negate());
+        to.updateBalance(amount);
+        return transaction;
+    }
+
+    /**
      * Get account by ID
      * @param id Account ID
      */
