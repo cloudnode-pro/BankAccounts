@@ -115,6 +115,8 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().getConfig().getBoolean("server-account.enabled")) {
+            Account[] accounts = Account.get(getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000")));
+            if (accounts.length > 0) return;
             String name = getInstance().getConfig().getString("server-account.name");
             Account.Type type = Account.getType(getInstance().getConfig().getInt("server-account.type"));
             BigDecimal balance = getInstance().getConfig().getString("server-account.starting-balance").equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
