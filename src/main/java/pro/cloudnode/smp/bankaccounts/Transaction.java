@@ -89,6 +89,14 @@ public class Transaction {
     }
 
     /**
+     * Create a new transaction from a database result set
+     * @param rs Result set
+     */
+    public Transaction(ResultSet rs) throws SQLException {
+        this(rs.getInt("id"), rs.getString("from"), rs.getString("to"), rs.getBigDecimal("amount"), rs.getTimestamp("time"), rs.getString("description"), rs.getString("instrument"));
+    }
+
+    /**
      * Get sender account
      */
     public Optional<Account> getFrom() {
@@ -122,6 +130,22 @@ public class Transaction {
             if (rs.next()) this.id = rs.getInt(1);
         } catch (Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save transaction: " + this.id, e);
+        }
+    }
+
+    /**
+     * Get transaction by ID
+     * @param id Transaction ID
+     */
+    public static Optional<Transaction> getByID(int id) {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `id` = ? LIMIT 1")) {
+            stmt.setInt(1, id);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? Optional.of(new Transaction(rs)) : Optional.empty();
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get transaction: " + id, e);
+            return Optional.empty();
         }
     }
 }
