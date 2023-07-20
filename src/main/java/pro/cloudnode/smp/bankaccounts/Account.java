@@ -216,11 +216,20 @@ public class Account {
         /**
          * Personal, individual, private account
          */
-        PERSONAL,
+        PERSONAL("Personal"),
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS
+        BUSINESS("Business");
+
+        /**
+         * User-friendly name
+         */
+        public final @NotNull String name;
+
+        Type(@NotNull String name) {
+            this.name = name;
+        }
     }
 
     /**
