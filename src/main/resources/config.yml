@@ -21,6 +21,14 @@ db:
     elideSetAutoCommits: true
     maintainTimeStats: false
 
+currency:
+    # Currency symbol
+    symbol: $
+
+    # Currency format
+    # See https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/text/DecimalFormat.html#special_pattern_character
+    format: "#,##0.00"
+
 # Starting balance
 # Set to `null` to disable automatically creating a personal account on first join
 starting-balance: 0
@@ -39,3 +47,41 @@ server-account:
     # Starting balance
     # Use `Infinity` for infinite ∞ balance
     starting-balance: Infinity
+
+# Messages
+messages:
+    # Currency symbol
+    currency: $
+
+    # Errors
+    errors:
+        # You have no accounts
+        no-accounts: "<red>(!) You have no bank accounts.</red>"
+        # No permission
+        no-permission: "<red>(!) You do not have permission to use this command.</red>"
+        # Account not found
+        account-not-found: "<red>(!) Account not found.</red>"
+        # Command not recognised
+        unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/bank help><gray>/bank help</gray></click>.</red>"
+
+    # Account balance
+    # Available placeholders:
+    # <account> - Account name. Defaults to owner username or ID if not set.
+    # <account-id> - Account ID
+    # <account-type> - Account type (Personal or Business)
+    # <balance> - Account balance without formatting, example: 123456.78
+    # <balance-formatted> - Account balance with formatting, example: 123,456.78
+    # <balance-short> - Account balance with formatting, example: 123k
+    balance: |
+        <green><account></green> <gray>(<account-type> account)</gray>
+        <green>Balance:</green> <white><balance-formatted></white>
+        <i><gray><click:copy_to_clipboard:<account-id>><hover:show_text:'Click to copy account ID'><account-id></hover></click></gray></i>
+
+    # List accounts
+    list-accounts:
+        header: "<green>Bank accounts</green>"
+        # Same placeholders as balance
+        entry: "<gray>- <click:run_command:/bank balance <account-id>><hover:show_text:'<white><account></white>:<gray><account-type> - <green><balance-formatted></green></gray>:<gray>Click to view'><account></hover></click> - <white><balance-short></white></gray>"
+
+    # Plugin reload
+    reload: "<green>(!) Plugin configuration reloaded</green>"

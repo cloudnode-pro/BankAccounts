@@ -4,14 +4,19 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
+import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
+import java.text.DecimalFormat;
+import java.util.UUID;
 import java.util.logging.Level;
 
 public final class BankAccounts extends JavaPlugin {
@@ -35,6 +40,10 @@ public final class BankAccounts extends JavaPlugin {
         }
 
         createServerAccount();
+
+        // Register commands
+        getCommand("bank").setExecutor(new BankCommand());
+
         // Register events
         getServer().getPluginManager().registerEvents(new Join(), this);
     }
