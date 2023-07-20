@@ -195,12 +195,16 @@ public class Account {
             stmt.setString(1, id);
             stmt.setString(2, owner.getUniqueId().toString());
             stmt.setInt(3, getType(type));
-            stmt.setString(4, name);
-            stmt.setBigDecimal(5, balance);
+            if (name == null) stmt.setNull(4, java.sql.Types.VARCHAR);
+            else stmt.setString(4, name);
+            if (balance == null) stmt.setNull(5, java.sql.Types.DECIMAL);
+            else stmt.setBigDecimal(5, balance);
             stmt.setBoolean(6, frozen);
             // update
-            stmt.setString(7, name);
-            stmt.setBigDecimal(8, balance);
+            if (name == null) stmt.setNull(7, java.sql.Types.VARCHAR);
+            else stmt.setString(7, name);
+            if (balance == null) stmt.setNull(8, java.sql.Types.DECIMAL);
+            else stmt.setBigDecimal(8, balance);
             stmt.setBoolean(9, frozen);
 
             stmt.executeUpdate();
