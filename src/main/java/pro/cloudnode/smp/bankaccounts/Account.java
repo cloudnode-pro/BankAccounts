@@ -125,7 +125,7 @@ public class Account {
      * Get account by ID
      * @param id Account ID
      */
-    public static Optional<Account> getByID(String id) {
+    public static Optional<Account> get(String id) {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
             stmt.setString(1, id);
