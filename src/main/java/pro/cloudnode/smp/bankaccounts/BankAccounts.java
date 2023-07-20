@@ -109,6 +109,61 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Get currency symbol
+     */
+    public static @NotNull String getCurrencySymbol() {
+        String symbol = getInstance().getConfig().getString("currency.symbol");
+        return symbol != null ? symbol : "$";
+    }
+
+    /**
+     * Format currency
+     *
+     * @param amount Amount
+     */
+    public static String formatCurrency(BigDecimal amount) {
+        if (amount == null) return getCurrencySymbol() + "∞";
+        String format = getInstance().getConfig().getString("currency.format");
+        return getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount);
+    }
+
+    /**
+     * Short currency format
+     * <p>
+     * Example: {@code $1.23}, {@code $1.2K}, {@code $132K}, {@code $1.2M}, {@code $100M}, etc. including B and T
+     *
+     * @param amount Amount
+     */
+    public static String formatCurrencyShort(BigDecimal amount) {
+        String currencySymbol = getCurrencySymbol();
+        if (amount == null) return currencySymbol + "∞";
+        BigDecimal absAmount = amount.abs();
+
+        if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0)
+            return currencySymbol + amount.setScale(2, RoundingMode.HALF_UP).toString();
+        else if (absAmount.compareTo(BigDecimal.valueOf(10_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP).toString() + "K";
+        else if (absAmount.compareTo(BigDecimal.valueOf(100_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 1, RoundingMode.HALF_UP).toString() + "K";
+        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 0, RoundingMode.HALF_UP).toString() + "K";
+        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 2, RoundingMode.HALF_UP).toString() + "M";
+        else if (absAmount.compareTo(BigDecimal.valueOf(100_000_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 1, RoundingMode.HALF_UP).toString() + "M";
+        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000_000)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 0, RoundingMode.HALF_UP).toString() + "M";
+        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000_000L)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 2, RoundingMode.HALF_UP).toString() + "B";
+        else if (absAmount.compareTo(BigDecimal.valueOf(100_000_000_000L)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 1, RoundingMode.HALF_UP).toString() + "B";
+        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000_000_000L)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 0, RoundingMode.HALF_UP).toString() + "B";
+        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000_000_000L)) < 0)
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000_000L), 2, RoundingMode.HALF_UP).toString() + "T";
+        else
+            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000_000L), 1, RoundingMode.HALF_UP).toString() + "T";
+    }
 
     /**
      * Create server account, if enabled in config
