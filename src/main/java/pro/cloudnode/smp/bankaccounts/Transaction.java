@@ -100,14 +100,14 @@ public class Transaction {
      * Get sender account
      */
     public Optional<Account> getFrom() {
-        return Account.getByID(from);
+        return Account.get(from);
     }
 
     /**
      * Get recipient account
      */
     public Optional<Account> getTo() {
-        return Account.getByID(to);
+        return Account.get(to);
     }
 
     /**
@@ -137,7 +137,7 @@ public class Transaction {
      * Get transaction by ID
      * @param id Transaction ID
      */
-    public static Optional<Transaction> getByID(int id) {
+    public static Optional<Transaction> get(int id) {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
              PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `id` = ? LIMIT 1")) {
             stmt.setInt(1, id);
