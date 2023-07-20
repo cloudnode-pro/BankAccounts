@@ -2,8 +2,15 @@ package pro.cloudnode.smp.bankaccounts;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+import java.sql.Types;
 import java.util.Date;
 import java.util.Optional;
+import java.util.logging.Level;
 
 /**
  * Bank account transaction
@@ -93,5 +100,28 @@ public class Transaction {
      */
     public Optional<Account> getTo() {
         return Account.getByID(to);
+    }
+
+    /**
+     * Insert transaction in the database
+     */
+    public void save() {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_transactions` (`from`, `to`, `amount`, `time`, `description`, `instrument`) VALUES (?, ?, ?, ?, ?, ?)")) {
+            stmt.setString(1, from);
+            stmt.setString(2, to);
+            stmt.setBigDecimal(3, amount);
+            stmt.setTimestamp(4, new Timestamp(time.getTime()));
+            if (description == null) stmt.setNull(5, Types.VARCHAR);
+            else stmt.setString(5, description);
+            if (instrument == null) stmt.setNull(6, Types.VARCHAR);
+            else stmt.setString(6, instrument);
+
+            stmt.executeUpdate();
+            ResultSet rs = stmt.getGeneratedKeys();
+            if (rs.next()) this.id = rs.getInt(1);
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save transaction: " + this.id, e);
+        }
     }
 }
