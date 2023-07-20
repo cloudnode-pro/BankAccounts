@@ -48,6 +48,7 @@ public final class BankAccounts extends JavaPlugin {
      * Setup database source
      */
     private void setupDbSource() {
+        config.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
         if (getConfig().isString("db.jdbc")) config.setJdbcUrl(getConfig().getString("db.jdbc"));
         else getLogger().severe("config: db.jdbc: not set");
         if (getConfig().isString("db.user")) config.setUsername(getConfig().getString("db.user"));
