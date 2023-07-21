@@ -3,6 +3,7 @@ package pro.cloudnode.smp.bankaccounts;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
@@ -180,13 +181,29 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().getConfig().getBoolean("server-account.enabled")) {
-            Account[] accounts = Account.get(getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000")));
+            Account[] accounts = Account.get(getConsoleOfflinePlayer());
             if (accounts.length > 0) return;
             String name = getInstance().getConfig().getString("server-account.name");
-            Account.Type type = Account.getType(getInstance().getConfig().getInt("server-account.type"));
+            Account.Type type = Account.Type.getType(getInstance().getConfig().getInt("server-account.type"));
             BigDecimal balance = getInstance().getConfig().getString("server-account.starting-balance").equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
-            OfflinePlayer server = getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-            new Account(server, type, name, balance, false).save();
+            new Account(getConsoleOfflinePlayer(), type, name, balance, false).save();
         }
+    }
+
+    /**
+     * Get console offline player
+     * <p>
+     * Not real player; UUID: 00000000-0000-0000-0000-000000000000
+     */
+    public static @NotNull OfflinePlayer getConsoleOfflinePlayer() {
+        return BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+    }
+
+    /**
+     * Get offline player or console as offline player (UUID 0)
+     * @param sender Command sender
+     */
+    public static @NotNull OfflinePlayer getOfflinePlayer(@NotNull CommandSender sender) {
+        return sender instanceof OfflinePlayer ? (OfflinePlayer) sender : getConsoleOfflinePlayer();
     }
 }

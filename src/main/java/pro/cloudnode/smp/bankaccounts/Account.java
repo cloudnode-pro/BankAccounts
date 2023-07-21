@@ -86,7 +86,7 @@ public class Account {
         this(
                 rs.getString("id"),
                 BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString(rs.getString("owner"))),
-                getType(rs.getInt("type")),
+                Type.getType(rs.getInt("type")),
                 rs.getString("name"),
                 rs.getBigDecimal("balance"),
                 rs.getBoolean("frozen")
@@ -151,7 +151,7 @@ public class Account {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
              PreparedStatement stmt = conn.prepareStatement(type == null ? "SELECT * FROM `bank_accounts` WHERE `owner` = ?" : "SELECT * FROM `bank_accounts` WHERE `owner` = ? AND `type` = ?")) {
             stmt.setString(1, owner.getUniqueId().toString());
-            if (type != null) stmt.setInt(2, getType(type));
+            if (type != null) stmt.setInt(2, Type.getType(type));
             ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) accounts.add(new Account(rs));
@@ -197,7 +197,7 @@ public class Account {
             // insert
             stmt.setString(1, id);
             stmt.setString(2, owner.getUniqueId().toString());
-            stmt.setInt(3, getType(type));
+            stmt.setInt(3, Type.getType(type));
             if (name == null) stmt.setNull(4, java.sql.Types.VARCHAR);
             else stmt.setString(4, name);
             if (balance == null) stmt.setNull(5, java.sql.Types.DECIMAL);
@@ -237,23 +237,30 @@ public class Account {
         Type(@NotNull String name) {
             this.name = name;
         }
-    }
 
-    /**
-     * Convert account type to integer
-     * @param type Account type
-     * @return Account type as integer
-     */
-    public static int getType(Type type) {
-        return type.ordinal();
-    }
+        /**
+         * Convert account type to integer
+         * @param type Account type
+         * @return Account type as integer
+         */
+        public static int getType(Type type) {
+            return type.ordinal();
+        }
 
-    /**
-     * Convert integer to account type
-     * @param type Account type as integer
-     * @return Account type
-     */
-    public static Type getType(int type) {
-        return Type.values()[type];
+        /**
+         * Convert integer to account type
+         * @param type Account type as integer
+         * @return Account type
+         */
+        public static Type getType(int type) {
+            return Type.values()[type];
+        }
+
+        public static Optional<Type> fromString(String name) {
+            for (Type type : Type.values()) {
+                if (type.name.equalsIgnoreCase(name)) return Optional.of(type);
+            }
+            return Optional.empty();
+        }
     }
 }

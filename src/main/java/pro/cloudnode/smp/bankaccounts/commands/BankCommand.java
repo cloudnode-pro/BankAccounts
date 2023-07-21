@@ -8,12 +8,15 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +37,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             suggestions.add("help");
             if (sender.hasPermission("bank.balance.self")) suggestions.addAll(Arrays.asList("balance", "bal", "account", "accounts"));
             if (sender.hasPermission("bank.reload")) suggestions.add("reload");
+            if (sender.hasPermission("bank.account.create")) suggestions.addAll(Arrays.asList("create", "new"));
         }
         else {
             switch (args[0]) {
@@ -54,6 +58,18 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                         for (Account account : accounts) if (account.owner.getName() != null) suggestions.add(account.owner.getName());
                     }
                 }
+                case "create", "new" -> {
+                    if (args.length == 2) {
+                        suggestions.addAll(Arrays.asList("PERSONAL", "BUSINESS"));
+                    }
+                    else if (args.length == 3 && sender.hasPermission("bank.account.create.other"))
+                        suggestions.add("--player");
+                    else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission("bank.account.create.other")) {
+                        Account[] accounts = Account.get();
+                        for (Account account : accounts)
+                            if (account.owner.getName() != null) suggestions.add(account.owner.getName());
+                    }
+                }
             }
         }
         return suggestions;
@@ -66,8 +82,9 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         if (args.length == 0) overview(sender);
         else switch (args[0]) {
             case "help" -> help(sender, label);
-            case "bal", "balance", "account", "accounts" -> balance(sender, Arrays.copyOfRange(args, 1, args.length));
+            case "bal", "balance", "account", "accounts" -> balance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "reload" -> reload(sender);
+            case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
         }
     }
@@ -92,6 +109,8 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(MiniMessage.miniMessage().deserialize(""));
         if (sender.hasPermission("bank.balance.self")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>"));
         if (sender.hasPermission("bank.balance.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player [player]</gray></green> <white>- List another player's accounts</click>"));
+        if (sender.hasPermission("bank.account.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create ><green>/bank create <gray>[PERSONAL|BUSINESS]</gray></green> <white>- Create a new account</click>"));
+        if (sender.hasPermission("bank.account.create.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create --player ><green>/bank create <gray>[PERSONAL|BUSINESS] --player [player]</gray></green> <white>- Create an account for another player</click>"));
         if (sender.hasPermission("bank.reload")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>"));
         sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
     }
@@ -111,13 +130,13 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      *  <li>{@code balance --player <player>} List all accounts owned by the specified player. Permission: `bank.balance.other`</li>
      * </ul>
      */
-    public static void balance(@NotNull CommandSender sender, String[] args) throws NullPointerException {
+    public static void balance(@NotNull CommandSender sender, String[] args, String label) throws NullPointerException {
         if (args.length == 0) {
             if (!sender.hasPermission("bank.balance.self")) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
                 return;
             }
-            @NotNull OfflinePlayer player = sender instanceof OfflinePlayer ? (OfflinePlayer) sender : BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString("00000000-0000-0000-0000-000000000000"));
+            @NotNull OfflinePlayer player = BankAccounts.getOfflinePlayer(sender);
             listAccounts(sender, player);
         }
         else switch (args[0]) {
@@ -127,7 +146,9 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     return;
                 }
                 if (args.length == 1) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> balance --player <player>"));
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> balance --player <player>",
+                            Placeholder.unparsed("command", label)
+                    ));
                     return;
                 }
                 @NotNull OfflinePlayer player = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
@@ -169,6 +190,54 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
         BankAccounts.getInstance().reloadConfig();
         sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.reload"))));
+    }
+
+    /**
+     * Create account
+     * create [type] [--player <player>]
+     */
+    public static void create(@NotNull CommandSender sender, String[] args, String label) {
+        @NotNull OfflinePlayer target = BankAccounts.getOfflinePlayer(sender);
+        if (Arrays.asList(args).contains("--player")) {
+            if (!sender.hasPermission("bank.account.create.other")) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+                return;
+            }
+            else {
+                // find value of --player
+                int index = Arrays.asList(args).indexOf("--player");
+                // index out of bounds
+                if (index == -1 || index >= args.length - 1) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create [PERSONAL|BUSINESS] --player <player>",
+                            Placeholder.unparsed("command", label)
+                    ));
+                    return;
+                }
+                target = BankAccounts.getInstance().getServer().getOfflinePlayer(args[index + 1]);
+            }
+        }
+        // check if target is the same as sender
+        if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()) && !sender.hasPermission("bank.account.create")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
+        @NotNull Account.Type type = args.length == 0 ? Account.Type.PERSONAL : Account.Type.fromString(args[0]).orElse(Account.Type.PERSONAL);
+        if (!sender.hasPermission("bank.account.create.bypass")) {
+            Account[] accounts = Account.get(target, type);
+            int limit = BankAccounts.getInstance().getConfig().getInt("account-limits." + Account.Type.getType(type));
+            if (limit != -1 && accounts.length >= limit) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.max-accounts")),
+                        Placeholder.unparsed("type", type.name),
+                        Placeholder.unparsed("limit", String.valueOf(BankAccounts.getInstance().getConfig().getInt("account-limits." + Account.Type.getType(type))))
+                ));
+                return;
+            }
+        }
+
+        Account account = new Account(target, type, null, BigDecimal.ZERO, false);
+        account.save();
+
+        sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
     }
 
     /**

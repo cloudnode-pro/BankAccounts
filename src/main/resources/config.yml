@@ -48,6 +48,23 @@ server-account:
     # Use `Infinity` for infinite ∞ balance
     starting-balance: Infinity
 
+# Maximum number of accounts a player can have
+# Account types:
+#   0: Personal account
+#   1: Business account
+# Limits:
+#   0: cannot have any accounts
+#   -1: unlimited accounts
+#
+# Players can open accounts themselves if they have `bank.account.create`. These limits also apply if someone else
+# creates bank accounts for other players with the admin permission `bank.account.create.other`. You can bypass the
+# limits using `bank.account.create.bypass`.
+account-limits:
+    # Personal accounts
+    0: 1
+    # Business accounts
+    1: -1
+
 # Messages
 messages:
     # Currency symbol
@@ -63,6 +80,9 @@ messages:
         account-not-found: "<red>(!) Account not found.</red>"
         # Command not recognised
         unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/bank help><gray>/bank help</gray></click>.</red>"
+        # <type> the account type
+        # <limit> the account limit for that type
+        max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
 
     # Account balance
     # Available placeholders:
@@ -81,7 +101,10 @@ messages:
     list-accounts:
         header: "<green>Bank accounts</green>"
         # Same placeholders as balance
-        entry: "<gray>- <click:run_command:/bank balance <account-id>><hover:show_text:'<white><account></white>:<gray><account-type> - <green><balance-formatted></green></gray>:<gray>Click to view'><account></hover></click> - <white><balance-short></white></gray>"
+        entry: "<dark_gray>*</dark_gray> <gray><click:run_command:/bank balance <account-id>><hover:show_text:'<white><account></white><newline><gray><account-type> - <green><balance-formatted></green></gray><newline><gray>Click to view'><account></hover></click> - <white><balance-short></white></gray>"
 
     # Plugin reload
     reload: "<green>(!) Plugin configuration reloaded</green>"
+
+    # Account created (same placeholders as balance)
+    account-created: "<green>(!) Successfully created <account-type> account: <account></green> <click:run_command:/bank balance <account-id>><gray>Click to view</gray></click>"
