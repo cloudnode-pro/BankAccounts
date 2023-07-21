@@ -98,6 +98,7 @@ public class Account {
      * @param diff Balance difference (positive or negative)
      */
     public void updateBalance(BigDecimal diff) {
+        if (balance == null) return;
         this.balance = balance.add(diff);
         this.save();
     }
@@ -115,7 +116,7 @@ public class Account {
         if (frozen) throw new IllegalStateException("Your account is frozen");
         if (to.frozen) throw new IllegalStateException("Recipient account is frozen");
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
-        if (balance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient funds");
+        if (balance != null && balance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient funds");
 
         Transaction transaction = new Transaction(this.id, to.id, amount, description, instrument);
         transaction.save();
