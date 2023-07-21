@@ -166,7 +166,7 @@ public final class BankAccounts extends JavaPlugin {
         String suffix = bounds.get(bound);
         BigDecimal divided = absAmount.divide(bound, RoundingMode.HALF_UP);
         int scale = divided.compareTo(BigDecimal.valueOf(10)) < 0 ? 2 : divided.compareTo(BigDecimal.valueOf(100)) < 0 ? 1 : 0;
-        return prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros() + suffix;
+        return prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + suffix;
     }
 
     /**
