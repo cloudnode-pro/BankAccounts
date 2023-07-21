@@ -17,6 +17,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -147,33 +148,25 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static String formatCurrencyShort(BigDecimal amount) {
         String currencySymbol = getCurrencySymbol();
-        if (amount == null) return currencySymbol + "∞";
-        BigDecimal absAmount = amount.abs();
+        if (amount == null) return "∞";
+        BigDecimal absAmount = amount.abs().setScale(2, RoundingMode.HALF_UP);
+        String prefix = (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + currencySymbol;
+        if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0) return prefix + absAmount.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
 
-        if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0)
-            return currencySymbol + amount.setScale(2, RoundingMode.HALF_UP).toString();
-        else if (absAmount.compareTo(BigDecimal.valueOf(10_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 2, RoundingMode.HALF_UP).toString() + "K";
-        else if (absAmount.compareTo(BigDecimal.valueOf(100_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 1, RoundingMode.HALF_UP).toString() + "K";
-        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1000), 0, RoundingMode.HALF_UP).toString() + "K";
-        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 2, RoundingMode.HALF_UP).toString() + "M";
-        else if (absAmount.compareTo(BigDecimal.valueOf(100_000_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 1, RoundingMode.HALF_UP).toString() + "M";
-        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000_000)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000), 0, RoundingMode.HALF_UP).toString() + "M";
-        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000_000L)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 2, RoundingMode.HALF_UP).toString() + "B";
-        else if (absAmount.compareTo(BigDecimal.valueOf(100_000_000_000L)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 1, RoundingMode.HALF_UP).toString() + "B";
-        else if (absAmount.compareTo(BigDecimal.valueOf(1_000_000_000_000L)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000L), 0, RoundingMode.HALF_UP).toString() + "B";
-        else if (absAmount.compareTo(BigDecimal.valueOf(10_000_000_000_000L)) < 0)
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000_000L), 2, RoundingMode.HALF_UP).toString() + "T";
-        else
-            return currencySymbol + amount.divide(BigDecimal.valueOf(1_000_000_000_000L), 1, RoundingMode.HALF_UP).toString() + "T";
+        Map<BigDecimal, String> bounds = Map.of(
+                BigDecimal.valueOf(1000), "K",
+                BigDecimal.valueOf(1_000_000), "M",
+                BigDecimal.valueOf(1_000_000_000), "B",
+                BigDecimal.valueOf(1_000_000_000_000L), "T"
+        );
+        Map.Entry<BigDecimal, String> entry = bounds.entrySet().stream().sorted(Map.Entry.comparingByKey()).filter(e -> absAmount.divide(e.getKey(), RoundingMode.HALF_UP).compareTo(BigDecimal.valueOf(1000)) < 0).findFirst().orElse(null);
+        if (entry == null) entry = bounds.entrySet().stream().max(Map.Entry.comparingByKey()).orElse(null);
+        if (entry == null) return "FAIL";
+        BigDecimal bound = entry.getKey();
+        String suffix = bounds.get(bound);
+        BigDecimal divided = absAmount.divide(bound, RoundingMode.HALF_UP);
+        int scale = divided.compareTo(BigDecimal.valueOf(10)) < 0 ? 2 : divided.compareTo(BigDecimal.valueOf(100)) < 0 ? 1 : 0;
+        return prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros() + suffix;
     }
 
     /**
