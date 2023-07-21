@@ -83,6 +83,7 @@ messages:
         # <type> the account type
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
+        rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
 
     # Account balance
     # Available placeholders:
@@ -111,3 +112,6 @@ messages:
 
     # Balance set (same placeholders as balance)
     balance-set: "<green>(!) Successfully set <white><account></white> <gray>(<account-type>, <account-id>)</gray> balance to <white><balance-formatted></white></green>"
+
+    # Account name set (same placeholders as balance)
+    name-set: "<green>(!) Successfully renamed account <white><account></white>"
