@@ -136,7 +136,7 @@ public final class BankAccounts extends JavaPlugin {
     public static String formatCurrency(BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
         String format = getInstance().getConfig().getString("currency.format");
-        return getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount);
+        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount.abs().setScale(2, RoundingMode.HALF_UP));
     }
 
     /**
