@@ -42,6 +42,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         else {
             switch (args[0]) {
                 case "balance", "bal", "account", "accounts" -> {
+                    if (!sender.hasPermission("bank.balance.self") && !sender.hasPermission("bank.balance.other")) return suggestions;
                     if (args.length == 2) {
                         if (sender.hasPermission("bank.balance.other")) suggestions.add("--player");
                         if (sender instanceof OfflinePlayer player) {
@@ -59,6 +60,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     }
                 }
                 case "create", "new" -> {
+                    if (!sender.hasPermission("bank.account.create")) return suggestions;
                     if (args.length == 2) {
                         suggestions.addAll(Arrays.asList("PERSONAL", "BUSINESS"));
                     }
