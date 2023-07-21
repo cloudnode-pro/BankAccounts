@@ -108,3 +108,6 @@ messages:
 
     # Account created (same placeholders as balance)
     account-created: "<green>(!) Successfully created <account-type> account: <account></green> <click:run_command:/bank balance <account-id>><gray>Click to view</gray></click>"
+
+    # Balance set (same placeholders as balance)
+    balance-set: "<green>(!) Successfully set <white><account></white> <gray>(<account-type>, <account-id>)</gray> balance to <white><balance-formatted></white></green>"

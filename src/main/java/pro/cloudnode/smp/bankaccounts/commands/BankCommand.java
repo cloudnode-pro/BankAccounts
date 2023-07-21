@@ -38,6 +38,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("bank.balance.self")) suggestions.addAll(Arrays.asList("balance", "bal", "account", "accounts"));
             if (sender.hasPermission("bank.reload")) suggestions.add("reload");
             if (sender.hasPermission("bank.account.create")) suggestions.addAll(Arrays.asList("create", "new"));
+            if (sender.hasPermission("bank.set.balance")) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
         }
         else {
             switch (args[0]) {
@@ -72,6 +73,14 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                             if (account.owner.getName() != null) suggestions.add(account.owner.getName());
                     }
                 }
+                case "setbal", "setbalance" -> {
+                    if (!sender.hasPermission("bank.set.balance")) return suggestions;
+                    if (args.length == 2) {
+                        Account[] accounts = Account.get();
+                        for (Account account : accounts) suggestions.add(account.id);
+                    }
+                    if (args.length == 3) suggestions.add("Infinity");
+                }
             }
         }
         return suggestions;
@@ -87,6 +96,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             case "bal", "balance", "account", "accounts" -> balance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "reload" -> reload(sender);
             case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "setbal", "setbalance" -> setBalance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
         }
     }
@@ -240,6 +250,39 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         account.save();
 
         sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
+    }
+
+    /**
+     * Set account balance
+     * setbal <account> <bal>
+     */
+    public static void setBalance(@NotNull CommandSender sender, String[] args, String label) {
+        if (!sender.hasPermission("bank.set.balance")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
+        if (args.length < 2) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setbalance " + (args.length > 0 ? args[0] : "<account>") + " <bal>",
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
+        Optional<Account> account = Account.get(args[0]);
+        if (account.isEmpty()) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+        else {
+            // acceptable values: -1.99, 0, 12345.6, Infinity (= null)
+            BigDecimal balance;
+            try {
+                balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
+            }
+            catch (NumberFormatException e) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number"))));
+                return;
+            }
+            account.get().balance = balance;
+            account.get().save();
+            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance-set")), account.get()));
+        }
     }
 
     /**
