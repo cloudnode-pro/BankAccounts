@@ -6,6 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.Date;
@@ -115,7 +116,7 @@ public class Transaction {
      */
     public void save() {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_transactions` (`from`, `to`, `amount`, `time`, `description`, `instrument`) VALUES (?, ?, ?, ?, ?, ?)")) {
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_transactions` (`from`, `to`, `amount`, `time`, `description`, `instrument`) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
             stmt.setString(1, from);
             stmt.setString(2, to);
             stmt.setBigDecimal(3, amount);

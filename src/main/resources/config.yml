@@ -65,6 +65,16 @@ account-limits:
     # Business accounts
     1: -1
 
+# Transfer confirmation
+transfer-confirmation:
+    # If enabled, players will be shown a transfer overview asking them to confirm the transfer
+    enabled: true
+    # Minimum transfer amount to show confirmation for
+    # Min transfer amount is > 0, so setting this to 0 will enable confirmation for all transfers amounts
+    min-amount: 200
+    # If true, confirmation will not be required for transfers between own accounts
+    bypass-own-accounts: true
+
 # Messages
 messages:
     # Currency symbol
@@ -86,18 +96,34 @@ messages:
         rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
         # You do not own this account
         not-account-owner: "<red>(!) You are not the owner of account <gray><account></gray></red>"
+        # Account frozen (placeholders same as balance)
+        frozen: "<gold>(!) <account-type> account <gray><account> (<account-id>)</gray> is frozen. This account cannot initiate or receive transactions.</gold>"
+        # Cannot transfer to same account
+        same-from-to: "<red>(!) The from and to accounts must be different.</red>"
+        # You can only make transfer between your own accounts
+        transfer-self-only: "<red>(!) You can only make transfers between your own accounts.</red>"
+        # You can only transfer to account that are not yours
+        transfer-other-only: "<red>(!) You cannot make a transfer between your own accounts.</red>"
+        # Invalid number. Placeholder <number> is the invalid number
+        invalid-number: "<red>(!) Invalid number: <gray><number></gray></red>"
+        # $0 transfer
+        zero-transfer: "<red>(!) The amount to transfer must be greater than zero.</red>"
+        # Insufficient funds (placeholders same as balance)
+        insufficient-funds: "<red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>"
 
     # Account balance
     # Available placeholders:
     # <account> - Account name. Defaults to owner username or ID if not set.
     # <account-id> - Account ID
     # <account-type> - Account type (Personal or Business)
+    # <account-owner> - Account owner username
     # <balance> - Account balance without formatting, example: 123456.78
     # <balance-formatted> - Account balance with formatting, example: 123,456.78
     # <balance-short> - Account balance with formatting, example: 123k
-    balance: |
+    balance: |-
         <green><account></green> <gray>(<account-type> account)</gray>
         <green>Balance:</green> <white><balance-formatted></white>
+        <white><i>Owned by <account-owner></i></white>
         <i><gray><click:copy_to_clipboard:<account-id>><hover:show_text:'Click to copy account ID'><account-id></hover></click></gray></i>
 
     # List accounts
@@ -120,3 +146,29 @@ messages:
 
     # Account deleted (same placeholders as balance)
     account-deleted: "<green>(!) Successfully deleted account <white><account></white>"
+
+    # Transfer confirmation
+    # Placeholders are the same as balance. Add prefix `from-` for account sending and `to-` for account receiving
+    # Example: <to-account-id>, <from-balance-formatted>
+    # Additional placeholders:
+    # <amount> - Transfer amount without formatting, example: 123456.78
+    # <amount-formatted> - Transfer amount with formatting, example: 123,456.78
+    # <amount-short> - Transfer amount with formatting, example: 123k
+    # <description> - Transfer description
+    # <confirm-command> - Command to run to confirm transfer
+    confirm-transfer: |-
+        <green><bold>CONFIRM TRANSFER</bold></green>
+        <green>From:</green> <white><from-account></white> <gray>(<from-account-type> account of <from-account-owner>, <from-account-id>)</gray>
+        <green>To:</green> <white><to-account></white> <gray>(<to-account-type> account of <to-account-owner>, <to-account-id>)</gray>
+        <green>Amount:</green> <white><amount-formatted></white>
+        <green>Description:</green> <white><description></white>
+        
+        <click:run_command:<confirm-command>><hover:show_text:'<green>Click to confirm transfer</green>'><green>[I CONFIRM]</green></hover></click>
+
+    # Transfer sent (same placeholders as confirm-transfer, except confirm-command)
+    # Additional placeholders:
+    # <transaction-id> - Transaction ID
+    transfer-sent: <green>(!) Successfully sent <white><amount-formatted></white> from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type> - <green><from-balance-formatted></green></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> to <hover:show_text:'<white><to-account></white><newline><gray><to-account-type></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover></green> <click:copy_to_clipboard:<transaction-id>><hover:show_text:'Click to copy transaction ID'><gray>#<transaction-id></gray></hover></click>
+
+    # Transfer received (same placeholders as transfer-sent)
+    transfer-received: <green>(!) You have received <white><amount-formatted></white> from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> in your <hover:show_text:'<white><to-account></white><newline><gray><to-account-type> - <green><to-balance-formatted></green></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover> account:</green> <white><description></white> <click:copy_to_clipboard:<transaction-id>><hover:show_text:'Click to copy transaction ID'><gray>(#<transaction-id>)</gray></hover></click>

@@ -116,13 +116,21 @@ public class Account {
         if (frozen) throw new IllegalStateException("Your account is frozen");
         if (to.frozen) throw new IllegalStateException("Recipient account is frozen");
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
-        if (balance != null && balance.compareTo(amount) < 0) throw new IllegalStateException("Insufficient funds");
+        if (!hasFunds(amount)) throw new IllegalStateException("Insufficient funds");
 
         Transaction transaction = new Transaction(this.id, to.id, amount, description, instrument);
         transaction.save();
         this.updateBalance(amount.negate());
         to.updateBalance(amount);
         return transaction;
+    }
+
+    /**
+     * Check if account has sufficient funds
+     * @param amount Amount to check
+     */
+    public boolean hasFunds(BigDecimal amount) {
+        return balance == null || balance.compareTo(amount) >= 0;
     }
 
     /**
@@ -233,7 +241,7 @@ public class Account {
     /**
      * Bank account type
      */
-    public static enum Type {
+    public enum Type {
         /**
          * Personal, individual, private account
          */

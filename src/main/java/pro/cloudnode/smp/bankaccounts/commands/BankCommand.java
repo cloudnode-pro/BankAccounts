@@ -10,13 +10,17 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.Transaction;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -41,6 +45,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("bank.set.balance")) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
             if (sender.hasPermission("bank.set.name")) suggestions.addAll(Arrays.asList("setname", "rename"));
             if (sender.hasPermission("bank.delete")) suggestions.add("delete");
+            if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
         }
         else {
             switch (args[0]) {
@@ -97,6 +102,18 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                         for (Account account : accounts) suggestions.add(account.id);
                     }
                 }
+                case "transfer", "send", "pay" -> {
+                    if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other")) return suggestions;
+                    if (args.length == 2) {
+                        Account[] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (Account account : accounts) suggestions.add(account.id);
+                    }
+                    else if (args.length == 3) {
+                        Account[] accounts = sender.hasPermission("bank.transfer.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        accounts = Arrays.stream(accounts).filter(account -> !account.id.equals(args[1])).toArray(Account[]::new);
+                        for (Account account : accounts) suggestions.add(account.id);
+                    }
+                }
             }
         }
         return suggestions;
@@ -115,6 +132,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             case "setbal", "setbalance" -> setBalance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "setname", "rename" -> setName(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "delete" -> delete(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "transfer", "send", "pay" -> transfer(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
         }
     }
@@ -139,6 +157,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         sender.sendMessage(MiniMessage.miniMessage().deserialize(""));
         if (sender.hasPermission("bank.balance.self")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>"));
         if (sender.hasPermission("bank.balance.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player [player]</gray></green> <white>- List another player's accounts</click>"));
+        if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>"));
         if (sender.hasPermission("bank.account.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create ><green>/bank create <gray>[PERSONAL|BUSINESS]</gray></green> <white>- Create a new account</click>"));
         if (sender.hasPermission("bank.account.create.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create --player ><green>/bank create <gray>[PERSONAL|BUSINESS] --player [player]</gray></green> <white>- Create an account for another player</click>"));
         if (sender.hasPermission("bank.delete")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank delete ><green>/bank delete <gray>[account]</gray></green> <white>- Delete an account</click>"));
@@ -297,7 +316,9 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
             }
             catch (NumberFormatException e) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number"))));
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
+                        Placeholder.unparsed("number", args[1])
+                ));
                 return;
             }
             account.get().balance = balance;
@@ -369,17 +390,197 @@ public class BankCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
+     * Make a transfer to another account
+     * <p>
+     * {@code transfer [--confirm] <from> <to> <amount> [description]}
+     */
+    public static void transfer(@NotNull CommandSender sender, String[] args, String label) {
+        if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
+        boolean confirm = args.length > 0 && args[0].equals("--confirm");
+        if (confirm) args = Arrays.copyOfRange(args, 1, args.length);
+        if (args.length < 3) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> transfer " + (args.length > 0 ? args[0] : "<from>") + " " + (args.length > 1 ? args[1] : "<to>") + " <amount> [description]",
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
+        Optional<Account> from = Account.get(args[0]);
+        // account does not exist
+        if (from.isEmpty()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+            return;
+        }
+        // sender does not own account
+        if (!from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
+            return;
+        }
+        // account is frozen
+        if (from.get().frozen) {
+            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), from.get()));
+            return;
+        }
+        // recipient does not exist
+        Optional<Account> to = Account.get(args[1]);
+        if (to.isEmpty()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+            return;
+        }
+        // to is same as from
+        if (from.get().id.equals(to.get().id)) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.same-from-to"))));
+            return;
+        }
+        // to is frozen
+        if (to.get().frozen) {
+            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), to.get()));
+            return;
+        }
+        // to is foreign
+        if (!sender.hasPermission("bank.transfer.other") && !to.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.transfer-self-only"))));
+            return;
+        }
+        // to is not foreign
+        if (!sender.hasPermission("bank.transfer.self") && to.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.transfer-other-only"))));
+            return;
+        }
+
+        @NotNull BigDecimal amount;
+        try {
+            amount = BigDecimal.valueOf(Double.parseDouble(args[2])).setScale(2, RoundingMode.HALF_UP);
+        }
+        catch (NumberFormatException e) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
+                    Placeholder.unparsed("number", args[2])
+            ));
+            return;
+        }
+        // amount is 0
+        if (amount.compareTo(BigDecimal.ZERO) == 0) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.zero-transfer"))));
+            return;
+        }
+        // account has insufficient funds
+        if (!from.get().hasFunds(amount)) {
+            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), from.get()));
+            return;
+        }
+
+        String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length)).trim() : null;
+        if (description != null && description.length() > 64) description = description.substring(0, 64);
+
+        if (!confirm && BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.enabled")) {
+            // show confirmation if amount is above this
+            BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().getConfig().getDouble("transfer-confirmation.min-amount"));
+            // show confirmation if accounts have different owners or if bypassOwnAccounts is false
+            boolean bypassOwnAccounts = BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.bypass-own-accounts");
+            if (amount.compareTo(minAmount) < 0 || (bypassOwnAccounts && from.get().owner.getUniqueId().equals(to.get().owner.getUniqueId()))) {
+                // no confirmation needed
+            }
+            else {
+                sender.sendMessage(transferConfirmation(from.get(), to.get(), amount, description));
+                return;
+            }
+        }
+
+        Transaction transfer = from.get().transfer(to.get(), amount, description, null);
+        sender.sendMessage(transferSuccess(transfer, from.get(), to.get(), amount, description, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-sent"))));
+        // if owner of receiving account is online and is not the sender, send them a message
+        Player player = to.get().owner.getPlayer();
+        if (player != null && player.isOnline() && !player.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            player.sendMessage(transferSuccess(transfer, from.get(), to.get(), amount, description, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-received"))));
+    }
+
+    /**
+     * Transfer confirmation message
+     * <ul>
+     *    <li>{@code <amount>} Transfer amount without formatting, example: 123456.78</li>
+     *    <li>{@code <amount-formatted>} Transfer amount with formatting, example: 123,456.78</li>
+     *    <li>{@code <amount-short>} Transfer amount with formatting, example: 123k</li>
+     *    <li>{@code <description>} Transfer description</li>
+     *    <li>{@code <confirm-command>} Command to run to confirm transfer</li>
+     * </ul>
+     * @param from Account sending from
+     * @param to Account sending to
+     * @param amount Amount of transfer
+     * @param description Description of transfer
+     */
+    public static Component transferConfirmation(@NotNull Account from, @NotNull Account to, @NotNull BigDecimal amount, @Nullable String description) {
+        String message = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.confirm-transfer"))
+                .replace("<amount>", amount.toPlainString())
+                .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
+                .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
+                .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description)
+                .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description));
+        return accountPlaceholders(message, new HashMap<>() {{
+            put("from", from);
+            put("to", to);
+        }});
+    }
+
+    /**
+     * Transfer success message
+     * <ul>
+     *     <li>{@code <transaction-id>} Transaction ID</li>
+     *     <li>{@code <amount>} Transfer amount without formatting, example: 123456.78</li>
+     *     <li>{@code <amount-formatted>} Transfer amount with formatting, example: 123,456.78</li>
+     *     <li>{@code <amount-short>} Transfer amount with formatting, example: 123k</li>
+     *     <li>{@code <description>} Transfer description</li>
+     * </ul>
+     * @param transaction Transaction
+     * @param from Account sending from
+     * @param to Account sending to
+     * @param amount Amount of transfer
+     * @param description Description of transfer
+     * @param message Message to replace placeholders in
+     */
+    public static Component transferSuccess(@NotNull Transaction transaction, @NotNull Account from, @NotNull Account to, @NotNull BigDecimal amount, @Nullable String description, @NotNull String message) {
+        return accountPlaceholders(message
+                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
+                        .replace("<amount>", amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
+                        .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description),
+                new HashMap<>() {{
+                    put("from", from);
+                    put("to", to);
+                }});
+    }
+
+    /**
      * Account placeholders
      * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param account Account to apply placeholders to
      */
     public static Component accountPlaceholders(@NotNull String string, Account account) {
-        return MiniMessage.miniMessage().deserialize(string
-                .replace("<account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
-                .replace("<account-id>", account.id)
-                .replace("<account-type>", account.type.name)
-                .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
-                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
-                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
-        );
+        return accountPlaceholders(string, new HashMap<>() {{
+            put("", account);
+        }});
+    }
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param accounts Accounts to apply placeholders to
+     */
+    public static Component accountPlaceholders(@NotNull String string, HashMap<String, Account> accounts) {
+        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
+            String name = entry.getKey();
+            Account account = entry.getValue();
+            String prefix = name.isEmpty() ? "" : name + "-";
+            string = string.replace("<" + prefix + "account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
+                    .replace("<" + prefix + "account-id>", account.id)
+                    .replace("<" + prefix + "account-type>", account.type.name)
+                    .replace("<" + prefix + "account-owner>", account.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : account.owner.getName() == null ? "<i>unknown player</i>" : account.owner.getName())
+                    .replace("<" + prefix + "balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                    .replace("<" + prefix + "balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                    .replace("<" + prefix + "balance-short>", BankAccounts.formatCurrencyShort(account.balance));
+        }
+        return MiniMessage.miniMessage().deserialize(string);
     }
 }

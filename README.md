@@ -6,6 +6,8 @@ A multi-account economy plugin.
 |------------------------------|--------------|----------------------------------------------------|-------------------|
 | `bank.command`               | `bank`       | Required to use any bank command                   | `default`         |
 | `bank.balance.self`          | `balance`    | List your accounts and check own balance           | `default`         |
+| `bank.transfer.self`         | `transfer`   | Transfer money between your accounts               | `default`         |
+| `bank.transfer.other`        | `transfer`   | Send money to another player's account             | `default`         |
 | `bank.account.create`        | `create`     | Create a new account                               | `default`         |
 | `bank.set.name`              | `setname`    | Set the name of an account                         | `default`         |
 | `bank.delete`                | `delete`     | Delete an account                                  | `default`         |
