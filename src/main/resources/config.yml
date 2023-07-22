@@ -132,7 +132,7 @@ messages:
     list-accounts:
         header: "<green>Bank accounts</green>"
         # Same placeholders as balance
-        entry: "<dark_gray>*</dark_gray> <gray><click:run_command:/bank balance <account-id>><hover:show_text:'<white><account></white><newline><gray><account-type> - <green><balance-formatted></green></gray><newline><gray>Click to view'><account></hover></click> - <white><balance-short></white></gray>"
+        entry: "<dark_gray>*</dark_gray> <gray><click:run_command:/bank balance <account-id>><hover:show_text:'<white><account></white><newline><gray><account-type> - <green><balance-formatted></green></gray><newline><gray><account-id></gray><newline><gray>Click to view'><account></hover></click> - <white><balance-short></white></gray>"
 
     # Plugin reload
     reload: "<green>(!) Plugin configuration reloaded</green>"
