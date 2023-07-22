@@ -106,8 +106,8 @@ messages:
         transfer-other-only: "<red>(!) You cannot make a transfer between your own accounts.</red>"
         # Invalid number. Placeholder <number> is the invalid number
         invalid-number: "<red>(!) Invalid number: <gray><number></gray></red>"
-        # $0 transfer
-        zero-transfer: "<red>(!) The amount to transfer must be greater than zero.</red>"
+        # $0 or negative transfer
+        negative-transfer: "<red>(!) The amount to transfer must be greater than zero.</red>"
         # Insufficient funds (placeholders same as balance)
         insufficient-funds: "<red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>"
         # Trying to close an account that has non-zero balance

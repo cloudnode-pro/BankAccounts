@@ -468,9 +468,9 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             ));
             return;
         }
-        // amount is 0
-        if (amount.compareTo(BigDecimal.ZERO) == 0) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.zero-transfer"))));
+        // amount is 0 or less
+        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.negative-transfer"))));
             return;
         }
         // account has insufficient funds
