@@ -218,6 +218,19 @@ public class Account {
     }
 
     /**
+     * Delete account from database
+     */
+    public void delete() {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
+            stmt.setString(1, id);
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account: " + id, e);
+        }
+    }
+
+    /**
      * Bank account type
      */
     public static enum Type {

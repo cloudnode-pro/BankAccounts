@@ -115,3 +115,6 @@ messages:
 
     # Account name set (same placeholders as balance)
     name-set: "<green>(!) Successfully renamed account <white><account></white>"
+
+    # Account deleted (same placeholders as balance)
+    account-deleted: "<green>(!) Successfully deleted account <white><account></white>"
