@@ -194,8 +194,8 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 }
                 Optional<Account> account = Account.get(args[0]);
                 if (account.isEmpty()) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-                else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId().equals(((OfflinePlayer) sender).getUniqueId())) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+                else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId().equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId())) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
                     return;
                 }
                 else sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), account.get()));
@@ -325,7 +325,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
         else {
             if (!sender.hasPermission("bank.set.name.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
                 return;
             }
             if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL) {
@@ -360,7 +360,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
         else {
             if (!sender.hasPermission("bank.delete.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
                 return;
             }
             account.get().delete();

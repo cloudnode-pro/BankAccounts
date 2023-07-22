@@ -84,6 +84,8 @@ messages:
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
         rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
+        # You do not own this account
+        not-account-owner: "<red>(!) You are not the owner of account <gray><account></gray></red>"
 
     # Account balance
     # Available placeholders:
