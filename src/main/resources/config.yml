@@ -110,6 +110,8 @@ messages:
         zero-transfer: "<red>(!) The amount to transfer must be greater than zero.</red>"
         # Insufficient funds (placeholders same as balance)
         insufficient-funds: "<red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>"
+        # Trying to close an account that has non-zero balance
+        closing-balance: "<red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>"
 
     # Account balance
     # Available placeholders:
