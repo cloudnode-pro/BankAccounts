@@ -136,7 +136,7 @@ public final class BankAccounts extends JavaPlugin {
     public static String formatCurrency(BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
         String format = getInstance().getConfig().getString("currency.format");
-        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount.abs().setScale(2, RoundingMode.HALF_UP));
+        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
     /**
@@ -166,7 +166,7 @@ public final class BankAccounts extends JavaPlugin {
         String suffix = bounds.get(bound);
         BigDecimal divided = absAmount.divide(bound, RoundingMode.HALF_UP);
         int scale = divided.compareTo(BigDecimal.valueOf(10)) < 0 ? 2 : divided.compareTo(BigDecimal.valueOf(100)) < 0 ? 1 : 0;
-        return prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + suffix;
+        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>" : "") + prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + suffix + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
     /**
