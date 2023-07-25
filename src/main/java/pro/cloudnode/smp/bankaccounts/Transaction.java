@@ -164,7 +164,7 @@ public class Transaction {
     public static Transaction[] get(Account account, int limit, int page) {
         int offset = (page - 1) * limit;
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `from` = ? OR `to` = ? ORDER BY `time` LIMIT ? OFFSET ?")) {
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `from` = ? OR `to` = ? ORDER BY `time` DESC LIMIT ? OFFSET ?")) {
             stmt.setString(1, account.id);
             stmt.setString(2, account.id);
             stmt.setInt(3, limit);
