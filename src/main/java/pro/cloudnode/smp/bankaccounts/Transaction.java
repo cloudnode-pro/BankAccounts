@@ -100,15 +100,6 @@ public class Transaction {
     }
 
     /**
-     * Get other account
-     * @param account The account not to return
-     * @return The other account involved in the transaction
-     */
-    public Account getOther(Account account) {
-        return account.id.equals(from.id) ? to : from;
-    }
-
-    /**
      * Insert transaction in the database
      */
     public void save() {

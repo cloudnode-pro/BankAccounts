@@ -608,14 +608,16 @@ public class BankCommand implements CommandExecutor, TabCompleter {
     public static Component transactionPlaceholders(@NotNull CommandSender sender, @NotNull Transaction transaction, @NotNull Account account, @NotNull String message) {
         final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        boolean isSender = transaction.from.id.equals(account.id);
+        final BigDecimal amount = isSender ? transaction.amount.negate() : transaction.amount;
+        final Account other = isSender ? transaction.to : transaction.from;
         message = message
-                .replace("<amount>", transaction.amount.toPlainString())
-                .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
-                .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
+                .replace("<amount>", amount.toPlainString())
+                .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
+                .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
                 .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
                 .replace("<transaction-id>", String.valueOf(transaction.getId()))
                 .replace("<full_date>", sdf.format(transaction.time) + " UTC");
-        Account other = transaction.getOther(account);
         message = accountPlaceholdersString(message, new HashMap<>() {{
             put("", account);
             put("other", other);
