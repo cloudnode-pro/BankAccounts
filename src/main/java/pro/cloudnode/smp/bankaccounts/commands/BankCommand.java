@@ -278,7 +278,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 int index = Arrays.asList(args).indexOf("--player");
                 // index out of bounds
                 if (index == -1 || index >= args.length - 1) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create [PERSONAL|BUSINESS] --player <player>",
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> --player <player>",
                             Placeholder.unparsed("command", label)
                     ));
                     return;
@@ -286,12 +286,25 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 target = BankAccounts.getInstance().getServer().getOfflinePlayer(args[index + 1]);
             }
         }
+        if (args.length == 0) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> [--player <player>]",
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
         // check if target is the same as sender
         if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()) && !sender.hasPermission("bank.account.create")) {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
             return;
         }
-        @NotNull Account.Type type = args.length == 0 ? Account.Type.PERSONAL : Account.Type.fromString(args[0]).orElse(Account.Type.PERSONAL);
+        @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
+        if (optionalType.isEmpty()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> [--player <player>]",
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
+        @NotNull Account.Type type = optionalType.get();
         if (!sender.hasPermission("bank.account.create.bypass")) {
             Account[] accounts = Account.get(target, type);
             int limit = BankAccounts.getInstance().getConfig().getInt("account-limits." + Account.Type.getType(type));
@@ -320,7 +333,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setbalance " + (args.length > 0 ? args[0] : "<account>") + " <bal>",
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>",
                     Placeholder.unparsed("command", label)
             ));
             return;
@@ -328,7 +341,6 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         Optional<Account> account = Account.get(args[0]);
         if (account.isEmpty()) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
         else {
-            // acceptable values: -1.99, 0, 12345.6, Infinity (= null)
             BigDecimal balance;
             try {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
@@ -354,7 +366,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setname " + (args.length > 0 ? args[0] : "<account>") + " <name>",
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setname " + (args.length > 0 ? args[0] : "<account>") + " [name]",
                     Placeholder.unparsed("command", label)
             ));
             return;
@@ -537,7 +549,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             return;
         }
         if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> transactions <account> [page|--all]",
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> transactions <account> [page=1|--all]",
                     Placeholder.unparsed("command", label)
             ));
             return;
