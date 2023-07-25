@@ -1,6 +1,21 @@
 # Bank Accounts
 A multi-account economy plugin.
 
+## Commands
+| Command                                               | Description                              | Aliases                      |
+|-------------------------------------------------------|------------------------------------------|------------------------------|
+| `/bank`                                               | Show plugin version                      |                              |
+| `/bank balance[account]`                              | List accounts or show balance of account | `bal`, `account`, `accounts` |
+| `/bank balance --player <player>`                     | List accounts of another player          | `bal`, `account`, `accounts` |
+| `/bank transfer <from> <to> <amount> [description]`   | Move money to another account            | `send`, `pay`                |
+| `/bank transactions <account> [page=1]`               | List transactions                        | `history`                    |
+| `/bank create <PERSONAL\|BUSINESS>`                   | Create a new account                     | `new`                        |
+| `/bank create <PERSONAL\|BUSINESS> --player <player>` | Create an account for another player     | `new`                        |
+| `/bank delete <account>`                              | Delete an account                        |                              |
+| `/bank setbalance <account> <balance\|Infinity>`      | Set the balance of an account            | `setbal`                     |
+| `/bank setname <account> [name]`                      | Set an account's name                    | `rename`                     |
+| `/bank reload`                                        | Reload configuration                     |                              |
+
 ## Permissions
 | Permission                   | Command        | Description                                           | Recommended group |
 |------------------------------|----------------|-------------------------------------------------------|-------------------|
