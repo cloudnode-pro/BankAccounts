@@ -630,7 +630,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
         sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         boolean isSender = transaction.from.id.equals(account.id);
-        final BigDecimal amount = isSender ? transaction.amount.negate() : transaction.amount;
+        final BigDecimal amount = !isSender ? transaction.amount.negate() : transaction.amount;
         final Account other = isSender ? transaction.to : transaction.from;
         message = message
                 .replace("<amount>", amount.toPlainString())
