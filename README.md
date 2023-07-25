@@ -19,4 +19,5 @@ A multi-account economy plugin.
 | `bank.set.name.other`        | `setname`      | Set the name of an account owned by another player    | `admin`           |
 | `bank.set.name.personal`     | `setname`      | Allow renaming personal accounts (not recommended)    | `admin`           |
 | `bank.delete.other`          | `delete`       | Delete an account owned by another player             | `admin`           |
+| `bank.delete.personal`       | `delete`       | Bypass `prevent-close-personal`                       | `admin`           |
 | `bank.history.other`         | `transactions` | List transactions of accounts owned by another player | `admin`           |

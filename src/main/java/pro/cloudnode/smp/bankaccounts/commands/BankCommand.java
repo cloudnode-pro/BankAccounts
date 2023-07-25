@@ -409,6 +409,10 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), account.get()));
                 return;
             }
+            if (BankAccounts.getInstance().getConfig().getBoolean("prevent-close-personal") && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal")) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.closing-personal"))));
+                return;
+            }
             account.get().delete();
             sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-deleted")), account.get()));
         }
