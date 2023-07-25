@@ -267,6 +267,10 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      * create [type] [--player <player>]
      */
     public static void create(@NotNull CommandSender sender, String[] args, String label) {
+        if (!sender.hasPermission("bank.account.create")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
         @NotNull OfflinePlayer target = BankAccounts.getOfflinePlayer(sender);
         if (Arrays.asList(args).contains("--player")) {
             if (!sender.hasPermission("bank.account.create.other")) {
