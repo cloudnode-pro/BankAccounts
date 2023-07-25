@@ -107,6 +107,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     if (!sender.hasPermission("bank.delete")) return suggestions;
                     if (args.length == 2) {
                         Account[] accounts = sender.hasPermission("bank.delete.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        if (!sender.hasPermission("bank.delete.person")) accounts = Arrays.stream(accounts).filter(account -> account.type != Account.Type.PERSONAL).toArray(Account[]::new);
                         for (Account account : accounts) suggestions.add(account.id);
                     }
                 }
