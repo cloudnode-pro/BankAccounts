@@ -5,4 +5,5 @@ api-version: "1.20"
 author: Cloudnode
 commands:
     bank:
-        usage: /<command>
+        description: Bank Accounts
+        usage: /<command> help
