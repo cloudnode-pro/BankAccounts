@@ -287,7 +287,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             }
         }
         if (args.length == 0) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> [--player <player>]",
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS>" + (sender.hasPermission("bank.account.create.other") ? " [--player <player>]" : ""),
                     Placeholder.unparsed("command", label)
             ));
             return;
@@ -299,7 +299,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
         @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
         if (optionalType.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> [--player <player>]",
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS>" + (sender.hasPermission("bank.account.create.other") ? " [--player <player>]" : ""),
                     Placeholder.unparsed("command", label)
             ));
             return;
