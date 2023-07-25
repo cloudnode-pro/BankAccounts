@@ -8,7 +8,7 @@ A multi-account economy plugin.
 | `/bank balance[account]`                              | List accounts or show balance of account | `bal`, `account`, `accounts` |
 | `/bank balance --player <player>`                     | List accounts of another player          | `bal`, `account`, `accounts` |
 | `/bank transfer <from> <to> <amount> [description]`   | Move money to another account            | `send`, `pay`                |
-| `/bank transactions <account> [page=1]`               | List transactions                        | `history`                    |
+| `/bank transactions <account> [page=1\|--all]`        | List transactions                        | `history`                    |
 | `/bank create <PERSONAL\|BUSINESS>`                   | Create a new account                     | `new`                        |
 | `/bank create <PERSONAL\|BUSINESS> --player <player>` | Create an account for another player     | `new`                        |
 | `/bank delete <account>`                              | Delete an account                        |                              |
