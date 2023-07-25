@@ -75,6 +75,12 @@ transfer-confirmation:
     # If true, confirmation will not be required for transfers between own accounts
     bypass-own-accounts: true
 
+# Transactions history
+history:
+    # Number of transactions to return per page
+    # You can use `/bank transactions <account> --all` to view all transactions
+    per-page: 10
+
 # Messages
 messages:
     # Currency symbol
@@ -174,3 +180,22 @@ messages:
 
     # Transfer received (same placeholders as transfer-sent)
     transfer-received: <green>(!) You have received <white><amount-formatted></white> from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> in your <hover:show_text:'<white><to-account></white><newline><gray><to-account-type> - <green><to-balance-formatted></green></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover> account:</green> <white><description></white> <click:copy_to_clipboard:<transaction-id>><hover:show_text:'Click to copy transaction ID'><gray>(#<transaction-id>)</gray></hover></click>
+
+    # Transaction history
+    history:
+        # All placeholders of `balance` are available
+        # Additional placeholders:
+        # <page> - Current page number
+        # <max-page> - Maximum number of pages
+        # <cmd-prev> - Command to go to previous page
+        # <cmd-next> - Command to go to next page
+        header: "<green>Transaction history</green> <gray>(<hover:show_text:'<white><account></white><newline><gray><account-type> - <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover>)</gray>"
+        # All placeholders of `balance` and `transfer-sent` are available. Use <account> (no prefix) for your account and "other-" prefix for other account
+        # Additional placeholders:
+        # <date> - Transaction date. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
+        # <full_date> - Full date with time zone. Can be used in <hover>, <click> etc.
+        entry: "<gray>#<transaction-id> <hover:show_text:'<full_date>'><date:'MMM d H:mm'></hover> - <white><amount-formatted></white> <gray><hover:show_text:'<white><other-account></white><newline><gray><other-account-type></gray><newline><gray>Owned by <other-account-owner></gray><newline><gray><other-account-id></gray>'><other-account></hover>: <description>"
+        # Same placeholders as header
+        footer: "<click:run_command:<cmd-prev>><hover:show_text:'<white>Previous page</white>'><green>← Previous</green></hover></click> <gray>Page <green><page></green>/<max-page></gray> <click:run_command:<cmd-next>><hover:show_text:'<white>Next page</white>'><green>Next →</green></hover></click>"
+        # No transactions
+        no-transactions: "<gray>(!) No transactions to show.</gray>"

@@ -9,7 +9,9 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
 
@@ -33,11 +35,11 @@ public class Transaction {
     /**
      * Sender account ID
      */
-    public final String from;
+    public final Account from;
     /**
      * Recipient account ID
      */
-    public final String to;
+    public final Account to;
     /**
      * Transaction amount.
      * <p>
@@ -67,7 +69,7 @@ public class Transaction {
      * @param description Transaction description
      * @param instrument Payment instrument used to facilitate the transaction
      */
-    public Transaction(int id, String from, String to, BigDecimal amount, Date time, @Nullable String description, @Nullable String instrument) {
+    public Transaction(int id, Account from, Account to, BigDecimal amount, Date time, @Nullable String description, @Nullable String instrument) {
         this.id = id;
         this.from = from;
         this.to = to;
@@ -85,7 +87,7 @@ public class Transaction {
      * @param description Transaction description
      * @param instrument Payment instrument used to facilitate the transaction
      */
-    public Transaction(String from, String to, BigDecimal amount, @Nullable String description, @Nullable String instrument) {
+    public Transaction(Account from, Account to, BigDecimal amount, @Nullable String description, @Nullable String instrument) {
         this(-1, from, to, amount, new Date(), description, instrument);
     }
 
@@ -93,22 +95,17 @@ public class Transaction {
      * Create a new transaction from a database result set
      * @param rs Result set
      */
-    public Transaction(ResultSet rs) throws SQLException {
-        this(rs.getInt("id"), rs.getString("from"), rs.getString("to"), rs.getBigDecimal("amount"), rs.getTimestamp("time"), rs.getString("description"), rs.getString("instrument"));
+    public Transaction(ResultSet rs) throws SQLException, Exception {
+        this(rs.getInt("id"), Account.get(rs.getString("from")).orElse(new Account.ClosedAccount()), Account.get(rs.getString("to")).orElse(new Account.ClosedAccount()), rs.getBigDecimal("amount"), rs.getTimestamp("time"), rs.getString("description"), rs.getString("instrument"));
     }
 
     /**
-     * Get sender account
+     * Get other account
+     * @param account The account not to return
+     * @return The other account involved in the transaction
      */
-    public Optional<Account> getFrom() {
-        return Account.get(from);
-    }
-
-    /**
-     * Get recipient account
-     */
-    public Optional<Account> getTo() {
-        return Account.get(to);
+    public Account getOther(Account account) {
+        return account.id.equals(from.id) ? to : from;
     }
 
     /**
@@ -117,8 +114,8 @@ public class Transaction {
     public void save() {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
              PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_transactions` (`from`, `to`, `amount`, `time`, `description`, `instrument`) VALUES (?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS)) {
-            stmt.setString(1, from);
-            stmt.setString(2, to);
+            stmt.setString(1, from.id);
+            stmt.setString(2, to.id);
             stmt.setBigDecimal(3, amount);
             stmt.setTimestamp(4, new Timestamp(time.getTime()));
             if (description == null) stmt.setNull(5, Types.VARCHAR);
@@ -147,6 +144,64 @@ public class Transaction {
         } catch (Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get transaction: " + id, e);
             return Optional.empty();
+        }
+    }
+
+    /**
+     * Get ALL transactions of account
+     * @param account Account
+     */
+    public static Transaction[] get(Account account) {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `from` = ? OR `to` = ? ORDER BY `time` DESC")) {
+            stmt.setString(1, account.id);
+            stmt.setString(2, account.id);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? new Transaction[]{new Transaction(rs)} : new Transaction[0];
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get transactions of account: " + account.id, e);
+            return new Transaction[0];
+        }
+    }
+
+    /**
+     * Get transactions of account
+     * @param account Account
+     * @param limit Maximum number of transactions to return per page.
+     * @param page Page number (starting from 1)
+     */
+    public static Transaction[] get(Account account, int limit, int page) {
+        int offset = (page - 1) * limit;
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_transactions` WHERE `from` = ? OR `to` = ? ORDER BY `time` DESC LIMIT ? OFFSET ?")) {
+            stmt.setString(1, account.id);
+            stmt.setString(2, account.id);
+            stmt.setInt(3, limit);
+            stmt.setInt(4, offset);
+            ResultSet rs = stmt.executeQuery();
+            List<Transaction> transactions = new ArrayList<>();
+            while (rs.next()) transactions.add(new Transaction(rs));
+            return transactions.toArray(new Transaction[0]);
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get transactions of account: " + account.id, e);
+            return new Transaction[0];
+        }
+    }
+
+    /**
+     * Count transactions of account
+     * @param account Account
+     */
+    public static int count(Account account) {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(*) FROM `bank_transactions` WHERE `from` = ? OR `to` = ?")) {
+            stmt.setString(1, account.id);
+            stmt.setString(2, account.id);
+            ResultSet rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not count transactions of account: " + account.id, e);
+            return 0;
         }
     }
 }

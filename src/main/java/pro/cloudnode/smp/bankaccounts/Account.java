@@ -118,7 +118,7 @@ public class Account {
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
         if (!hasFunds(amount)) throw new IllegalStateException("Insufficient funds");
 
-        Transaction transaction = new Transaction(this.id, to.id, amount, description, instrument);
+        Transaction transaction = new Transaction(this, to, amount, description, instrument);
         transaction.save();
         this.updateBalance(amount.negate());
         to.updateBalance(amount);
@@ -284,5 +284,20 @@ public class Account {
             }
             return Optional.empty();
         }
+    }
+
+    /**
+     * A dummy class representing a missing account (e.g. deleted).
+     */
+    public static class ClosedAccount extends Account {
+        public ClosedAccount() {
+            super("closed account", BankAccounts.getConsoleOfflinePlayer(), Type.PERSONAL, null, BigDecimal.ZERO, true);
+        }
+
+        @Override
+        public void save() {}
+
+        @Override
+        public void delete() {}
     }
 }
