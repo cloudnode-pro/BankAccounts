@@ -3,7 +3,10 @@ package pro.cloudnode.smp.bankaccounts;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.PluginCommand;
+import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
@@ -17,6 +20,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.text.DecimalFormat;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -44,10 +48,24 @@ public final class BankAccounts extends JavaPlugin {
         createServerAccount();
 
         // Register commands
-        getCommand("bank").setExecutor(new BankCommand());
+        HashMap<String, CommandExecutor> commands = new HashMap<>() {{
+            put("bank", new BankCommand());
+        }};
+        for (Map.Entry<String, CommandExecutor> entry : commands.entrySet()) {
+            PluginCommand command = getCommand(entry.getKey());
+            if (command == null) {
+                getLogger().log(Level.SEVERE, "Could not register command: " + entry.getKey());
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+            command.setExecutor(entry.getValue());
+        }
 
         // Register events
-        getServer().getPluginManager().registerEvents(new Join(), this);
+        Listener[] events = new Listener[]{
+                new Join()
+        };
+        for (Listener event : events) getServer().getPluginManager().registerEvents(event, this);
     }
 
     @Override
