@@ -100,7 +100,7 @@ public class Account {
     public void updateBalance(BigDecimal diff) {
         if (balance == null) return;
         this.balance = balance.add(diff);
-        this.save();
+        this.update();
     }
 
     /**
@@ -198,12 +198,11 @@ public class Account {
     }
 
     /**
-     * Insert or update account into database
+     * Insert into database
      */
-    public void save() {
+    public void insert() {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_accounts` (`id`, `owner`, `type`, `name`, `balance`, `frozen`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name` = ?, `balance` = ?, `frozen` = ?")) {
-            // insert
+             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_accounts` (`id`, `owner`, `type`, `name`, `balance`, `frozen`) VALUES (?, ?, ?, ?, ?, ?)")) {
             stmt.setString(1, id);
             stmt.setString(2, owner.getUniqueId().toString());
             stmt.setInt(3, Type.getType(type));
@@ -212,12 +211,25 @@ public class Account {
             if (balance == null) stmt.setNull(5, java.sql.Types.DECIMAL);
             else stmt.setBigDecimal(5, balance);
             stmt.setBoolean(6, frozen);
-            // update
-            if (name == null) stmt.setNull(7, java.sql.Types.VARCHAR);
-            else stmt.setString(7, name);
-            if (balance == null) stmt.setNull(8, java.sql.Types.DECIMAL);
-            else stmt.setBigDecimal(8, balance);
-            stmt.setBoolean(9, frozen);
+
+            stmt.executeUpdate();
+        } catch (Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save account: " + id, e);
+        }
+    }
+
+    /**
+     * Update in database
+     */
+    public void update() {
+        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             PreparedStatement stmt = conn.prepareStatement("UPDATE `bank_accounts` SET `name` = ?, `balance` = ?, `frozen` = ? WHERE `id` = ?")) {
+            if (name == null) stmt.setNull(1, java.sql.Types.VARCHAR);
+            else stmt.setString(1, name);
+            if (balance == null) stmt.setNull(2, java.sql.Types.DECIMAL);
+            else stmt.setBigDecimal(2, balance);
+            stmt.setBoolean(3, frozen);
+            stmt.setString(4, id);
 
             stmt.executeUpdate();
         } catch (Exception e) {
@@ -230,7 +242,7 @@ public class Account {
      */
     public void delete() {
         try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
+             PreparedStatement stmt = conn.prepareStatement("DELETE FROM `bank_accounts` WHERE `id` = ?")) {
             stmt.setString(1, id);
             stmt.executeUpdate();
         } catch (Exception e) {
@@ -295,7 +307,10 @@ public class Account {
         }
 
         @Override
-        public void save() {}
+        public void insert() {}
+
+        @Override
+        public void update() {}
 
         @Override
         public void delete() {}

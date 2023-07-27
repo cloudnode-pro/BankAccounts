@@ -1,12 +1,25 @@
 # Database configuration
-# Only MariaDB is supported
 db:
-    # JDBC url
-    jdbc: jdbc:mariadb://localhost:3306/your_db_name
-    # Database user
-    user: root
-    # Database password
-    password: ChangeThis!
+    # Select here the database you want to use
+    # The following databases are supported:
+    #  - sqlite - (default) stores all data in a local file
+    #  - mariadb - allows using a remote database with JDBC
+    db: sqlite
+
+    # SQLite
+    sqlite:
+        # Database file name (in the plugin's folder)
+        # If the file does not exist, it will be created
+        file: bank.db
+
+    # MariaDB
+    mariadb:
+        # JDBC url
+        jdbc: jdbc:mariadb://localhost:3306/your_db_name
+        # Database user
+        user: root
+        # Database password
+        password: ChangeThis!
 
     # Advanced configuration (do not touch unless you know what you are doing)
     # HikariCP. Comment out any data source property to disable setting it.

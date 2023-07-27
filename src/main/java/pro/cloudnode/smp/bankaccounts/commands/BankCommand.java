@@ -318,7 +318,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
 
         Account account = new Account(target, type, null, BigDecimal.ZERO, false);
-        account.save();
+        account.insert();
 
         sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
     }
@@ -352,7 +352,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 return;
             }
             account.get().balance = balance;
-            account.get().save();
+            account.get().update();
             sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance-set")), account.get()));
         }
     }
@@ -387,7 +387,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.length() == 0 ? null : name;
             account.get().name = name;
-            account.get().save();
+            account.get().update();
             sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.name-set")), account.get()));
         }
     }
