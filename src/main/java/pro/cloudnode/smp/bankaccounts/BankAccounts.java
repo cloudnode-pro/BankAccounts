@@ -39,15 +39,7 @@ public final class BankAccounts extends JavaPlugin {
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        setupDbSource();
-        try {
-            initDb();
-        } catch (@NotNull SQLException | @NotNull IOException e) {
-            getLogger().log(Level.SEVERE, "Could not initialize database.", e);
-            getServer().getPluginManager().disablePlugin(this);
-        }
-
-        createServerAccount();
+        reload();
 
         // Register commands
         final @NotNull HashMap<@NotNull String, @NotNull CommandExecutor> commands = new HashMap<>() {{
@@ -121,6 +113,16 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Reload plugin
+     */
+    public static void reload() {
+        getInstance().reloadConfig();
+        getInstance().setupDbSource();
+        getInstance().initDbWrapper();
+        createServerAccount();
+    }
+
+    /**
      * Create tables
      */
     private void initDb() throws @NotNull SQLException, @NotNull IOException {
@@ -151,6 +153,15 @@ public final class BankAccounts extends JavaPlugin {
             }
         }
         getLogger().info("Database setup complete.");
+    }
+
+    private void initDbWrapper() {
+        try {
+            initDb();
+        } catch (@NotNull SQLException | @NotNull IOException e) {
+            getLogger().log(Level.SEVERE, "Could not initialize database.", e);
+            getServer().getPluginManager().disablePlugin(this);
+        }
     }
 
     /**

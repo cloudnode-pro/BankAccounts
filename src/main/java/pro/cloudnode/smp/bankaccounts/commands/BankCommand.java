@@ -254,7 +254,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
             return;
         }
-        BankAccounts.getInstance().reloadConfig();
+        BankAccounts.reload();
         sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.reload"))));
     }
 

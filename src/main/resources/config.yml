@@ -4,6 +4,7 @@ db:
     # The following databases are supported:
     #  - sqlite - (default) stores all data in a local file
     #  - mariadb - allows using a remote database with JDBC
+    # IMPORTANT! If you change the DB type, the data is not automatically migrated between databases.
     db: sqlite
 
     # SQLite
