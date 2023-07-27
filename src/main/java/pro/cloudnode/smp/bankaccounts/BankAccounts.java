@@ -10,6 +10,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
+import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 
 import java.io.IOException;
@@ -50,6 +51,7 @@ public final class BankAccounts extends JavaPlugin {
         // Register commands
         HashMap<String, CommandExecutor> commands = new HashMap<>() {{
             put("bank", new BankCommand());
+            put("pos", new POSCommand());
         }};
         for (Map.Entry<String, CommandExecutor> entry : commands.entrySet()) {
             PluginCommand command = getCommand(entry.getKey());

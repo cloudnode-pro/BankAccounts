@@ -107,7 +107,7 @@ messages:
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
         rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
         # You do not own this account
-        not-account-owner: "<red>(!) You are not the owner of account <gray><account></gray></red>"
+        not-account-owner: "<red>(!) You are not the owner of this account.</red>"
         # Account frozen (placeholders same as balance)
         frozen: "<gold>(!) <account-type> account <gray><account> (<account-id>)</gray> is frozen. This account cannot initiate or receive transactions.</gold>"
         # Cannot transfer to same account
@@ -126,6 +126,12 @@ messages:
         closing-balance: "<red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>"
         # Trying to close a personal account and `prevent-close-last-personal` is enabled
         closing-personal: "<red>(!) You cannot close your last personal account.</red>"
+        # Command only for players
+        player-only: "<red>(!) You must be a player to use this command.</red>"
+        block-too-far: "<red>(!) The targeted block is too far away.</red>"
+        pos-already-exists: "<red>(!) A POS already exists at this location.</red>"
+        pos-not-chest: "<red>(!) The targeted block is not a chest.</red>"
+        pos-empty: "<red>(!) The chest is empty. POS cancelled.</red>"
 
     # Account balance
     # Available placeholders:
@@ -207,3 +213,16 @@ messages:
         footer: "<click:run_command:<cmd-prev>><hover:show_text:'<white>Previous page</white>'><green>← Previous</green></hover></click> <gray>Page <page>/<max-page></gray> <click:run_command:<cmd-next>><hover:show_text:'<white>Next page</white>'><green>Next →</green></hover></click>"
         # No transactions
         no-transactions: "<gray>(!) No transactions to show.</gray>"
+
+    # Pos created
+    # Same placeholders as balance (account is that of the seller).
+    # Additional placeholders:
+    # <price> - Price of the POS contents without formatting, example: 123456.78
+    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: 123k
+    # <description> - Bank statement description
+    # <x> - X coordinate of the chest
+    # <y> - Y coordinate of the chest
+    # <z> - Z coordinate of the chest
+    # <world> - World name of the chest
+    pos-created: "<green>(!) Successfully created POS with price <white><price-formatted></white> to receive in account <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><white><account></white></hover>:</green> <gray><description></gray>"

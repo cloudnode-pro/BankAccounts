@@ -7,3 +7,6 @@ commands:
     bank:
         description: Bank Accounts
         usage: /<command> help
+    pos:
+        description: Create point of sale
+        usage: /<command>
