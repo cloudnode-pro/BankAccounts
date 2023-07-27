@@ -1,5 +1,6 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -15,11 +16,13 @@ public final class Join implements Listener {
     public void onPlayerJoin(final @NotNull PlayerJoinEvent event) {
         final Player player = event.getPlayer();
         if (!"null".equals(BankAccounts.getInstance().getConfig().getString("starting-balance"))) {
-            final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
-            if (accounts.length == 0) {
-                final double startingBalance = BankAccounts.getInstance().getConfig().getDouble("starting-balance");
-                new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(startingBalance), false).save();
-            }
+            Bukkit.getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
+                final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
+                if (accounts.length == 0) {
+                    final double startingBalance = BankAccounts.getInstance().getConfig().getDouble("starting-balance");
+                    new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(startingBalance), false).save();
+                }
+            });
         }
     }
 }
