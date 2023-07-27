@@ -1,5 +1,9 @@
 # Bank Accounts
 [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml)
+[![Modrinth](https://img.shields.io/badge/Modrinth-%2326292f?logo=modrinth)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
 
 A multi-account economy plugin.
 
