@@ -1,4 +1,6 @@
 # Bank Accounts
+[![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml)
+
 A multi-account economy plugin.
 
 ## Commands
