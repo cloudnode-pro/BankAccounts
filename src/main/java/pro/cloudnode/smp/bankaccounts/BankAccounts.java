@@ -11,6 +11,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
+import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 
 import java.io.IOException;
@@ -65,7 +66,8 @@ public final class BankAccounts extends JavaPlugin {
 
         // Register events
         Listener[] events = new Listener[]{
-                new Join()
+                new Join(),
+                new BlockBreak()
         };
         for (Listener event : events) getServer().getPluginManager().registerEvents(event, this);
     }
