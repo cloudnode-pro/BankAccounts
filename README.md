@@ -1,3 +1,5 @@
+[![Banner](https://i.ibb.co/B338K1f/banner.png)](https://modrinth.com/plugin/Dc8RS2En/)
+
 # Bank Accounts
 [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml)
 [![Modrinth](https://img.shields.io/badge/Modrinth-%2326292f?logo=modrinth)](https://modrinth.com/plugin/Dc8RS2En/)
