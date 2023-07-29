@@ -2,6 +2,7 @@ package pro.cloudnode.smp.bankaccounts;
 
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -13,7 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
+import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
+import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -61,7 +64,9 @@ public final class BankAccounts extends JavaPlugin {
         // Register events
         final @NotNull Listener[] events = new Listener[]{
                 new Join(),
-                new BlockBreak()
+                new BlockBreak(),
+                new PlayerInteract(),
+                new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
     }
@@ -225,6 +230,14 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Namespaced key
+     * @param key Key
+     */
+    public static @NotNull NamespacedKey namespacedKey(final @NotNull String key) {
+        return new NamespacedKey(getInstance(), key);
+    }
+
+    /**
      * Create server account, if enabled in config
      */
     private static void createServerAccount() {
@@ -253,5 +266,13 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static @NotNull OfflinePlayer getOfflinePlayer(@NotNull CommandSender sender) {
         return sender instanceof OfflinePlayer ? (OfflinePlayer) sender : getConsoleOfflinePlayer();
+    }
+
+    public static final class Key {
+        public final static @NotNull NamespacedKey INSTRUMENT_ACCOUNT = namespacedKey("instrument-account");
+        public final static @NotNull NamespacedKey POS_OWNER_GUI = namespacedKey("pos-owner-gui");
+        public final static @NotNull NamespacedKey POS_BUYER_GUI = namespacedKey("pos-buyer-gui");
+        public final static @NotNull NamespacedKey POS_BUYER_GUI_CONFIRM = namespacedKey("pos-buyer-gui-confirm");
+        public final static @NotNull NamespacedKey POS_BUYER_GUI_CANCEL = namespacedKey("pos-buyer-gui-cancel");
     }
 }

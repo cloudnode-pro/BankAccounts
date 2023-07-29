@@ -33,3 +33,6 @@ CREATE TABLE IF NOT EXISTS `pos`
     `created`     DATETIME                                                   NOT NULL DEFAULT UTC_TIMESTAMP(),
     KEY `location` (`x`, `y`, `z`, `world`) USING BTREE
 );
+
+ALTER TABLE `bank_transactions`
+    CHANGE COLUMN `instrument` `instrument` VARCHAR(24) CHARACTER SET latin1 COLLATE latin1_general_ci NULL DEFAULT NULL AFTER `description`;

@@ -1,23 +1,46 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.Player;
 import org.bukkit.inventory.DoubleChestInventory;
+import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.Comparator;
 import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
+import java.util.zip.CRC32;
 
 public final class POS {
     /**
@@ -130,6 +153,13 @@ public final class POS {
     }
 
     /**
+     * Create POS id
+     */
+    public @NotNull String id() {
+        return world.getName() + ":" + x + ":" + y + ":" + z;
+    }
+
+    /**
      * Save POS to database
      */
     public void save() {
@@ -230,5 +260,185 @@ public final class POS {
             return Optional.empty();
         }
         else return get(chest.getLocation());
+    }
+
+    /**
+     * Get POS
+     *
+     * @param id POS id
+     */
+    public static Optional<POS> get(final @NotNull String id) {
+        final String[] split = id.split(":");
+        if (split.length != 4) return Optional.empty();
+        final World world = Bukkit.getWorld(split[0]);
+        if (world == null) return Optional.empty();
+        try {
+            final int x = Integer.parseInt(split[1]);
+            final int y = Integer.parseInt(split[2]);
+            final int z = Integer.parseInt(split[3]);
+            return get(x, y, z, world);
+        } catch (final NumberFormatException e) {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Open POS owner GUI
+     * <p>
+     * A gui that shows a preview of the items inside the POS. An extra row is added to the GUI, this row contains a
+     * paper item which shows the POS price and description. A barrier item is also added to the GUI, this item is used
+     * as a button to delete the POS.
+     *
+     * @param player Player to open the GUI for
+     * @param chest The POS chest
+     * @param pos The POS
+     */
+    public static void openOwnerGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos) {
+        final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
+        final int extraRows = 1;
+        final int size = extraRows * 9 + items.length + 9 - items.length % 9;
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize("<green><bold>Point of Sale</bold></green> <gray>— <price></gray>",
+                Placeholder.unparsed("price", BankAccounts.formatCurrency(pos.price))
+        ));
+        gui.addItem(items);
+
+        final @NotNull ItemStack overview = new ItemStack(Material.PAPER);
+        overview.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        overview.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+        final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
+        overviewMeta.displayName(MiniMessage.miniMessage().deserialize("<green><bold>POS</bold></green>").decoration(TextDecoration.ITALIC, false));
+        final @NotNull List<Component> lore = new ArrayList<>();
+        lore.add(MiniMessage.miniMessage().deserialize("<gray>Price:</gray> <green>" + BankAccounts.formatCurrency(pos.price) + "</green>").decoration(TextDecoration.ITALIC, false));
+        if (pos.description != null) lore.add(MiniMessage.miniMessage().deserialize("<gray>Description:</gray> <white>" + pos.description + "</white>").decoration(TextDecoration.ITALIC, false));
+        overviewMeta.lore(lore);
+        overview.setItemMeta(overviewMeta);
+        gui.setItem(size - 5, overview);
+
+        final @NotNull ItemStack delete = new ItemStack(Material.BARRIER);
+        final @NotNull ItemMeta deleteMeta = delete.getItemMeta();
+        deleteMeta.displayName(MiniMessage.miniMessage().deserialize("<red><bold>Cancel POS</bold></red>").decoration(TextDecoration.ITALIC, false));
+        final @NotNull PersistentDataContainer deleteContainer = deleteMeta.getPersistentDataContainer();
+        deleteContainer.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
+        delete.setItemMeta(deleteMeta);
+        gui.setItem(size - 1, delete);
+
+        player.openInventory(gui);
+    }
+
+    /**
+     * Buyer POS GUI
+     * <p>
+     * A gui that shows a preview of the items inside the POS. An extra row is added to the GUI, this row contains a
+     * paper item with shows the POS price and description. There are also two buttons, on to confirm purchase and
+     * one to cancel the purchase.
+     *
+     * @param player Player to open the GUI for
+     * @param chest The POS chest
+     * @param pos The POS
+     */
+    public static void openBuyGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos, final @NotNull Account account) {
+        final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
+        final int extraRows = 1;
+        final int size = extraRows * 9 + items.length + 9 - items.length % 9;
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize("<green><bold>Point of Sale</bold></green> <gray>— <price></gray>",
+                Placeholder.unparsed("price", BankAccounts.formatCurrency(pos.price))
+        ));
+        gui.addItem(items);
+
+        final @NotNull ItemStack overview = new ItemStack(Material.PAPER);
+        overview.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        overview.addUnsafeEnchantment(Enchantment.DURABILITY, 1);
+        final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
+        overviewMeta.displayName(MiniMessage.miniMessage().deserialize("<green><bold>POS</bold></green>").decoration(TextDecoration.ITALIC, false));
+        final @NotNull List<Component> lore = new ArrayList<>();
+        lore.add(MiniMessage.miniMessage().deserialize("<gray>Price:</gray> <green>" + BankAccounts.formatCurrency(pos.price) + "</green>").decoration(TextDecoration.ITALIC, false));
+        if (pos.description != null) lore.add(MiniMessage.miniMessage().deserialize("<gray>Description:</gray> <white>" + pos.description + "</white>").decoration(TextDecoration.ITALIC, false));
+        lore.add(MiniMessage.miniMessage().deserialize("<gray>Seller:</gray>").decoration(TextDecoration.ITALIC, false));
+        lore.add(MiniMessage.miniMessage().deserialize("<white><account-type> account <account></white> <gray>(<account-id>)</gray>",
+                Placeholder.unparsed("account-type", pos.seller.type.name()),
+                Placeholder.unparsed("account", pos.seller.name == null ? (pos.seller.type == Account.Type.PERSONAL && pos.seller.owner.getName() != null ? pos.seller.owner.getName() : pos.seller.id) : pos.seller.name),
+                Placeholder.unparsed("account-id", pos.seller.id)
+        ).decoration(TextDecoration.ITALIC, false));
+        lore.add(MiniMessage.miniMessage().deserialize("<gray>Owned by</gray> <white><account-owner></white>",
+                Placeholder.unparsed("account-owner", pos.seller.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : pos.seller.owner.getName() == null ? "<i>unknown player</i>" : pos.seller.owner.getName())
+        ).decoration(TextDecoration.ITALIC, false));
+        overviewMeta.lore(lore);
+        final @NotNull PersistentDataContainer overviewContainer = overviewMeta.getPersistentDataContainer();
+        overviewContainer.set(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING, String.join(",", POS.checksum(items)));
+        overview.setItemMeta(overviewMeta);
+        gui.setItem(size - 5, overview);
+
+        final @NotNull ItemStack confirm = new ItemStack(Material.LIME_STAINED_GLASS_PANE);
+        final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
+        confirmMeta.displayName(MiniMessage.miniMessage().deserialize("<green><bold>Confirm Purchase</bold></green>").decoration(TextDecoration.ITALIC, false));
+        final @NotNull PersistentDataContainer confirmContainer = confirmMeta.getPersistentDataContainer();
+        confirmContainer.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
+        final @NotNull List<Component> confirmLore = new ArrayList<>();
+        confirmLore.add(MiniMessage.miniMessage().deserialize("<gray>Click to confirm purchase</gray>").decoration(TextDecoration.ITALIC, false));
+        confirmLore.add(MiniMessage.miniMessage().deserialize("<gray>Paying with:</gray> <white><account-type> account <account> <gray>(<account-id>)</gray></white>",
+                Placeholder.unparsed("account-type", account.type.name()),
+                Placeholder.unparsed("account", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name),
+                Placeholder.unparsed("account-id", account.id)
+        ).decoration(TextDecoration.ITALIC, false));
+        confirmLore.add(MiniMessage.miniMessage().deserialize("<gray>Balance:</gray> <white>" + BankAccounts.formatCurrency(account.balance) + "</white>").decoration(TextDecoration.ITALIC, false));
+        confirmLore.add(MiniMessage.miniMessage().deserialize("<gray>Price:</gray> <green>" + BankAccounts.formatCurrency(pos.price) + "</green>").decoration(TextDecoration.ITALIC, false));
+        confirmMeta.lore(confirmLore);
+        confirm.setItemMeta(confirmMeta);
+        gui.setItem(size - 7, confirm);
+
+        final @NotNull ItemStack cancel = new ItemStack(Material.RED_STAINED_GLASS_PANE);
+        final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
+        cancelMeta.displayName(MiniMessage.miniMessage().deserialize("<red><bold>Cancel Purchase</bold></red>").decoration(TextDecoration.ITALIC, false));
+        final @NotNull PersistentDataContainer cancelContainer = cancelMeta.getPersistentDataContainer();
+        cancelContainer.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
+        final @NotNull List<Component> cancelLore = new ArrayList<>();
+        cancelLore.add(MiniMessage.miniMessage().deserialize("<gray>Click to decline this purchase</gray>").decoration(TextDecoration.ITALIC, false));
+        cancelMeta.lore(cancelLore);
+        cancel.setItemMeta(cancelMeta);
+        gui.setItem(size - 3, cancel);
+
+        player.openInventory(gui);
+    }
+
+    /**
+     * Item to checksum
+     *
+     * @param item The item to create a checksum for
+     */
+    public static @NotNull String checksum(final @NotNull ItemStack item) {
+        final byte[] bytes = item.serializeAsBytes();
+        CRC32 crc32 = new CRC32();
+        crc32.update(bytes);
+        return Long.toHexString(crc32.getValue());
+    }
+
+    /**
+     * Items to checksums
+     *
+     * @param items The items to create checksums for
+     */
+    public static @NotNull String[] checksum(final @NotNull ItemStack[] items) {
+        return Arrays.stream(items).sorted(Comparator.comparing(ItemStack::translationKey)).sorted(Comparator.comparing(ItemStack::getAmount)).map(POS::checksum).toArray(String[]::new);
+    }
+
+    /**
+     * Verify checksum
+     *
+     * @param item The item to verify
+     * @param checksum The checksum to verify against
+     */
+    public static boolean verifyChecksum(final @NotNull ItemStack item, final @NotNull String checksum) {
+        return checksum(item).equals(checksum);
+    }
+
+    /**
+     * Verify checksums
+     *
+     * @param items The items to verify
+     * @param checksums The checksums to verify against
+     */
+    public static boolean verifyChecksum(final @NotNull ItemStack[] items, final @NotNull String[] checksums) {
+        BankAccounts.getInstance().getLogger().info("1: " + String.join(",", checksum(items)) + " 2: " + String.join(",", checksums));
+        return Arrays.equals(checksum(items), checksums);
     }
 }

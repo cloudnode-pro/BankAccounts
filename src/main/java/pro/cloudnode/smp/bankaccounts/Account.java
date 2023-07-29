@@ -172,12 +172,21 @@ public class Account {
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
 
-        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        final @NotNull NamespacedKey id = BankAccounts.Key.INSTRUMENT_ACCOUNT;
         meta.getPersistentDataContainer().set(id, PersistentDataType.STRING, this.id);
 
         instrument.setItemMeta(meta);
 
         return instrument;
+    }
+
+    /**
+     * Check if an item is an instrument
+     *
+     * @param item Item to check
+     */
+    public static boolean isInstrument(final @NotNull ItemStack item) {
+        return item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.INSTRUMENT_ACCOUNT, PersistentDataType.STRING);
     }
 
     /**
@@ -216,11 +225,10 @@ public class Account {
      * @param instrument Instrument item
      */
     public static @NotNull Optional<@NotNull Account> get(final @NotNull ItemStack instrument) {
-        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        if (!isInstrument(instrument)) return Optional.empty();
+        final @NotNull NamespacedKey id = BankAccounts.Key.INSTRUMENT_ACCOUNT;
         final @NotNull ItemMeta meta = instrument.getItemMeta();
-        if (meta == null) return Optional.empty();
-        final String accountId = meta.getPersistentDataContainer().get(id, PersistentDataType.STRING);
-        if (accountId == null) return Optional.empty();
+        final @NotNull String accountId = Objects.requireNonNull(meta.getPersistentDataContainer().get(id, PersistentDataType.STRING));
         return get(accountId);
     }
 

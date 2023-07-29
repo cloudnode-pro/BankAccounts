@@ -31,3 +31,6 @@ CREATE TABLE IF NOT EXISTS `pos`
     `created`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`x`, `y`, `z`, `world`)
 );
+
+ALTER TABLE `bank_transactions` DROP COLUMN `instrument`; -- column has never been in use before
+ALTER TABLE `bank_transactions` ADD COLUMN `instrument` VARCHAR(24) DEFAULT NULL COLLATE BINARY;

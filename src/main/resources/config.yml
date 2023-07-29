@@ -124,7 +124,7 @@ instruments:
     # NOTE: The placeholders are set only when the item is created.
     # If the account is renamed or the balance changes, the text on the item will NOT be updated.
     # Additionally, if you modify this, it will only be effective for new bank cards.
-    name: "<green><b>Bank Card</b></green> — <gray><account></gray>"
+    name: "<green><b>Bank Card</b></green> <aqua>—</aqua> <gray><account></gray>"
 
     # Lore of the item (text below the name)
     # Same placeholders as name
@@ -202,6 +202,11 @@ messages:
         pos-already-exists: "<red>(!) A POS already exists at this location.</red>"
         pos-not-chest: "<red>(!) The targeted block is not a chest.</red>"
         pos-empty: "<red>(!) The chest is empty. POS cancelled.</red>"
+        pos-invalid-card: "<red>(!) You need a valid bank card to use POS.</red>"
+        pos-no-permission: "<red>(!) You do not have permission to use POS.</red>"
+        card-no-permission: "<red>(!) You cannot use your card here.</red>"
+        no-card: "<red>(!) You must hold your bank card to use this.</red>"
+        pos-items-changed: "<red>(!) The items in the chest have changed. POS cancelled.</red>"
 
     # Account balance
     # Available placeholders:
@@ -302,3 +307,17 @@ messages:
     # Pos removed
     # (no placeholders)
     pos-removed: "<gold>(!) Removed POS.</gold>"
+    # Pos purchase completed
+    # Same placeholders as transfer-sent. `from` account is buyer, `to` account is seller.
+    # Additional placeholders:
+    # <items> - Number of items purchased
+    # <items-formatted> - E.g. `1 item`, `5 items`, etc.
+    # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
+    pos-purchase: "<green>(!) Successfully purchased <white><items-formatted></white> from <hover:show_text:'<white><to-account></white><newline><gray><to-account-type></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover> for <white><amount-formatted></white>. You paid from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type><dark_gray>:</dark_gray> <green><from-balance-formatted></green></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover>:</green> <gray><description></gray>"
+    # Someone made a purchase from your POS
+    # Same placeholders as pos-purchase. `from` account is buyer, `to` account is seller.
+    # Additional placeholders:
+    # <items> - Number of items purchased
+    # <items-formatted> - E.g. `1 item`, `5 items`, etc.
+    # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
+    pos-purchase-seller: "<green>(!) Sold <white><items-formatted></white> to <hover:show_text:'<white><from-account></white><newline><gray><from-account-type></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> for <white><amount-formatted></white> at POS <gray><pos></gray>. The funds are in account <hover:show_text:'<white><to-account></white><newline><gray><to-account-type><dark_gray>:</dark_gray> <green><to-balance-formatted></green></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover>:</green> <gray><description></gray>"

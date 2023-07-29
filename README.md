@@ -39,6 +39,7 @@ A multi-account economy plugin.
 | `bank.set.name`                 | `setname`      | Set the name of an account                                                                | `default`         |
 | `bank.delete`                   | `delete`       | Delete an account                                                                         | `default`         |
 | `bank.pos.create`               | `pos`          | Create a new POS                                                                          | `default`         |
+| `bank.pos.use`                  |                | Buy items from a POS                                                                      | `default`         |
 | `bank.reload`                   | `reload`       | Reload the plugin                                                                         | `admin`           |
 | `bank.account.create.other`     | `create`       | Create a new account for another player                                                   | `admin`           |
 | `bank.account.create.bypass`    | `create`       | Bypass the maximum account limit                                                          | `admin`           |
@@ -50,4 +51,5 @@ A multi-account economy plugin.
 | `bank.delete.other`             | `delete`       | Delete an account owned by another player                                                 | `admin`           |
 | `bank.delete.personal`          | `delete`       | Bypass `prevent-close-last-personal`                                                      | `admin`           |
 | `bank.pos.create.other`         | `pos`          | Create a new POS for another player's account                                             | `admin`           |
+| `bank.pos.use.other`            |                | Buy items from a POS without being the card's account owner                               | `admin`           |
 | `bank.history.other`            | `transactions` | List transactions of accounts owned by another player                                     | `admin`           |
