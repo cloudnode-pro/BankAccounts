@@ -652,6 +652,13 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             return;
         }
 
+        if (target.getInventory().firstEmpty() == -1) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.target-inventory-full")),
+                    Placeholder.unparsed("player", target.getName())
+            ));
+            return;
+        }
+
         if (BankAccounts.getInstance().getConfig().getBoolean("instruments.require-item") && sender instanceof final @NotNull Player player) {
             final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
             final ItemStack item = Arrays.stream(player.getInventory().getStorageContents()).filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta()).findFirst().orElse(null);
