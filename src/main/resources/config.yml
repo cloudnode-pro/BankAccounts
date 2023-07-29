@@ -193,7 +193,11 @@ messages:
         # Player not found
         player-not-found: "<red>(!) Player not found.</red>"
         # You must have a specific item to convert to an instrument
+        # Placeholder: <material> - the item type that is required
         instrument-requires-item: "<red>(!) You must have <gray>x1 <material></gray> in your inventory to create a bank card from.</red>"
+        # Target player's inventory is full
+        # Placeholder: <player> - the target player's name
+        target-inventory-full: "<red>(!) The inventory of <gray><player></gray> is full.</red>"
 
     # Account balance
     # Available placeholders:
