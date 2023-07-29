@@ -105,7 +105,15 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
     }
 
     public ArrayList<String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final String[] args) {
-        return new ArrayList<>();
+        ArrayList<String> suggestions = new ArrayList<>();
+        if (sender.hasPermission("bank.pos.create") && sender instanceof Player && args.length == 1) {
+            final @NotNull Account[] accounts = sender.hasPermission("bank.pos.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+            for (final @NotNull Account account : accounts) {
+                if (account.frozen) continue;
+                suggestions.add(account.id);
+            }
+        }
+        return suggestions;
     }
 
     /**
