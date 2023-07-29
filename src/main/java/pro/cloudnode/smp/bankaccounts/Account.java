@@ -1,7 +1,21 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -9,8 +23,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -134,6 +151,50 @@ public class Account {
     }
 
     /**
+     * Create payment instrument
+     */
+    public final @NotNull ItemStack createInstrument() {
+        final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
+        final @NotNull ItemStack instrument = new ItemStack(material);
+
+        final @NotNull String name = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.name"));
+        final @NotNull List<String> lore = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("instruments.lore"));
+        final boolean glint = BankAccounts.getInstance().getConfig().getBoolean("instruments.glint.enabled");
+
+        final @NotNull ItemMeta meta = instrument.getItemMeta();
+        meta.displayName(this.instrumentPlaceholders(name));
+        meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
+
+        if (glint) {
+            final @NotNull NamespacedKey key = NamespacedKey.minecraft(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.glint.enchantment")));
+            final @NotNull Enchantment enchantment = Objects.requireNonNull(EnchantmentWrapper.getByKey(key));
+            meta.addEnchant(enchantment, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+
+        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        meta.getPersistentDataContainer().set(id, PersistentDataType.STRING, this.id);
+
+        instrument.setItemMeta(meta);
+
+        return instrument;
+    }
+
+    /**
+     * Set placeholders for instrument
+     * @param string String to set placeholders in
+     */
+    public final @NotNull Component instrumentPlaceholders (final @NotNull String string) {
+        return MiniMessage.miniMessage().deserialize(string,
+                Placeholder.unparsed("account", this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name),
+                Placeholder.unparsed("account-id", this.id),
+                Placeholder.unparsed("account-type", this.type.name),
+                Placeholder.unparsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
+                Formatter.date("date", LocalDateTime.now(ZoneOffset.UTC))
+        ).decoration(TextDecoration.ITALIC, false);
+    }
+
+    /**
      * Get account by ID
      * @param id Account ID
      */
@@ -148,6 +209,19 @@ public class Account {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account: " + id, e);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Get account from instrument
+     * @param instrument Instrument item
+     */
+    public static @NotNull Optional<@NotNull Account> get(final @NotNull ItemStack instrument) {
+        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        final @NotNull ItemMeta meta = instrument.getItemMeta();
+        if (meta == null) return Optional.empty();
+        final String accountId = meta.getPersistentDataContainer().get(id, PersistentDataType.STRING);
+        if (accountId == null) return Optional.empty();
+        return get(accountId);
     }
 
     /**

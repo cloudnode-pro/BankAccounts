@@ -4,12 +4,14 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
@@ -50,6 +52,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("bank.delete")) suggestions.add("delete");
             if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
             if (sender.hasPermission("bank.history")) suggestions.addAll(Arrays.asList("transactions", "history"));
+            if (sender.hasPermission("bank.instrument.create")) suggestions.addAll(Arrays.asList("instrument", "card"));
         }
         else {
             switch (args[0]) {
@@ -126,6 +129,15 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                         for (Account account : accounts) suggestions.add(account.id);
                     }
                 }
+                case "instrument", "card" -> {
+                    if (!sender.hasPermission("bank.instrument.create")) return suggestions;
+                    if (args.length == 2) {
+                        Account[] accounts = sender.hasPermission("bank.instrument.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (Account account : accounts) suggestions.add(account.id);
+                    }
+                    else if (args.length == 3 && sender.hasPermission("bank.instrument.create.other"))
+                        suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+                }
             }
         }
         return suggestions;
@@ -146,6 +158,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             case "delete" -> delete(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "transfer", "send", "pay" -> transfer(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "transactions", "history" -> transactions(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "instrument", "card" -> instrument(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
         }
     }
@@ -596,6 +609,71 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             for (Transaction transaction : transactions) sender.sendMessage(transactionPlaceholders(sender, transaction, account.get(), Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
             transactionsHeaderFooter(sender, account.get(), page.orElse(1), maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
         }
+    }
+
+    /**
+     * Create instrument
+     */
+    public static void instrument(final @NotNull CommandSender sender, final @NotNull String[] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.instrument.create")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
+        if (!(sender instanceof Player)) {
+            if (!sender.hasPermission("bank.instrument.create.other")) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.player-only"))));
+                return;
+            }
+            else if (args.length < 2) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> instrument " + (args.length > 0 ? args[0] : "<account>") + " <player>",
+                        Placeholder.unparsed("command", label)
+                ));
+                return;
+            }
+        }
+        else if (args.length < 1) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> instrument <account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : ""),
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
+        final Player target = !(sender instanceof Player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts.getInstance().getServer().getPlayer(args[1]) : (Player) sender;
+        if (target == null || !target.isOnline()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.player-not-found"))));
+            return;
+        }
+        Optional<Account> account = Account.get(args[0]);
+        if (account.isEmpty()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+            return;
+        }
+        if (!sender.hasPermission("bank.instrument.create.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
+            return;
+        }
+
+        if (BankAccounts.getInstance().getConfig().getBoolean("instruments.require-item") && sender instanceof final @NotNull Player player) {
+            final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
+            final ItemStack item = Arrays.stream(player.getInventory().getStorageContents()).filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta()).findFirst().orElse(null);
+
+            if (!sender.hasPermission("bank.instrument.create.bypass")) {
+                if (item == null) {
+                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.instrument-requires-item")),
+                            Placeholder.unparsed("material", Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material")).toLowerCase())
+                    ));
+                    return;
+                }
+                else {
+                    final @NotNull ItemStack clone = item.clone();
+                    clone.setAmount(1);
+                    player.getInventory().removeItem(clone);
+                }
+            }
+        }
+
+        final @NotNull ItemStack instrument = account.get().createInstrument();
+        target.getInventory().addItem(instrument);
+        sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.instrument-created"))));
     }
 
     /**
