@@ -148,7 +148,9 @@ public class Transaction {
             stmt.setString(1, account.id);
             stmt.setString(2, account.id);
             ResultSet rs = stmt.executeQuery();
-            return rs.next() ? new Transaction[]{new Transaction(rs)} : new Transaction[0];
+            List<Transaction> transactions = new ArrayList<>();
+            while (rs.next()) transactions.add(new Transaction(rs));
+            return transactions.toArray(new Transaction[0]);
         } catch (Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get transactions of account: " + account.id, e);
             return new Transaction[0];
