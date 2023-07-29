@@ -125,6 +125,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                         Account[] accounts = sender.hasPermission("bank.history.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (Account account : accounts) suggestions.add(account.id);
                     }
+                    else if (args.length == 3) suggestions.add("--all");
                 }
             }
         }
@@ -568,13 +569,17 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
             return;
         }
-        @NotNull Optional<Integer> page;
+        final int page;
+        @NotNull Optional<Integer> limit = Optional.of(BankAccounts.getInstance().getConfig().getInt("history.per-page"));
         if (args.length > 1) {
-            if (args[1].equals("--all")) page = Optional.empty();
+            if (args[1].equals("--all")) {
+                page = 1;
+                limit = Optional.empty();
+            }
             else {
                 try {
-                    page = Optional.of(Integer.parseInt(args[1]));
-                    if (page.get() <= 0) throw new NumberFormatException();
+                    page = Integer.parseInt(args[1]);
+                    if (page <= 0) throw new NumberFormatException();
                 }
                 catch (NumberFormatException e) {
                     sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
@@ -584,17 +589,15 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 }
             }
         }
-        else page = Optional.of(1);
-
-        int limit = BankAccounts.getInstance().getConfig().getInt("history.per-page");
-        int maxPage = (int) Math.ceil((double) Transaction.count(account.get()) / limit);
-        if (page.isPresent() && page.get() > maxPage) page = Optional.of(maxPage);
-        Transaction[] transactions = page.map(integer -> Transaction.get(account.get(), limit, integer)).orElseGet(() -> Transaction.get(account.get()));
+        else page = 1;
+        Transaction[] transactions = limit.map(integer -> Transaction.get(account.get(), integer, page)).orElseGet(() -> Transaction.get(account.get()));
         if (transactions.length == 0) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.no-transactions"))));
         else {
-            transactionsHeaderFooter(sender, account.get(), page.orElse(1), maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.header")));
+            final int count = Transaction.count(account.get());
+            int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.header")));
             for (Transaction transaction : transactions) sender.sendMessage(transactionPlaceholders(sender, transaction, account.get(), Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
-            transactionsHeaderFooter(sender, account.get(), page.orElse(1), maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
         }
     }
 
