@@ -24,6 +24,7 @@ A multi-account economy plugin.
 | `/bank setbalance <account> <balance\|Infinity>`      | Set the balance of an account            | `setbal`                     |
 | `/bank setname <account> [name]`                      | Set an account's name                    | `rename`                     |
 | `/bank reload`                                        | Reload configuration                     |                              |
+| `/pos <account> <price> [description]`                | Create a new POS                         |                              |
 
 ## Permissions
 | Permission                      | Command        | Description                                                                               | Recommended group |
