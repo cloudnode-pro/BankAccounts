@@ -9,6 +9,7 @@ import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
@@ -24,38 +25,31 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Level;
 
 public final class BankAccounts extends JavaPlugin {
 
-    public final HikariConfig config = new HikariConfig();
+    public final @NotNull HikariConfig config = new HikariConfig();
     private HikariDataSource dbSource;
 
-    public HikariDataSource getDb() {
+    public @NotNull HikariDataSource getDb() {
         return dbSource;
     }
 
     @Override
     public void onEnable() {
         saveDefaultConfig();
-        setupDbSource();
-        try {
-            initDb();
-        } catch (SQLException | IOException e) {
-            getLogger().log(Level.SEVERE, "Could not initialize database.", e);
-            getServer().getPluginManager().disablePlugin(this);
-        }
-
-        createServerAccount();
+        reload();
 
         // Register commands
-        HashMap<String, CommandExecutor> commands = new HashMap<>() {{
+        final @NotNull HashMap<@NotNull String, @NotNull CommandExecutor> commands = new HashMap<>() {{
             put("bank", new BankCommand());
             put("pos", new POSCommand());
         }};
-        for (Map.Entry<String, CommandExecutor> entry : commands.entrySet()) {
-            PluginCommand command = getCommand(entry.getKey());
+        for (Map.Entry<@NotNull String, @NotNull CommandExecutor> entry : commands.entrySet()) {
+            final PluginCommand command = getCommand(entry.getKey());
             if (command == null) {
                 getLogger().log(Level.SEVERE, "Could not register command: " + entry.getKey());
                 getServer().getPluginManager().disablePlugin(this);
@@ -65,11 +59,11 @@ public final class BankAccounts extends JavaPlugin {
         }
 
         // Register events
-        Listener[] events = new Listener[]{
+        final @NotNull Listener[] events = new Listener[]{
                 new Join(),
                 new BlockBreak()
         };
-        for (Listener event : events) getServer().getPluginManager().registerEvents(event, this);
+        for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
     }
 
     @Override
@@ -81,13 +75,23 @@ public final class BankAccounts extends JavaPlugin {
      * Setup database source
      */
     private void setupDbSource() {
-        config.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
-        if (getConfig().isString("db.jdbc")) config.setJdbcUrl(getConfig().getString("db.jdbc"));
-        else getLogger().severe("config: db.jdbc: not set");
-        if (getConfig().isString("db.user")) config.setUsername(getConfig().getString("db.user"));
-        else getLogger().severe("config: db.user: not set");
-        if (getConfig().isString("db.password")) config.setPassword(getConfig().getString("db.password"));
-        else getLogger().severe("config: db.password: not set");
+        switch (Objects.requireNonNull(getConfig().getString("db.db"))) {
+            case "sqlite" -> {
+                config.setDriverClassName(org.sqlite.JDBC.class.getName());
+                config.setJdbcUrl("jdbc:sqlite:" + getDataFolder().getAbsolutePath() + "/" + Objects.requireNonNull(getConfig().getString("db.sqlite.file")));
+            }
+            case "mariadb" -> {
+                config.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
+                config.setJdbcUrl(Objects.requireNonNull(getConfig().getString("db.mariadb.jdbc")));
+                config.setUsername(Objects.requireNonNull(getConfig().getString("db.mariadb.user")));
+                config.setPassword(Objects.requireNonNull(getConfig().getString("db.mariadb.password")));
+            }
+            default -> {
+                getLogger().log(Level.SEVERE, "Invalid database type.");
+                getServer().getPluginManager().disablePlugin(this);
+                return;
+            }
+        }
         if (getConfig().isBoolean("db.cachePrepStmts"))
             config.addDataSourceProperty("cachePrepStmts", getConfig().getString("db.cachePrepStmts"));
         if (getConfig().isInt("db.prepStmtCacheSize"))
@@ -113,32 +117,61 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Reload plugin
+     */
+    public static void reload() {
+        getInstance().reloadConfig();
+        getInstance().setupDbSource();
+        getInstance().initDbWrapper();
+        createServerAccount();
+    }
+
+    /**
      * Create tables
      */
-    private void initDb() throws SQLException, IOException {
-        String setup;
-        try (InputStream in = getClassLoader().getResourceAsStream("setup.sql")) {
-            // Java 9+ way
-            setup = new String(in.readAllBytes());
-        } catch (IOException e) {
+    private void initDb() throws @NotNull SQLException, @NotNull IOException {
+        final @NotNull HashMap<@NotNull String, @NotNull String> initFiles = new HashMap<>() {{
+            put("mariadb", "db-init/mysql.sql");
+            put("sqlite", "db-init/sql.sql");
+        }};
+        final @NotNull String db = Objects.requireNonNull(getConfig().getString("db.db"));
+        if (!initFiles.containsKey(db)) {
+            getLogger().log(Level.SEVERE, "Invalid database type.");
+            getServer().getPluginManager().disablePlugin(this);
+            return;
+        }
+        final @NotNull String initFile = initFiles.get(db);
+        @NotNull String setup;
+        try (final InputStream in = getClassLoader().getResourceAsStream(initFile)) {
+            setup = new String(Objects.requireNonNull(in).readAllBytes());
+        } catch (@NotNull IOException e) {
             getLogger().log(Level.SEVERE, "Could not read db setup file.", e);
             throw e;
         }
-        String[] queries = setup.split(";");
-        for (String query : queries) {
+        final @NotNull String[] queries = setup.split(";");
+        for (final @NotNull String query : queries) {
             if (query.isBlank()) continue;
-            try (Connection conn = getDb().getConnection();
-                 PreparedStatement stmt = conn.prepareStatement(query)) {
+            try (final @NotNull Connection conn = getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement(query)) {
                 stmt.execute();
             }
         }
         getLogger().info("Database setup complete.");
     }
 
+    private void initDbWrapper() {
+        try {
+            initDb();
+        } catch (@NotNull SQLException | @NotNull IOException e) {
+            getLogger().log(Level.SEVERE, "Could not initialize database.", e);
+            getServer().getPluginManager().disablePlugin(this);
+        }
+    }
+
     /**
      * Get instance of the plugin
      */
-    public static BankAccounts getInstance() {
+    public static @NotNull BankAccounts getInstance() {
         return getPlugin(BankAccounts.class);
     }
 
@@ -146,7 +179,7 @@ public final class BankAccounts extends JavaPlugin {
      * Get currency symbol
      */
     public static @NotNull String getCurrencySymbol() {
-        String symbol = getInstance().getConfig().getString("currency.symbol");
+        final @Nullable String symbol = getInstance().getConfig().getString("currency.symbol");
         return symbol != null ? symbol : "$";
     }
 
@@ -155,9 +188,9 @@ public final class BankAccounts extends JavaPlugin {
      *
      * @param amount Amount
      */
-    public static String formatCurrency(BigDecimal amount) {
+    public static String formatCurrency(final @Nullable BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
-        String format = getInstance().getConfig().getString("currency.format");
+        final @Nullable String format = getInstance().getConfig().getString("currency.format");
         return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
@@ -168,25 +201,25 @@ public final class BankAccounts extends JavaPlugin {
      *
      * @param amount Amount
      */
-    public static String formatCurrencyShort(BigDecimal amount) {
-        String currencySymbol = getCurrencySymbol();
+    public static String formatCurrencyShort(final @Nullable BigDecimal amount) {
+        final @NotNull String currencySymbol = getCurrencySymbol();
         if (amount == null) return "∞";
-        BigDecimal absAmount = amount.abs().setScale(2, RoundingMode.HALF_UP);
-        String prefix = (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + currencySymbol;
+        final @NotNull BigDecimal absAmount = amount.abs().setScale(2, RoundingMode.HALF_UP);
+        final @NotNull String prefix = (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + currencySymbol;
         if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0) return prefix + absAmount.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
 
-        Map<BigDecimal, String> bounds = Map.of(
+        final @NotNull Map<BigDecimal, String> bounds = Map.of(
                 BigDecimal.valueOf(1000), "K",
                 BigDecimal.valueOf(1_000_000), "M",
                 BigDecimal.valueOf(1_000_000_000), "B",
                 BigDecimal.valueOf(1_000_000_000_000L), "T"
         );
-        Map.Entry<BigDecimal, String> entry = bounds.entrySet().stream().sorted(Map.Entry.comparingByKey()).filter(e -> absAmount.divide(e.getKey(), RoundingMode.HALF_UP).compareTo(BigDecimal.valueOf(1000)) < 0).findFirst().orElse(null);
+        @Nullable Map.Entry<BigDecimal, String> entry = bounds.entrySet().stream().sorted(Map.Entry.comparingByKey()).filter(e -> absAmount.divide(e.getKey(), RoundingMode.HALF_UP).compareTo(BigDecimal.valueOf(1000)) < 0).findFirst().orElse(null);
         if (entry == null) entry = bounds.entrySet().stream().max(Map.Entry.comparingByKey()).orElse(null);
         if (entry == null) return "FAIL";
-        BigDecimal bound = entry.getKey();
-        String suffix = bounds.get(bound);
-        BigDecimal divided = absAmount.divide(bound, RoundingMode.HALF_UP);
+        final @NotNull BigDecimal bound = entry.getKey();
+        final @NotNull String suffix = bounds.get(bound);
+        final @NotNull BigDecimal divided = absAmount.divide(bound, RoundingMode.HALF_UP);
         int scale = divided.compareTo(BigDecimal.valueOf(10)) < 0 ? 2 : divided.compareTo(BigDecimal.valueOf(100)) < 0 ? 1 : 0;
         return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>" : "") + prefix + divided.setScale(scale, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString() + suffix + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
@@ -196,12 +229,12 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().getConfig().getBoolean("server-account.enabled")) {
-            Account[] accounts = Account.get(getConsoleOfflinePlayer());
+            final @NotNull Account[] accounts = Account.get(getConsoleOfflinePlayer());
             if (accounts.length > 0) return;
-            String name = getInstance().getConfig().getString("server-account.name");
-            Account.Type type = Account.Type.getType(getInstance().getConfig().getInt("server-account.type"));
-            BigDecimal balance = getInstance().getConfig().getString("server-account.starting-balance").equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
-            new Account(getConsoleOfflinePlayer(), type, name, balance, false).save();
+            final @Nullable String name = getInstance().getConfig().getString("server-account.name");
+            final @NotNull Account.Type type = Account.Type.getType(getInstance().getConfig().getInt("server-account.type"));
+            final @Nullable BigDecimal balance = Objects.requireNonNull(getInstance().getConfig().getString("server-account.starting-balance")).equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
+            new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
         }
     }
 

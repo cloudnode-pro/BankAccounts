@@ -20,7 +20,7 @@ public final class Join implements Listener {
                 final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
                 if (accounts.length == 0) {
                     final double startingBalance = BankAccounts.getInstance().getConfig().getDouble("starting-balance");
-                    new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(startingBalance), false).save();
+                    new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(startingBalance), false).insert();
                 }
             });
         }

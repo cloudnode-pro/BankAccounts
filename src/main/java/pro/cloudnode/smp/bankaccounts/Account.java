@@ -1,7 +1,21 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
+import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentWrapper;
+import org.bukkit.inventory.ItemFlag;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -9,8 +23,11 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -22,7 +39,7 @@ public class Account {
     /**
      * Unique account ID
      */
-    public final String id;
+    public final @NotNull String id;
     /**
      * Account owner
      */
@@ -30,7 +47,7 @@ public class Account {
     /**
      * Account type
      */
-    public final Type type;
+    public final @NotNull Type type;
     /**
      * Account display name
      * <p>
@@ -57,7 +74,7 @@ public class Account {
      * @param balance Account balance
      * @param frozen Whether the account is frozen
      */
-    public Account(String id, @NotNull OfflinePlayer owner, Type type, @Nullable String name, @Nullable BigDecimal balance, boolean frozen) {
+    public Account(final @NotNull String id, final @NotNull OfflinePlayer owner, final @NotNull Type type, final @Nullable String name, final @Nullable BigDecimal balance, final boolean frozen) {
         this.id = id;
         this.owner = owner;
         this.type = type;
@@ -74,7 +91,7 @@ public class Account {
      * @param balance Account balance
      * @param frozen Whether the account is frozen
      */
-    public Account(@NotNull OfflinePlayer owner, Type type, String name, BigDecimal balance, boolean frozen) {
+    public Account(final @NotNull OfflinePlayer owner, final @NotNull Type type, final @Nullable String name, final @Nullable BigDecimal balance, final boolean frozen) {
         this(StringGenerator.generate(16), owner, type, name, balance, frozen);
     }
 
@@ -82,7 +99,7 @@ public class Account {
      * Create bank account instance from database result set
      * @param rs Database result set
      */
-    public Account(ResultSet rs) throws SQLException {
+    public Account(final @NotNull ResultSet rs) throws @NotNull SQLException {
         this(
                 rs.getString("id"),
                 BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString(rs.getString("owner"))),
@@ -97,10 +114,10 @@ public class Account {
      * Update account balance
      * @param diff Balance difference (positive or negative)
      */
-    public void updateBalance(BigDecimal diff) {
+    public final void updateBalance(final @NotNull BigDecimal diff) {
         if (balance == null) return;
         this.balance = balance.add(diff);
-        this.save();
+        this.update();
     }
 
     /**
@@ -112,13 +129,13 @@ public class Account {
      * @throws IllegalStateException If the sender or recipient account is frozen or the sender has insufficient funds
      * @throws IllegalArgumentException If the amount is less than or equal to zero
      */
-    public Transaction transfer(Account to, BigDecimal amount, @Nullable String description, @Nullable String instrument) {
+    public final @NotNull Transaction transfer(final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description, final @Nullable String instrument) {
         if (frozen) throw new IllegalStateException("Your account is frozen");
         if (to.frozen) throw new IllegalStateException("Recipient account is frozen");
         if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
         if (!hasFunds(amount)) throw new IllegalStateException("Insufficient funds");
 
-        Transaction transaction = new Transaction(this, to, amount, description, instrument);
+        final @NotNull Transaction transaction = new Transaction(this, to, amount, description, instrument);
         transaction.save();
         this.updateBalance(amount.negate());
         to.updateBalance(amount);
@@ -129,25 +146,82 @@ public class Account {
      * Check if account has sufficient funds
      * @param amount Amount to check
      */
-    public boolean hasFunds(BigDecimal amount) {
+    public final boolean hasFunds(final @NotNull BigDecimal amount) {
         return balance == null || balance.compareTo(amount) >= 0;
+    }
+
+    /**
+     * Create payment instrument
+     */
+    public final @NotNull ItemStack createInstrument() {
+        final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
+        final @NotNull ItemStack instrument = new ItemStack(material);
+
+        final @NotNull String name = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.name"));
+        final @NotNull List<String> lore = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("instruments.lore"));
+        final boolean glint = BankAccounts.getInstance().getConfig().getBoolean("instruments.glint.enabled");
+
+        final @NotNull ItemMeta meta = instrument.getItemMeta();
+        meta.displayName(this.instrumentPlaceholders(name));
+        meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
+
+        if (glint) {
+            final @NotNull NamespacedKey key = NamespacedKey.minecraft(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.glint.enchantment")));
+            final @NotNull Enchantment enchantment = Objects.requireNonNull(EnchantmentWrapper.getByKey(key));
+            meta.addEnchant(enchantment, 1, true);
+            meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+        }
+
+        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        meta.getPersistentDataContainer().set(id, PersistentDataType.STRING, this.id);
+
+        instrument.setItemMeta(meta);
+
+        return instrument;
+    }
+
+    /**
+     * Set placeholders for instrument
+     * @param string String to set placeholders in
+     */
+    public final @NotNull Component instrumentPlaceholders (final @NotNull String string) {
+        return MiniMessage.miniMessage().deserialize(string,
+                Placeholder.unparsed("account", this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name),
+                Placeholder.parsed("account-id", this.id),
+                Placeholder.parsed("account-type", this.type.name),
+                Placeholder.parsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
+                Formatter.date("date", LocalDateTime.now(ZoneOffset.UTC))
+        ).decoration(TextDecoration.ITALIC, false);
     }
 
     /**
      * Get account by ID
      * @param id Account ID
      */
-    public static Optional<Account> get(String id) {
-        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
+    public static @NotNull Optional<@NotNull Account> get(final @NotNull String id) {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
             stmt.setString(1, id);
-            ResultSet rs = stmt.executeQuery();
+            final @NotNull ResultSet rs = stmt.executeQuery();
             return rs.next() ? Optional.of(new Account(rs)) : Optional.empty();
         }
-        catch (Exception e) {
+        catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account: " + id, e);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Get account from instrument
+     * @param instrument Instrument item
+     */
+    public static @NotNull Optional<@NotNull Account> get(final @NotNull ItemStack instrument) {
+        final @NotNull NamespacedKey id = new NamespacedKey(BankAccounts.getInstance(), "instrument-account");
+        final @NotNull ItemMeta meta = instrument.getItemMeta();
+        if (meta == null) return Optional.empty();
+        final String accountId = meta.getPersistentDataContainer().get(id, PersistentDataType.STRING);
+        if (accountId == null) return Optional.empty();
+        return get(accountId);
     }
 
     /**
@@ -155,18 +229,18 @@ public class Account {
      * @param owner Account owner
      * @param type Account type
      */
-    public static Account[] get(OfflinePlayer owner, @Nullable Type type) {
-        List<Account> accounts = new ArrayList<>();
-        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement(type == null ? "SELECT * FROM `bank_accounts` WHERE `owner` = ?" : "SELECT * FROM `bank_accounts` WHERE `owner` = ? AND `type` = ?")) {
+    public static @NotNull Account[] get(final @NotNull OfflinePlayer owner, final @Nullable Type type) {
+        final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement(type == null ? "SELECT * FROM `bank_accounts` WHERE `owner` = ?" : "SELECT * FROM `bank_accounts` WHERE `owner` = ? AND `type` = ?")) {
             stmt.setString(1, owner.getUniqueId().toString());
             if (type != null) stmt.setInt(2, Type.getType(type));
-            ResultSet rs = stmt.executeQuery();
+            final @NotNull ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) accounts.add(new Account(rs));
             return accounts.toArray(new Account[0]);
         }
-        catch (Exception e) {
+        catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts for: " + owner.getUniqueId().toString() + " (" + owner.getName() + "), type = " + (type == null ? "all" : type.name()), e);
             return new Account[0];
         }
@@ -176,34 +250,33 @@ public class Account {
      * Get accounts by owner
      * @param owner Account owner
      */
-    public static Account[] get(OfflinePlayer owner) {
+    public static @NotNull Account[] get(final @NotNull OfflinePlayer owner) {
         return get(owner, null);
     }
 
     /**
      * Get all accounts
      */
-    public static Account[] get() {
-        List<Account> accounts = new ArrayList<>();
-        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts`")) {
-            ResultSet rs = stmt.executeQuery();
+    public static @NotNull Account[] get() {
+        final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts`")) {
+            final @NotNull ResultSet rs = stmt.executeQuery();
 
             while (rs.next()) accounts.add(new Account(rs));
             return accounts.toArray(new Account[0]);
-        } catch (Exception e) {
+        } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts", e);
             return new Account[0];
         }
     }
 
     /**
-     * Insert or update account into database
+     * Insert into database
      */
-    public void save() {
-        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_accounts` (`id`, `owner`, `type`, `name`, `balance`, `frozen`) VALUES (?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE `name` = ?, `balance` = ?, `frozen` = ?")) {
-            // insert
+    public void insert() {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("INSERT INTO `bank_accounts` (`id`, `owner`, `type`, `name`, `balance`, `frozen`) VALUES (?, ?, ?, ?, ?, ?)")) {
             stmt.setString(1, id);
             stmt.setString(2, owner.getUniqueId().toString());
             stmt.setInt(3, Type.getType(type));
@@ -212,15 +285,28 @@ public class Account {
             if (balance == null) stmt.setNull(5, java.sql.Types.DECIMAL);
             else stmt.setBigDecimal(5, balance);
             stmt.setBoolean(6, frozen);
-            // update
-            if (name == null) stmt.setNull(7, java.sql.Types.VARCHAR);
-            else stmt.setString(7, name);
-            if (balance == null) stmt.setNull(8, java.sql.Types.DECIMAL);
-            else stmt.setBigDecimal(8, balance);
-            stmt.setBoolean(9, frozen);
 
             stmt.executeUpdate();
-        } catch (Exception e) {
+        } catch (final @NotNull Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save account: " + id, e);
+        }
+    }
+
+    /**
+     * Update in database
+     */
+    public void update() {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("UPDATE `bank_accounts` SET `name` = ?, `balance` = ?, `frozen` = ? WHERE `id` = ?")) {
+            if (name == null) stmt.setNull(1, java.sql.Types.VARCHAR);
+            else stmt.setString(1, name);
+            if (balance == null) stmt.setNull(2, java.sql.Types.DECIMAL);
+            else stmt.setBigDecimal(2, balance);
+            stmt.setBoolean(3, frozen);
+            stmt.setString(4, id);
+
+            stmt.executeUpdate();
+        } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save account: " + id, e);
         }
     }
@@ -229,11 +315,11 @@ public class Account {
      * Delete account from database
      */
     public void delete() {
-        try (Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             PreparedStatement stmt = conn.prepareStatement("DELETE FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("DELETE FROM `bank_accounts` WHERE `id` = ?")) {
             stmt.setString(1, id);
             stmt.executeUpdate();
-        } catch (Exception e) {
+        } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account: " + id, e);
         }
     }
@@ -256,7 +342,7 @@ public class Account {
          */
         public final @NotNull String name;
 
-        Type(@NotNull String name) {
+        Type(final @NotNull String name) {
             this.name = name;
         }
 
@@ -265,7 +351,7 @@ public class Account {
          * @param type Account type
          * @return Account type as integer
          */
-        public static int getType(Type type) {
+        public static int getType(final @NotNull Type type) {
             return type.ordinal();
         }
 
@@ -274,12 +360,12 @@ public class Account {
          * @param type Account type as integer
          * @return Account type
          */
-        public static Type getType(int type) {
+        public static @NotNull Type getType(final int type) {
             return Type.values()[type];
         }
 
-        public static Optional<Type> fromString(String name) {
-            for (Type type : Type.values()) {
+        public static @NotNull Optional<@NotNull Type> fromString(final @NotNull String name) {
+            for (final @NotNull Type type : Type.values()) {
                 if (type.name.equalsIgnoreCase(name)) return Optional.of(type);
             }
             return Optional.empty();
@@ -289,13 +375,16 @@ public class Account {
     /**
      * A dummy class representing a missing account (e.g. deleted).
      */
-    public static class ClosedAccount extends Account {
+    public static final class ClosedAccount extends Account {
         public ClosedAccount() {
             super("closed account", BankAccounts.getConsoleOfflinePlayer(), Type.PERSONAL, null, BigDecimal.ZERO, true);
         }
 
         @Override
-        public void save() {}
+        public void insert() {}
+
+        @Override
+        public void update() {}
 
         @Override
         public void delete() {}
