@@ -18,3 +18,16 @@ CREATE TABLE IF NOT EXISTS `bank_transactions`
     `description` TEXT                         DEFAULT NULL COLLATE NOCASE,
     `instrument`  CHAR(24)                     DEFAULT NULL COLLATE BINARY
 );
+
+CREATE TABLE IF NOT EXISTS `pos`
+(
+    `x`           INTEGER  NOT NULL,
+    `y`           INTEGER  NOT NULL,
+    `z`           INTEGER  NOT NULL,
+    `world`       TEXT     NOT NULL,
+    `price`       NUMERIC  NOT NULL,
+    `description` TEXT              DEFAULT NULL,
+    `seller`      TEXT     NOT NULL,
+    `created`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`x`, `y`, `z`, `world`)
+);

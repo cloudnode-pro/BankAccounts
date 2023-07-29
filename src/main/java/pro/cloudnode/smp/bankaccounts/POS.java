@@ -156,7 +156,7 @@ public final class POS {
      */
     public void delete() {
         try (final Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             final PreparedStatement stmt = conn.prepareStatement("DELETE FROM `pos` WHERE `x` = ? AND `y` = ? AND `z` = ? AND `world` = ? LIMIT 1")) {
+             final PreparedStatement stmt = conn.prepareStatement("DELETE FROM `pos` WHERE `x` = ? AND `y` = ? AND `z` = ? AND `world` = ?")) {
             stmt.setInt(1, x);
             stmt.setInt(2, y);
             stmt.setInt(3, z);
