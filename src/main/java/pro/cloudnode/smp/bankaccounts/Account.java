@@ -187,9 +187,9 @@ public class Account {
     public final @NotNull Component instrumentPlaceholders (final @NotNull String string) {
         return MiniMessage.miniMessage().deserialize(string,
                 Placeholder.unparsed("account", this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name),
-                Placeholder.unparsed("account-id", this.id),
-                Placeholder.unparsed("account-type", this.type.name),
-                Placeholder.unparsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
+                Placeholder.parsed("account-id", this.id),
+                Placeholder.parsed("account-type", this.type.name),
+                Placeholder.parsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
                 Formatter.date("date", LocalDateTime.now(ZoneOffset.UTC))
         ).decoration(TextDecoration.ITALIC, false);
     }
