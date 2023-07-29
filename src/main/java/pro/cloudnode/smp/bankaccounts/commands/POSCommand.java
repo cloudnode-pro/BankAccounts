@@ -18,6 +18,7 @@ import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -65,13 +66,21 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
 
             final @NotNull BigDecimal price;
             try {
-                price = BigDecimal.valueOf(Double.parseDouble(args[1]));
+                price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
             } catch (NumberFormatException e) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
                         Placeholder.unparsed("number", args[1])
                 ));
                 return true;
             }
+
+            if (price.compareTo(BigDecimal.ZERO) <= 0) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
+                        Placeholder.unparsed("number", args[1])
+                ));
+                return true;
+            }
+
 
             final @Nullable Block target = player.getTargetBlockExact(5);
             if (target == null) {
