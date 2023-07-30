@@ -54,6 +54,11 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
+            if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig().getBoolean("pos.allow-personal") && !player.hasPermission("bank.pos.create.personal")) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-create-business-only"))));
+                return true;
+            }
+
             if (account.get().frozen) {
                 sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen"))));
                 return true;
@@ -118,7 +123,8 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
         if (sender.hasPermission("bank.pos.create") && sender instanceof Player && args.length == 1) {
             final @NotNull Account[] accounts = sender.hasPermission("bank.pos.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
             for (final @NotNull Account account : accounts) {
-                if (account.frozen) continue;
+                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig().getBoolean("pos.allow-personal") && !sender.hasPermission("bank.pos.create.personal")))
+                    continue;
                 suggestions.add(account.id);
             }
         }

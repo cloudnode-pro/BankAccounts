@@ -51,5 +51,6 @@ A multi-account economy plugin.
 | `bank.delete.other`             | `delete`       | Delete an account owned by another player                                                 | `admin`           |
 | `bank.delete.personal`          | `delete`       | Bypass `prevent-close-last-personal`                                                      | `admin`           |
 | `bank.pos.create.other`         | `pos`          | Create a new POS for another player's account                                             | `admin`           |
+| `bank.pos.create.personal`      | `pos`          | Bypass config option `pos.allow-personal = false`                                         | `admin`           |
 | `bank.pos.use.other`            |                | Buy items from a POS without being the card's account owner                               | `admin`           |
 | `bank.history.other`            | `transactions` | List transactions of accounts owned by another player                                     | `admin`           |

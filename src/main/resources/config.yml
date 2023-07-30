@@ -151,6 +151,11 @@ instruments:
 # POS
 # Note: you cannot use <hover> <click> etc. in GUIs
 pos:
+    # Allow creating POS with a PERSONAL account
+    # If you want to require players to use a business account, set this to false.
+    # You can bypass this with `bank.pos.create.personal`
+    allow-personal: false
+
     # The title shown at the top of the GUI when opening a POS
     # Placeholders:
     # <description> - POS description
@@ -274,6 +279,7 @@ messages:
         card-no-permission: "<red>(!) You cannot use your card here.</red>"
         no-card: "<red>(!) You must hold your bank card to use this.</red>"
         pos-items-changed: "<red>(!) The items in the chest have changed. POS cancelled.</red>"
+        pos-create-business-only: "<red>(!) You can only create a POS with a business account.</red>"
 
     # Account balance
     # Available placeholders:
