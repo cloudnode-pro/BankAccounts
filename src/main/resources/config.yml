@@ -281,9 +281,10 @@ messages:
         header: "<green>Transaction history</green> <gray>(<hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover>)</gray>"
         # All placeholders of `balance` and `transfer-sent` are available. Use <account> (no prefix) for your account and "other-" prefix for other account
         # Additional placeholders:
+        # <instrument> - The way the transfer was made, e.g. "direct transfer", "pos", etc.
         # <date> - Transaction date. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
         # <full_date> - Full date with time zone. Can be used in <hover>, <click> etc.
-        entry: "<gray>#<transaction-id> <hover:show_text:'<full_date>'><date:'MMM d H:mm'></hover><dark_gray>:</dark_gray> <white><amount-formatted></white> <gray><hover:show_text:'<white><other-account></white><newline><gray><other-account-type></gray><newline><gray>Owned by <other-account-owner></gray><newline><gray><other-account-id></gray>'><other-account></hover>: <description>"
+        entry: "<hover:show_text:'<full_date>'><dark_gray>#<transaction-id></dark_gray></hover> <white><amount-formatted></white> <gray><hover:show_text:'<white><other-account></white><newline><gray><other-account-type></gray><newline><gray>Owned by <other-account-owner></gray><newline><gray><other-account-id></gray>'><other-account></hover>: <description></gray> <dark_gray>(<instrument>)</dark_gray>"
         # Same placeholders as header
         footer: "<click:run_command:<cmd-prev>><hover:show_text:'<white>Previous page</white>'><green>← Previous</green></hover></click> <gray>Page <page>/<max-page></gray> <click:run_command:<cmd-next>><hover:show_text:'<white>Next page</white>'><green>Next →</green></hover></click>"
         # No transactions

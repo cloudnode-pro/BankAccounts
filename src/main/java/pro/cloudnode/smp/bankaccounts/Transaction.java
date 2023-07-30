@@ -253,6 +253,7 @@ public class Transaction {
                 .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
                 .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
                 .replace("<transaction-id>", String.valueOf(transaction.getId()))
+                .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
                 .replace("<full_date>", sdf.format(transaction.time) + " UTC");
         message = Account.placeholdersString(message, new HashMap<>() {{
             put("", account);
