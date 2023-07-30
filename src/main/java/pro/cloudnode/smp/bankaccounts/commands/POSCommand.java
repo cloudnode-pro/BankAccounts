@@ -110,6 +110,13 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
 
             final @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
 
+            if (description != null && (description.contains("<") || description.contains(">"))) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
+                        Placeholder.unparsed("characters", "<>")
+                ));
+                return true;
+            }
+
             final POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
             pos.save();
             player.sendMessage(replacePlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-created")), pos));
