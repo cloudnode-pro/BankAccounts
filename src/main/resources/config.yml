@@ -101,6 +101,126 @@ history:
     # You can use `/bank transactions <account> --all` to view all transactions
     per-page: 10
 
+# Payment instruments
+# These are like bank cards that can be used to make payments.
+instruments:
+    # The in-game item to use. See https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+    material: PAPER
+
+    # Require the player to have an item in their inventory of the same material in order to create a new instrument.
+    # The item is consumed and replaced with the instrument. This is recommended to prevent limitless generation of
+    # items. Payment instruments CAN be used in crafting recipes and villager trading as if they were regular items.
+    # You can bypass this requirement using `bank.instrument.create.bypass`. Non-players (e.g. console, command blocks,
+    # etc.) always bypass this requirement.
+    require-item: true
+
+    # The name of the item
+    # Placeholders:
+    #  - <account> - Account name. Defaults to owner username or ID if not set.
+    #  - <account-id> - Account ID
+    #  - <account-type> - Account type (Personal or Business)
+    #  - <account-owner> - Account owner username
+    #  - <date> - Date card was created. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
+    # NOTE: The placeholders are set only when the item is created.
+    # If the account is renamed or the balance changes, the text on the item will NOT be updated.
+    # Additionally, if you modify this, it will only be effective for new bank cards.
+    name: "<green><b>Bank Card</b></green> <aqua>—</aqua> <gray><account></gray>"
+
+    # Lore of the item (text below the name)
+    # Same placeholders as name
+    lore:
+        - "<white><account-type>, <account></white>"
+        - "<gray>#<account-id></gray>"
+        - "<gray>Issued <date:'MM/yy'></gray>"
+        - "<gray>Owner:</gray> <white><account-owner></white>"
+
+    # Item glint
+    # This makes the item shine as if enchanted
+    glint:
+        enabled: true
+
+        # The hidden enchantment to apply to the item
+        # Enchantments are the same as seen in the `/enchant` command. Do not include the `minecraft:` prefix.
+        # If you set this to something like "vanishing_curse" the item will disappear when the player dies.
+        # If you use a compatible enchantment with the item material, the enchantment will be fully functional.
+        # (e.g. if your item is a sword, and you use "sharpness", the sword will deal more damage, even though the
+        # enchantment is not listed in the lore. it is recommended to avoid that)
+        # Level 1 is always applied.
+        enchantment: unbreaking
+
+# POS
+# Note: you cannot use <hover> <click> etc. in GUIs
+pos:
+    # Allow creating POS with a PERSONAL account
+    # If you want to require players to use a business account, set this to false.
+    # You can bypass this with `bank.pos.create.personal`
+    allow-personal: false
+
+    # The title shown at the top of the GUI when opening a POS
+    # Placeholders:
+    # <description> - POS description
+    # <price> - Price of the POS contents without formatting, example: 123456.78
+    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: 123k
+    title: "<green><bold>Point of Sale</bold></green> <gray>— <price-formatted></gray>"
+
+    # POS info item
+    info:
+        # Available materials: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+        material: PAPER
+
+        # Glint / glow (does not work on all items)
+        glint: true
+
+        # Item name when owner is viewing the POS.
+        # Same placeholders as POS title.
+        name-owner: "<green><bold>POS</bold></green>"
+        # Item name when potential buyer is viewing the POS.
+        # Same placeholders as POS title.
+        # Extra placeholders: same as `messages.balance`. The account is of the owner of the POS.
+        name-buyer: "<green><bold>POS</bold></green> <gray>— <account></gray>"
+
+        # Lore lines when owner is viewing the POS.
+        # Same placeholders as POS title.
+        lore-owner:
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Description:</gray> <white><description></white>"
+        # Same placeholders as name-buyer
+        lore-buyer:
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Description:</gray> <white><description></white>"
+
+    # POS delete item (owner only)
+    # No placeholders.
+    delete:
+        material: BARRIER
+        glint: false
+        name: "<red><bold>Cancel POS</bold></red>"
+        lore:
+            - "<gray>Click to cancel this POS.</gray>"
+
+    # Confirm purchase item (buyer only)
+    # Same placeholders as name-buyer, but this time the account is of the buyer.
+    confirm:
+        material: LIME_STAINED_GLASS_PANE
+        glint: false
+        name: "<green><bold>Confirm Purchase</bold></green>"
+        lore:
+            - "<gray>Click to confirm purchase.</gray>"
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Balance:</gray> <white><balance-formatted></white>"
+            - "<gray>Paying with:</gray> <white><account></white> <gray>(<account-formatted>)</gray>"
+            - "<dark_gray>Account ID <account-id></dark_gray>"
+    # Deny purchase item (buyer only)
+    # No placeholders.
+    decline:
+        material: RED_STAINED_GLASS_PANE
+        glint: false
+        name: "<red><bold>Decline Purchase</bold></red>"
+        lore:
+            - "<gray>Click to decline this purchase.</gray>"
+
+
 # Messages
 messages:
     # Currency symbol
@@ -121,7 +241,7 @@ messages:
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
         rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
         # You do not own this account
-        not-account-owner: "<red>(!) You are not the owner of account <gray><account></gray></red>"
+        not-account-owner: "<red>(!) You are not the owner of this account.</red>"
         # Account frozen (placeholders same as balance)
         frozen: "<gold>(!) <account-type> account <gray><account> (<account-id>)</gray> is frozen. This account cannot initiate or receive transactions.</gold>"
         # Cannot transfer to same account
@@ -140,6 +260,26 @@ messages:
         closing-balance: "<red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>"
         # Trying to close a personal account and `prevent-close-last-personal` is enabled
         closing-personal: "<red>(!) You cannot close your last personal account.</red>"
+        # Command only for players
+        player-only: "<red>(!) You must be a player to use this command.</red>"
+        # Player not found
+        player-not-found: "<red>(!) Player not found.</red>"
+        # You must have a specific item to convert to an instrument
+        # Placeholder: <material> - the item type that is required
+        instrument-requires-item: "<red>(!) You must have <gray>x1 <material></gray> in your inventory to create a bank card from.</red>"
+        # Target player's inventory is full
+        # Placeholder: <player> - the target player's name
+        target-inventory-full: "<red>(!) The inventory of <gray><player></gray> is full.</red>"
+        block-too-far: "<red>(!) The targeted block is too far away.</red>"
+        pos-already-exists: "<red>(!) A POS already exists at this location.</red>"
+        pos-not-chest: "<red>(!) The targeted block is not a chest.</red>"
+        pos-empty: "<red>(!) The chest is empty. POS cancelled.</red>"
+        pos-invalid-card: "<red>(!) You need a valid bank card to use POS.</red>"
+        pos-no-permission: "<red>(!) You do not have permission to use POS.</red>"
+        card-no-permission: "<red>(!) You cannot use your card here.</red>"
+        no-card: "<red>(!) You must hold your bank card to use this.</red>"
+        pos-items-changed: "<red>(!) The items in the chest have changed. POS cancelled.</red>"
+        pos-create-business-only: "<red>(!) You can only create a POS with a business account.</red>"
 
     # Account balance
     # Available placeholders:
@@ -214,10 +354,47 @@ messages:
         header: "<green>Transaction history</green> <gray>(<hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover>)</gray>"
         # All placeholders of `balance` and `transfer-sent` are available. Use <account> (no prefix) for your account and "other-" prefix for other account
         # Additional placeholders:
+        # <instrument> - The way the transfer was made, e.g. "direct transfer", "pos", etc.
         # <date> - Transaction date. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
         # <full_date> - Full date with time zone. Can be used in <hover>, <click> etc.
-        entry: "<gray>#<transaction-id> <hover:show_text:'<full_date>'><date:'MMM d H:mm'></hover><dark_gray>:</dark_gray> <white><amount-formatted></white> <gray><hover:show_text:'<white><other-account></white><newline><gray><other-account-type></gray><newline><gray>Owned by <other-account-owner></gray><newline><gray><other-account-id></gray>'><other-account></hover>: <description>"
+        entry: "<hover:show_text:'<full_date>'><dark_gray>#<transaction-id></dark_gray></hover> <white><amount-formatted></white> <gray><hover:show_text:'<white><other-account></white><newline><gray><other-account-type></gray><newline><gray>Owned by <other-account-owner></gray><newline><gray><other-account-id></gray>'><other-account></hover>: <description></gray> <dark_gray>(<instrument>)</dark_gray>"
         # Same placeholders as header
         footer: "<click:run_command:<cmd-prev>><hover:show_text:'<white>Previous page</white>'><green>← Previous</green></hover></click> <gray>Page <page>/<max-page></gray> <click:run_command:<cmd-next>><hover:show_text:'<white>Next page</white>'><green>Next →</green></hover></click>"
         # No transactions
         no-transactions: "<gray>(!) No transactions to show.</gray>"
+
+    # Successfully created payment instrument (bank card)
+    instrument-created: "<green>(!) Successfully created payment instrument.</green>"
+
+    # Pos created
+    # Same placeholders as balance (account is that of the seller).
+    # Additional placeholders:
+    # <price> - Price of the POS contents without formatting, example: 123456.78
+    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: 123k
+    # <description> - Bank statement description
+    # <x> - X coordinate of the chest
+    # <y> - Y coordinate of the chest
+    # <z> - Z coordinate of the chest
+    # <world> - World name of the chest
+    pos-created: "<green>(!) Successfully created POS with price <white><price-formatted></white> to receive in account <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><white><account></white></hover>:</green> <gray><description></gray>"
+
+    # Pos removed
+    # (no placeholders)
+    pos-removed: "<gold>(!) Removed POS.</gold>"
+
+    # Pos purchase completed
+    # Same placeholders as transfer-sent. `from` account is buyer, `to` account is seller.
+    # Additional placeholders:
+    # <items> - Number of items purchased
+    # <items-formatted> - E.g. `1 item`, `5 items`, etc.
+    # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
+    pos-purchase: "<green>(!) Successfully purchased <white><items-formatted></white> from <hover:show_text:'<white><to-account></white><newline><gray><to-account-type></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover> for <white><amount-formatted></white>. You paid from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type><dark_gray>:</dark_gray> <green><from-balance-formatted></green></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover>:</green> <gray><description></gray>"
+
+    # Someone made a purchase from your POS
+    # Same placeholders as pos-purchase. `from` account is buyer, `to` account is seller.
+    # Additional placeholders:
+    # <items> - Number of items purchased
+    # <items-formatted> - E.g. `1 item`, `5 items`, etc.
+    # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
+    pos-purchase-seller: "<green>(!) Sold <white><items-formatted></white> to <hover:show_text:'<white><from-account></white><newline><gray><from-account-type></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> for <white><amount-formatted></white> at POS <gray><pos></gray>. The funds are in account <hover:show_text:'<white><to-account></white><newline><gray><to-account-type><dark_gray>:</dark_gray> <green><to-balance-formatted></green></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover>:</green> <gray><description></gray>"
