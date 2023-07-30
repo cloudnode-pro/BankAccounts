@@ -438,7 +438,6 @@ public final class POS {
      * @param checksums The checksums to verify against
      */
     public static boolean verifyChecksum(final @NotNull ItemStack[] items, final @NotNull String[] checksums) {
-        BankAccounts.getInstance().getLogger().info("1: " + String.join(",", checksum(items)) + " 2: " + String.join(",", checksums));
         return Arrays.equals(checksum(items), checksums);
     }
 }
