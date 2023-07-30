@@ -15,7 +15,6 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
@@ -26,7 +25,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -330,6 +331,49 @@ public class Account {
         } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account: " + id, e);
         }
+    }
+
+
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param account Account to apply placeholders to
+     */
+    public static Component placeholders(@NotNull String string, Account account) {
+        return placeholders(string, new HashMap<>() {{
+            put("", account);
+        }});
+    }
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param accounts Accounts to apply placeholders to
+     */
+    public static String placeholdersString(@NotNull String string, HashMap<String, @NotNull Account> accounts) {
+        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
+            String name = entry.getKey();
+            Account account = entry.getValue();
+            String prefix = name.isEmpty() ? "" : name + "-";
+            string = string.replace("<" + prefix + "account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
+                    .replace("<" + prefix + "account-id>", account.id)
+                    .replace("<" + prefix + "account-type>", account.type.name)
+                    .replace("<" + prefix + "account-owner>", account.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : account.owner.getName() == null ? "<i>unknown player</i>" : account.owner.getName())
+                    .replace("<" + prefix + "balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                    .replace("<" + prefix + "balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                    .replace("<" + prefix + "balance-short>", BankAccounts.formatCurrencyShort(account.balance));
+        }
+        return string;
+    }
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param accounts Accounts to apply placeholders to
+     */
+    public static Component placeholders(@NotNull String string, HashMap<String, Account> accounts) {
+        return MiniMessage.miniMessage().deserialize(placeholdersString(string, accounts));
     }
 
     /**

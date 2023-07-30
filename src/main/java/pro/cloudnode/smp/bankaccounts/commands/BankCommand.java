@@ -2,7 +2,6 @@ package pro.cloudnode.smp.bankaccounts.commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -20,15 +19,11 @@ import pro.cloudnode.smp.bankaccounts.Transaction;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.SimpleDateFormat;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.TimeZone;
 
 public class BankCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -245,7 +240,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
                     return;
                 }
-                else sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), account.get()));
+                else sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), account.get()));
             }
         }
     }
@@ -253,10 +248,10 @@ public class BankCommand implements CommandExecutor, TabCompleter {
     private static void listAccounts(@NotNull CommandSender sender, @NotNull OfflinePlayer player) {
         Account[] accounts = Account.get(player);
         if (accounts.length == 0) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-accounts"))));
-        else if (accounts.length == 1) sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), accounts[0]));
+        else if (accounts.length == 1) sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), accounts[0]));
         else {
             sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.list-accounts.header"))));
-            for (Account account : accounts) sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.list-accounts.entry")), account));
+            for (Account account : accounts) sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.list-accounts.entry")), account));
         }
     }
 
@@ -334,7 +329,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         Account account = new Account(target, type, null, BigDecimal.ZERO, false);
         account.insert();
 
-        sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
+        sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
     }
 
     /**
@@ -367,7 +362,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             }
             account.get().balance = balance;
             account.get().update();
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance-set")), account.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance-set")), account.get()));
         }
     }
 
@@ -402,7 +397,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             name = name.length() == 0 ? null : name;
             account.get().name = name;
             account.get().update();
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.name-set")), account.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.name-set")), account.get()));
         }
     }
 
@@ -429,11 +424,11 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 return;
             }
             if (account.get().balance != null && account.get().balance.compareTo(BigDecimal.ZERO) != 0) {
-                sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.closing-balance")), account.get()));
+                sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.closing-balance")), account.get()));
                 return;
             }
             if (account.get().frozen) {
-                sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), account.get()));
+                sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), account.get()));
                 return;
             }
             if (
@@ -446,7 +441,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 return;
             }
             account.get().delete();
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-deleted")), account.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-deleted")), account.get()));
         }
     }
 
@@ -481,7 +476,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
         // account is frozen
         if (from.get().frozen) {
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), from.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), from.get()));
             return;
         }
         // recipient does not exist
@@ -497,7 +492,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
         // to is frozen
         if (to.get().frozen) {
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), to.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), to.get()));
             return;
         }
         // to is foreign
@@ -528,7 +523,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
         // account has insufficient funds
         if (!from.get().hasFunds(amount)) {
-            sender.sendMessage(accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), from.get()));
+            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), from.get()));
             return;
         }
 
@@ -550,11 +545,11 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         }
 
         Transaction transfer = from.get().transfer(to.get(), amount, description, null);
-        sender.sendMessage(transferSuccess(transfer, from.get(), to.get(), amount, description, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-sent"))));
+        sender.sendMessage(Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-sent"))));
         // if owner of receiving account is online and is not the sender, send them a message
         Player player = to.get().owner.getPlayer();
         if (player != null && player.isOnline() && !player.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            player.sendMessage(transferSuccess(transfer, from.get(), to.get(), amount, description, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-received"))));
+            player.sendMessage(Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-received"))));
     }
 
     /**
@@ -609,7 +604,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             final int count = Transaction.count(account.get());
             int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
             transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.header")));
-            for (Transaction transaction : transactions) sender.sendMessage(transactionPlaceholders(sender, transaction, account.get(), Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
+            for (Transaction transaction : transactions) sender.sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
             transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
         }
     }
@@ -700,34 +695,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 .replace("<max-page>", String.valueOf(maxPage))
                 .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
                 .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1));
-        sender.sendMessage(accountPlaceholders(message, account));
-    }
-
-    /**
-     * Transaction placeholders
-     * @param sender Command sender
-     * @param transaction Transaction
-     * @param account Account
-     * @param message Message to replace placeholders in
-     */
-    public static Component transactionPlaceholders(@NotNull CommandSender sender, @NotNull Transaction transaction, @NotNull Account account, @NotNull String message) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        boolean isSender = transaction.from.id.equals(account.id);
-        final BigDecimal amount = isSender ? transaction.amount.negate() : transaction.amount;
-        final Account other = isSender ? transaction.to : transaction.from;
-        message = message
-                .replace("<amount>", amount.toPlainString())
-                .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
-                .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                .replace("<full_date>", sdf.format(transaction.time) + " UTC");
-        message = accountPlaceholdersString(message, new HashMap<>() {{
-            put("", account);
-            put("other", other);
-        }});
-        return MiniMessage.miniMessage().deserialize(message, Formatter.date("date", transaction.time.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()));
+        sender.sendMessage(Account.placeholders(message, account));
     }
 
     /**
@@ -751,79 +719,9 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                 .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
                 .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description)
                 .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description));
-        return accountPlaceholders(message, new HashMap<>() {{
+        return Account.placeholders(message, new HashMap<>() {{
             put("from", from);
             put("to", to);
         }});
-    }
-
-    /**
-     * Transfer success message
-     * <ul>
-     *     <li>{@code <transaction-id>} Transaction ID</li>
-     *     <li>{@code <amount>} Transfer amount without formatting, example: 123456.78</li>
-     *     <li>{@code <amount-formatted>} Transfer amount with formatting, example: 123,456.78</li>
-     *     <li>{@code <amount-short>} Transfer amount with formatting, example: 123k</li>
-     *     <li>{@code <description>} Transfer description</li>
-     * </ul>
-     * @param transaction Transaction
-     * @param from Account sending from
-     * @param to Account sending to
-     * @param amount Amount of transfer
-     * @param description Description of transfer
-     * @param message Message to replace placeholders in
-     */
-    public static Component transferSuccess(@NotNull Transaction transaction, @NotNull Account from, @NotNull Account to, @NotNull BigDecimal amount, @Nullable String description, @NotNull String message) {
-        return accountPlaceholders(message
-                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                        .replace("<amount>", amount.toPlainString())
-                        .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                        .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description),
-                new HashMap<>() {{
-                    put("from", from);
-                    put("to", to);
-                }});
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param account Account to apply placeholders to
-     */
-    public static Component accountPlaceholders(@NotNull String string, Account account) {
-        return accountPlaceholders(string, new HashMap<>() {{
-            put("", account);
-        }});
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param accounts Accounts to apply placeholders to
-     */
-    public static String accountPlaceholdersString(@NotNull String string, HashMap<String, @NotNull Account> accounts) {
-        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
-            String name = entry.getKey();
-            Account account = entry.getValue();
-            String prefix = name.isEmpty() ? "" : name + "-";
-            string = string.replace("<" + prefix + "account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
-                    .replace("<" + prefix + "account-id>", account.id)
-                    .replace("<" + prefix + "account-type>", account.type.name)
-                    .replace("<" + prefix + "account-owner>", account.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : account.owner.getName() == null ? "<i>unknown player</i>" : account.owner.getName())
-                    .replace("<" + prefix + "balance>", account.balance == null ? "∞" : account.balance.toPlainString())
-                    .replace("<" + prefix + "balance-formatted>", BankAccounts.formatCurrency(account.balance))
-                    .replace("<" + prefix + "balance-short>", BankAccounts.formatCurrencyShort(account.balance));
-        }
-        return string;
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param accounts Accounts to apply placeholders to
-     */
-    public static Component accountPlaceholders(@NotNull String string, HashMap<String, Account> accounts) {
-        return MiniMessage.miniMessage().deserialize(accountPlaceholdersString(string, accounts));
     }
 }

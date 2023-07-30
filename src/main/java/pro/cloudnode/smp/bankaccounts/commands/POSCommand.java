@@ -132,7 +132,7 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
      * @param pos     POS to get placeholders from
      */
     public static Component replacePlaceholders(final String message, final POS pos) {
-        return BankCommand.accountPlaceholders(message
+        return Account.placeholders(message
                         .replace("<price>", pos.price.toPlainString())
                         .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
                         .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))

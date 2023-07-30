@@ -108,22 +108,22 @@ public class GUI implements Listener {
                     }
                     if (pos.get().seller.frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(BankCommand.accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                         if (seller != null) {
-                            seller.sendMessage(BankCommand.accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
+                            seller.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
                             seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
                         }
                         return;
                     }
                     if (buyer.get().frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(BankCommand.accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), buyer.get()));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), buyer.get()));
                         return;
                     }
                     if (!buyer.get().hasFunds(pos.get().price)) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(BankCommand.accountPlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), buyer.get()));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), buyer.get()));
                         return;
                     }
                     if (event.getWhoClicked().getInventory().getSize() - event.getWhoClicked().getInventory().getStorageContents().length < items.length) {
