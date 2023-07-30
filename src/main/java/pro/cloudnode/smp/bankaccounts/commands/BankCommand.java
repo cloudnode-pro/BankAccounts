@@ -604,7 +604,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             final int count = Transaction.count(account.get());
             int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
             transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.header")));
-            for (Transaction transaction : transactions) sender.sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
+            for (Transaction transaction : transactions) sender.sendMessage(Transaction.historyPlaceholders(transaction, account.get(), Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
             transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
         }
     }
