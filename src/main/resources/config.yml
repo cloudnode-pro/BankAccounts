@@ -304,9 +304,11 @@ messages:
     # <z> - Z coordinate of the chest
     # <world> - World name of the chest
     pos-created: "<green>(!) Successfully created POS with price <white><price-formatted></white> to receive in account <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><white><account></white></hover>:</green> <gray><description></gray>"
+
     # Pos removed
     # (no placeholders)
     pos-removed: "<gold>(!) Removed POS.</gold>"
+
     # Pos purchase completed
     # Same placeholders as transfer-sent. `from` account is buyer, `to` account is seller.
     # Additional placeholders:
@@ -314,6 +316,7 @@ messages:
     # <items-formatted> - E.g. `1 item`, `5 items`, etc.
     # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
     pos-purchase: "<green>(!) Successfully purchased <white><items-formatted></white> from <hover:show_text:'<white><to-account></white><newline><gray><to-account-type></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover> for <white><amount-formatted></white>. You paid from <hover:show_text:'<white><from-account></white><newline><gray><from-account-type><dark_gray>:</dark_gray> <green><from-balance-formatted></green></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover>:</green> <gray><description></gray>"
+
     # Someone made a purchase from your POS
     # Same placeholders as pos-purchase. `from` account is buyer, `to` account is seller.
     # Additional placeholders:

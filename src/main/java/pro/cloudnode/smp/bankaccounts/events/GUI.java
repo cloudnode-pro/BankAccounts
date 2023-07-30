@@ -138,6 +138,17 @@ public class GUI implements Listener {
                     chest.getInventory().clear();
                     event.getWhoClicked().getInventory().addItem(chestItems);
                     pos.get().delete();
+                    final @NotNull String itemsFormatted = chestItems.length == 1 ? "1 item" : chestItems.length + " items";
+                    event.getWhoClicked().sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-purchase"))
+                            .replace("<items>", String.valueOf(chestItems.length))
+                            .replace("<items-formatted>", itemsFormatted)
+                    ));
+                    final @Nullable Player seller = pos.get().seller.owner.getPlayer();
+                    if (seller != null)
+                        seller.sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-purchase-seller"))
+                                .replace("<items>", String.valueOf(chestItems.length))
+                                .replace("<items-formatted>", itemsFormatted)
+                        ));
                 }
                 else if (item.equals(cancel)) {
                     inventory.close();
