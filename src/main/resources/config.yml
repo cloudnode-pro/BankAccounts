@@ -209,7 +209,7 @@ pos:
             - "<gray>Click to confirm purchase.</gray>"
             - "<gray>Price:</gray> <green><price-formatted></green>"
             - "<gray>Balance:</gray> <white><balance-formatted></white>"
-            - "<gray>Paying with:</gray> <white><account></white> <gray>(<account-formatted>)</gray>"
+            - "<gray>Paying from:</gray> <white><account></white> <gray>(<account-type>)</gray>"
             - "<dark_gray>Account ID <account-id></dark_gray>"
     # Deny purchase item (buyer only)
     # No placeholders.

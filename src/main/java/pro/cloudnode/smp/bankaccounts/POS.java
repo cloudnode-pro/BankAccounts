@@ -396,13 +396,13 @@ public final class POS {
             confirm.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.name-buyer")), account),
+        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.name")), account),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        confirmMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.confirm.lore-buyer")).stream()
+        confirmMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.confirm.lore")).stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -414,14 +414,14 @@ public final class POS {
         confirm.setItemMeta(confirmMeta);
         gui.setItem(size - 7, confirm);
 
-        final @NotNull ItemStack cancel = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.cancel.material")))), 1);
+        final @NotNull ItemStack cancel = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.decline.material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos.cancel.glint")) {
             cancel.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             cancel.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
         cancelMeta.displayName(MiniMessage.miniMessage().deserialize("<red><bold>Cancel Purchase</bold></red>").decoration(TextDecoration.ITALIC, false));
-        cancelMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.cancel.lore-buyer")).stream()
+        cancelMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.decline.lore")).stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
