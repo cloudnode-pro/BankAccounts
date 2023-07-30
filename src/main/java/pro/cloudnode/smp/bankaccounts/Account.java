@@ -333,19 +333,6 @@ public class Account {
         }
     }
 
-
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param account Account to apply placeholders to
-     */
-    public static Component placeholders(@NotNull String string, Account account) {
-        return placeholders(string, new HashMap<>() {{
-            put("", account);
-        }});
-    }
-
     /**
      * Account placeholders
      * @param string String to deserialize with MiniMessage and apply placeholders to
@@ -374,6 +361,28 @@ public class Account {
      */
     public static Component placeholders(@NotNull String string, HashMap<String, Account> accounts) {
         return MiniMessage.miniMessage().deserialize(placeholdersString(string, accounts));
+    }
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param account Account to apply placeholders to
+     */
+    public static Component placeholders(@NotNull String string, Account account) {
+        return placeholders(string, new HashMap<>() {{
+            put("", account);
+        }});
+    }
+
+    /**
+     * Account placeholders
+     * @param string String to deserialize with MiniMessage and apply placeholders to
+     * @param account Account to apply placeholders to
+     */
+    public static String placeholdersString(@NotNull String string, Account account) {
+        return placeholdersString(string, new HashMap<>() {{
+            put("", account);
+        }});
     }
 
     /**

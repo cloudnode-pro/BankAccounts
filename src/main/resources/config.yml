@@ -148,6 +148,73 @@ instruments:
         # Level 1 is always applied.
         enchantment: unbreaking
 
+# POS
+# Note: you cannot use <hover> <click> etc. in GUIs
+pos:
+    # The title shown at the top of the GUI when opening a POS
+    # Placeholders:
+    # <description> - POS description
+    # <price> - Price of the POS contents without formatting, example: 123456.78
+    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: 123k
+    title: "<green><bold>Point of Sale</bold></green> <gray>— <price-formatted></gray>"
+
+    # POS info item
+    info:
+        # Available materials: https://hub.spigotmc.org/javadocs/spigot/org/bukkit/Material.html
+        material: PAPER
+
+        # Glint / glow (does not work on all items)
+        glint: true
+
+        # Item name when owner is viewing the POS.
+        # Same placeholders as POS title.
+        name-owner: "<green><bold>POS</bold></green>"
+        # Item name when potential buyer is viewing the POS.
+        # Same placeholders as POS title.
+        # Extra placeholders: same as `messages.balance`. The account is of the owner of the POS.
+        name-buyer: "<green><bold>POS</bold></green> <gray>— <account></gray>"
+
+        # Lore lines when owner is viewing the POS.
+        # Same placeholders as POS title.
+        lore-owner:
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Description:</gray> <white><description></white>"
+        # Same placeholders as name-buyer
+        lore-buyer:
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Description:</gray> <white><description></white>"
+
+    # POS delete item (owner only)
+    # No placeholders.
+    delete:
+        material: BARRIER
+        glint: false
+        name: "<red><bold>Cancel POS</bold></red>"
+        lore:
+            - "<gray>Click to cancel this POS.</gray>"
+
+    # Confirm purchase item (buyer only)
+    # Same placeholders as name-buyer, but this time the account is of the buyer.
+    confirm:
+        material: LIME_STAINED_GLASS_PANE
+        glint: false
+        name: "<green><bold>Confirm Purchase</bold></green>"
+        lore:
+            - "<gray>Click to confirm purchase.</gray>"
+            - "<gray>Price:</gray> <green><price-formatted></green>"
+            - "<gray>Balance:</gray> <white><balance-formatted></white>"
+            - "<gray>Paying with:</gray> <white><account></white> <gray>(<account-formatted>)</gray>"
+            - "<dark_gray>Account ID <account-id></dark_gray>"
+    # Deny purchase item (buyer only)
+    # No placeholders.
+    decline:
+        material: RED_STAINED_GLASS_PANE
+        glint: false
+        name: "<red><bold>Decline Purchase</bold></red>"
+        lore:
+            - "<gray>Click to decline this purchase.</gray>"
+
 
 # Messages
 messages:
