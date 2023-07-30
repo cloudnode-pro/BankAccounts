@@ -397,6 +397,14 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.length() == 0 ? null : name;
+
+            if (name != null && (name.contains("<") || name.contains(">"))) {
+                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
+                        Placeholder.unparsed("characters", "<>")
+                ));
+                return;
+            }
+
             account.get().name = name;
             account.get().update();
             sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.name-set")), account.get()));
@@ -531,6 +539,13 @@ public class BankCommand implements CommandExecutor, TabCompleter {
 
         String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
+
+        if (description != null && (description.contains("<") || description.contains(">"))) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
+                    Placeholder.unparsed("characters", "<>")
+            ));
+            return;
+        }
 
         if (!confirm && BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.enabled")) {
             // show confirmation if amount is above this

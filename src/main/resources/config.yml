@@ -280,6 +280,9 @@ messages:
         no-card: "<red>(!) You must hold your bank card to use this.</red>"
         pos-items-changed: "<red>(!) The items in the chest have changed. POS cancelled.</red>"
         pos-create-business-only: "<red>(!) You can only create a POS with a business account.</red>"
+        # Provided string includes disallowed characters
+        # Placeholder: <characters> - the disallowed characters
+        disallowed-characters: "<red>(!) The provided string contains disallowed characters: <gray><characters></gray></red>"
 
     # Account balance
     # Available placeholders:
