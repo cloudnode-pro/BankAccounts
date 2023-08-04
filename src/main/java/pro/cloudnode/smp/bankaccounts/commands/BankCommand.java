@@ -22,8 +22,12 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class BankCommand implements CommandExecutor, TabCompleter {
     @Override
@@ -48,6 +52,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
             if (sender.hasPermission("bank.history")) suggestions.addAll(Arrays.asList("transactions", "history"));
             if (sender.hasPermission("bank.instrument.create")) suggestions.addAll(Arrays.asList("instrument", "card"));
+            if (sender.hasPermission("bank.whois")) suggestions.addAll(Arrays.asList("whois", "who", "info"));
         }
         else {
             switch (args[0]) {
@@ -64,10 +69,11 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                             for (Account account : accounts) suggestions.add(account.id);
                         }
                     }
-                    else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission("bank.balance.other")) {
-                        Account[] accounts = Account.get();
-                        for (Account account : accounts) if (account.owner.getName() != null) suggestions.add(account.owner.getName());
-                    }
+                    else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission("bank.balance.other"))
+                        suggestions.addAll(Arrays.stream(Account.get())
+                                .map(account -> account.owner.getName())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
                 }
                 case "create", "new" -> {
                     if (!sender.hasPermission("bank.account.create")) return suggestions;
@@ -76,11 +82,11 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     }
                     else if (args.length == 3 && sender.hasPermission("bank.account.create.other"))
                         suggestions.add("--player");
-                    else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission("bank.account.create.other")) {
-                        Account[] accounts = Account.get();
-                        for (Account account : accounts)
-                            if (account.owner.getName() != null) suggestions.add(account.owner.getName());
-                    }
+                    else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission("bank.account.create.other"))
+                        suggestions.addAll(Arrays.stream(Account.get())
+                                .map(account -> account.owner.getName())
+                                .filter(Objects::nonNull)
+                                .collect(Collectors.toSet()));
                 }
                 case "setbal", "setbalance" -> {
                     if (!sender.hasPermission("bank.set.balance")) return suggestions;
@@ -134,6 +140,11 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     else if (args.length == 3 && sender.hasPermission("bank.instrument.create.other"))
                         suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream().map(Player::getName).toList());
                 }
+                case "whois", "who", "info" -> {
+                    if (!sender.hasPermission("bank.whois")) return suggestions;
+                    if (args.length == 2)
+                        suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).toList());
+                }
             }
         }
         return suggestions;
@@ -155,6 +166,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             case "transfer", "send", "pay" -> transfer(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "transactions", "history" -> transactions(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "instrument", "card" -> instrument(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "whois", "who", "info" -> whois(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
         }
     }
@@ -185,6 +197,7 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         if (sender.hasPermission("bank.account.create.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create --player ><green>/bank create <gray><PERSONAL|BUSINESS> --player [player]</gray></green> <white>- Create an account for another player</click>"));
         if (sender.hasPermission("bank.delete")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>"));
         if (sender.hasPermission("bank.instrument.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>"));
+        if (sender.hasPermission("bank.whois")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>"));
         if (sender.hasPermission("bank.pos.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>"));
         if (sender.hasPermission("bank.set.balance")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setbalance ><green>/bank setbalance <gray><account> <balance|Infinity></gray></green> <white>- Set an account's balance</click>"));
         if (sender.hasPermission("bank.set.name")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>"));
@@ -696,6 +709,28 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         final @NotNull ItemStack instrument = account.get().createInstrument();
         target.getInventory().addItem(instrument);
         sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.instrument-created"))));
+    }
+
+    /**
+     * Account whois
+     */
+    public static void whois(final @NotNull CommandSender sender, final @NotNull String[] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.whois")) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
+            return;
+        }
+        if (args.length < 1) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> whois <account>",
+                    Placeholder.unparsed("command", label)
+            ));
+            return;
+        }
+        Optional<Account> account = Account.get(args[0]);
+        if (account.isEmpty()) {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+            return;
+        }
+        sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.whois")), account.get()));
     }
 
     /**
