@@ -401,3 +401,11 @@ messages:
     # <items-formatted> - E.g. `1 item`, `5 items`, etc.
     # <pos> - POS coordinates, e.g. `X: 123 Y: -12 Z: 456 in world`
     pos-purchase-seller: "<green>(!) Sold <white><items-formatted></white> to <hover:show_text:'<white><from-account></white><newline><gray><from-account-type></gray><newline><gray>Owned by <from-account-owner></gray><newline><gray><from-account-id></gray>'><white><from-account></white></hover> for <white><amount-formatted></white> at POS <gray><pos></gray>. The funds are in account <hover:show_text:'<white><to-account></white><newline><gray><to-account-type><dark_gray>:</dark_gray> <green><to-balance-formatted></green></gray><newline><gray>Owned by <to-account-owner></gray><newline><gray><to-account-id></gray>'><white><to-account></white></hover>:</green> <gray><description></gray>"
+
+    # Account whois
+    # Same placeholders as balance
+    whois: |-
+        <green>Account</green> <white><account></white>
+        <gray>Owned by:</gray> <white><account-owner></white>
+        <gray>Type:</gray> <white><account-type></white>
+        <gray>ID: <click:copy_to_clipboard:<account-id>><hover:show_text:'<white>Copy to clipboard</white>'><white><account-id></white></hover></click></gray>
