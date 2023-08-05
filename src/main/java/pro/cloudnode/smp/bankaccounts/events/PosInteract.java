@@ -18,7 +18,7 @@ import pro.cloudnode.smp.bankaccounts.POS;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class PlayerInteract implements Listener {
+public final class PosInteract implements Listener {
     @EventHandler
     public void onPlayerInteractEvent(PlayerInteractEvent event) {
         final @NotNull Player player = event.getPlayer();
