@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `bank_transactions`
     `amount`      DECIMAL(15, 2)      NOT NULL,
     `time`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `description` TEXT                         DEFAULT NULL COLLATE NOCASE,
-    `instrument`  CHAR(24)                     DEFAULT NULL COLLATE BINARY
+    `instrument`  VARCHAR(24)                  DEFAULT NULL COLLATE BINARY
 );
 
 CREATE TABLE IF NOT EXISTS `pos`
@@ -32,7 +32,7 @@ CREATE TABLE IF NOT EXISTS `pos`
     PRIMARY KEY (`x`, `y`, `z`, `world`)
 );
 
--- Modify `bank_transactions`.`instrument` to be `CHAR(24)`
+-- Modify `bank_transactions`.`instrument` to be `VARCHAR(24)`
 CREATE TABLE `new_bank_transactions`
 (
     `id`          INTEGER PRIMARY KEY NOT NULL,
@@ -41,7 +41,7 @@ CREATE TABLE `new_bank_transactions`
     `amount`      DECIMAL(15, 2)      NOT NULL,
     `time`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `description` TEXT                         DEFAULT NULL COLLATE NOCASE,
-    `instrument`  CHAR(24)                     DEFAULT NULL COLLATE BINARY
+    `instrument`  VARCHAR(24)                  DEFAULT NULL COLLATE NOCASE
 );
 
 INSERT INTO `new_bank_transactions`
