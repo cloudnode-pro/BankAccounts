@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS `bank_transactions`
     `amount`      DECIMAL(15, 2)      NOT NULL,
     `time`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `description` TEXT                         DEFAULT NULL COLLATE NOCASE,
-    `instrument`  CHAR(24)                     DEFAULT NULL COLLATE BINARY
+    `instrument`  VARCHAR(24)                  DEFAULT NULL COLLATE BINARY
 );
 
 CREATE TABLE IF NOT EXISTS `pos`
@@ -32,5 +32,24 @@ CREATE TABLE IF NOT EXISTS `pos`
     PRIMARY KEY (`x`, `y`, `z`, `world`)
 );
 
-ALTER TABLE `bank_transactions` DROP COLUMN `instrument`; -- column has never been in use before
-ALTER TABLE `bank_transactions` ADD COLUMN `instrument` VARCHAR(24) DEFAULT NULL COLLATE BINARY;
+-- Modify `bank_transactions`.`instrument` to be `VARCHAR(24)`
+CREATE TABLE `new_bank_transactions`
+(
+    `id`          INTEGER PRIMARY KEY NOT NULL,
+    `from`        CHAR(16)            NOT NULL COLLATE BINARY,
+    `to`          CHAR(16)            NOT NULL COLLATE BINARY,
+    `amount`      DECIMAL(15, 2)      NOT NULL,
+    `time`        DATETIME            NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `description` TEXT                         DEFAULT NULL COLLATE NOCASE,
+    `instrument`  VARCHAR(24)                  DEFAULT NULL COLLATE NOCASE
+);
+
+INSERT INTO `new_bank_transactions`
+SELECT *
+FROM `bank_transactions`;
+
+DROP TABLE `bank_transactions`;
+
+ALTER TABLE `new_bank_transactions`
+    RENAME TO `bank_transactions`;
+-- END OF `bank_transactions` MODIFICATION
