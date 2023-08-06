@@ -392,7 +392,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_BALANCE);
-        if (account.get().frozen) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_FROZEN);
+        if (account.get().frozen) return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), account.get()));
         if (BankAccounts.getInstance().getConfig()
                 .getBoolean("prevent-close-last-personal") && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_PERSONAL);
