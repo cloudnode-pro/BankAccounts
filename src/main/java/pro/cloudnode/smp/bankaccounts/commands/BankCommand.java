@@ -1,20 +1,18 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.Transaction;
 
 import java.math.BigDecimal;
@@ -22,34 +20,32 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
-public class BankCommand implements CommandExecutor, TabCompleter {
+public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (!sender.hasPermission("bank.command")) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-        else run(sender, label, args);
-        return true;
+    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        if (!sender.hasPermission("bank.command")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        return run(sender, label, args);
     }
 
     @Override
-    public ArrayList<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        ArrayList<String> suggestions = new ArrayList<>();
+    public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (!sender.hasPermission("bank.command")) return suggestions;
         if (args.length == 1) {
             suggestions.add("help");
-            if (sender.hasPermission("bank.balance.self")) suggestions.addAll(Arrays.asList("balance", "bal", "account", "accounts"));
+            if (sender.hasPermission("bank.balance.self"))
+                suggestions.addAll(Arrays.asList("balance", "bal", "account", "accounts"));
             if (sender.hasPermission("bank.reload")) suggestions.add("reload");
             if (sender.hasPermission("bank.account.create")) suggestions.addAll(Arrays.asList("create", "new"));
             if (sender.hasPermission("bank.set.balance")) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
             if (sender.hasPermission("bank.set.name")) suggestions.addAll(Arrays.asList("setname", "rename"));
             if (sender.hasPermission("bank.delete")) suggestions.add("delete");
-            if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
+            if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other"))
+                suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
             if (sender.hasPermission("bank.history")) suggestions.addAll(Arrays.asList("transactions", "history"));
             if (sender.hasPermission("bank.instrument.create")) suggestions.addAll(Arrays.asList("instrument", "card"));
             if (sender.hasPermission("bank.whois")) suggestions.addAll(Arrays.asList("whois", "who", "info"));
@@ -57,23 +53,22 @@ public class BankCommand implements CommandExecutor, TabCompleter {
         else {
             switch (args[0]) {
                 case "balance", "bal", "account", "accounts" -> {
-                    if (!sender.hasPermission("bank.balance.self") && !sender.hasPermission("bank.balance.other")) return suggestions;
+                    if (!sender.hasPermission("bank.balance.self") && !sender.hasPermission("bank.balance.other"))
+                        return suggestions;
                     if (args.length == 2) {
                         if (sender.hasPermission("bank.balance.other")) suggestions.add("--player");
                         if (sender instanceof OfflinePlayer player) {
-                            Account[] accounts = Account.get(player);
+                            final @NotNull Account @NotNull [] accounts = Account.get(player);
                             for (Account account : accounts) suggestions.add(account.id);
                         }
                         else {
-                            Account[] accounts = Account.get();
-                            for (Account account : accounts) suggestions.add(account.id);
+                            final @NotNull Account @NotNull [] accounts = Account.get();
+                            for (final @NotNull Account account : accounts) suggestions.add(account.id);
                         }
                     }
                     else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission("bank.balance.other"))
-                        suggestions.addAll(Arrays.stream(Account.get())
-                                .map(account -> account.owner.getName())
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet()));
+                        suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.owner.getName())
+                                .filter(Objects::nonNull).collect(Collectors.toSet()));
                 }
                 case "create", "new" -> {
                     if (!sender.hasPermission("bank.account.create")) return suggestions;
@@ -83,62 +78,60 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     else if (args.length == 3 && sender.hasPermission("bank.account.create.other"))
                         suggestions.add("--player");
                     else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission("bank.account.create.other"))
-                        suggestions.addAll(Arrays.stream(Account.get())
-                                .map(account -> account.owner.getName())
-                                .filter(Objects::nonNull)
-                                .collect(Collectors.toSet()));
+                        suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.owner.getName())
+                                .filter(Objects::nonNull).collect(Collectors.toSet()));
                 }
                 case "setbal", "setbalance" -> {
                     if (!sender.hasPermission("bank.set.balance")) return suggestions;
                     if (args.length == 2) {
-                        Account[] accounts = Account.get();
-                        for (Account account : accounts) suggestions.add(account.id);
+                        final @NotNull Account @NotNull [] accounts = Account.get();
+                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                     if (args.length == 3) suggestions.add("Infinity");
                 }
                 case "setname", "rename" -> {
                     if (!sender.hasPermission("bank.set.name")) return suggestions;
                     if (args.length == 2) {
-                        Account[] accounts = sender.hasPermission("bank.set.name.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (Account account : accounts) suggestions.add(account.id);
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.set.name.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                 }
                 case "delete" -> {
                     if (!sender.hasPermission("bank.delete")) return suggestions;
-                    if (args.length == 2) {
-                        Account[] accounts = sender.hasPermission("bank.delete.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        if (!sender.hasPermission("bank.delete.person")) accounts = Arrays.stream(accounts).filter(account -> account.type != Account.Type.PERSONAL).toArray(Account[]::new);
-                        for (Account account : accounts) suggestions.add(account.id);
-                    }
+                    if (args.length == 2) suggestions.addAll(Arrays
+                            .stream(sender.hasPermission("bank.delete.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .filter(account -> sender.hasPermission("bank.delete.person") || account.type != Account.Type.PERSONAL)
+                            .map(account -> account.id).collect(Collectors.toSet()));
                 }
                 case "transfer", "send", "pay" -> {
-                    if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other")) return suggestions;
+                    if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other"))
+                        return suggestions;
                     if (args.length == 2) {
-                        Account[] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (Account account : accounts) suggestions.add(account.id);
+                        final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
-                    else if (args.length == 3) {
-                        Account[] accounts = sender.hasPermission("bank.transfer.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        accounts = Arrays.stream(accounts).filter(account -> !account.id.equals(args[1])).toArray(Account[]::new);
-                        for (Account account : accounts) suggestions.add(account.id);
-                    }
+                    else if (args.length == 3) suggestions.addAll(Arrays
+                            .stream(sender.hasPermission("bank.transfer.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .filter(account -> !account.id.equals(args[1])).map(account -> account.id)
+                            .collect(Collectors.toSet()));
                 }
                 case "transactions", "history" -> {
                     if (!sender.hasPermission("bank.history")) return suggestions;
                     if (args.length == 2) {
-                        Account[] accounts = sender.hasPermission("bank.history.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (Account account : accounts) suggestions.add(account.id);
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.history.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                     else if (args.length == 3) suggestions.add("--all");
                 }
                 case "instrument", "card" -> {
                     if (!sender.hasPermission("bank.instrument.create")) return suggestions;
                     if (args.length == 2) {
-                        Account[] accounts = sender.hasPermission("bank.instrument.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (Account account : accounts) suggestions.add(account.id);
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.instrument.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                     else if (args.length == 3 && sender.hasPermission("bank.instrument.create.other"))
-                        suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream().map(Player::getName).toList());
+                        suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream()
+                                .map(Player::getName).toList());
                 }
                 case "whois", "who", "info" -> {
                     if (!sender.hasPermission("bank.whois")) return suggestions;
@@ -153,56 +146,70 @@ public class BankCommand implements CommandExecutor, TabCompleter {
     /**
      * Decide which command to run
      */
-    public static void run(@NotNull CommandSender sender, @NotNull String label, String[] args) {
-        if (args.length == 0) overview(sender);
-        else switch (args[0]) {
-            case "help" -> help(sender, label);
-            case "bal", "balance", "account", "accounts" -> balance(sender, Arrays.copyOfRange(args, 1, args.length), label);
+    public static boolean run(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        if (args.length == 0) return overview(sender);
+        final @NotNull String @NotNull [] argsSubset = Arrays.copyOfRange(args, 1, args.length);
+        return switch (args[0]) {
+            case "help" -> help(sender);
+            case "bal", "balance", "account", "accounts" ->
+                    balance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "reload" -> reload(sender);
-            case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "setbal", "setbalance" -> setBalance(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "setname", "rename" -> setName(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "delete" -> delete(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "transfer", "send", "pay" -> transfer(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "transactions", "history" -> transactions(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "instrument", "card" -> instrument(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            case "whois", "who", "info" -> whois(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            default -> sender.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().getConfig().getString("messages.errors.unknown-command")));
-        }
+            case "create", "new" -> create(sender, argsSubset, label);
+            case "setbal", "setbalance" -> setBalance(sender, argsSubset, label);
+            case "setname", "rename" -> setName(sender, argsSubset, label);
+            case "delete" -> delete(sender, argsSubset, label);
+            case "transfer", "send", "pay" -> transfer(sender, argsSubset, label);
+            case "transactions", "history" -> transactions(sender, argsSubset, label);
+            case "instrument", "card" -> instrument(sender, argsSubset, label);
+            case "whois", "who", "info" -> whois(sender, argsSubset, label);
+            default -> sendMessage(sender, BankConfig.MESSAGES_ERRORS_UNKNOWN_COMMAND);
+        };
     }
 
     /**
      * Plugin overview
      */
-    public static void overview(@NotNull CommandSender sender) {
-        BankAccounts plugin = BankAccounts.getInstance();
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<green><name></green> <white>v<version> by</white> <gray><author></gray>",
-                Placeholder.unparsed("name", plugin.getPluginMeta().getName()),
-                Placeholder.unparsed("version", plugin.getPluginMeta().getVersion()),
-                Placeholder.unparsed("author", String.join(", ", plugin.getPluginMeta().getAuthors()))));
+    public static boolean overview(final @NotNull CommandSender sender) {
+        final @NotNull BankAccounts plugin = BankAccounts.getInstance();
+        return sendMessage(sender, "<green><name></green> <white>v<version> by</white> <gray><author></gray>", Placeholder.unparsed("name", plugin
+                .getPluginMeta().getName()), Placeholder.unparsed("version", plugin.getPluginMeta()
+                .getVersion()), Placeholder.unparsed("author", String.join(", ", plugin.getPluginMeta().getAuthors())));
     }
 
     /**
      * Plugin help
      */
-    public static void help(@NotNull CommandSender sender, @NotNull String label) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<green>Available commands:"));
-        sender.sendMessage(MiniMessage.miniMessage().deserialize(""));
-        if (sender.hasPermission("bank.balance.self")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>"));
-        if (sender.hasPermission("bank.balance.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player [player]</gray></green> <white>- List another player's accounts</click>"));
-        if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>"));
-        if (sender.hasPermission("bank.history")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>"));
-        if (sender.hasPermission("bank.account.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>"));
-        if (sender.hasPermission("bank.account.create.other")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create --player ><green>/bank create <gray><PERSONAL|BUSINESS> --player [player]</gray></green> <white>- Create an account for another player</click>"));
-        if (sender.hasPermission("bank.delete")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>"));
-        if (sender.hasPermission("bank.instrument.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>"));
-        if (sender.hasPermission("bank.whois")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>"));
-        if (sender.hasPermission("bank.pos.create")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>"));
-        if (sender.hasPermission("bank.set.balance")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setbalance ><green>/bank setbalance <gray><account> <balance|Infinity></gray></green> <white>- Set an account's balance</click>"));
-        if (sender.hasPermission("bank.set.name")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>"));
-        if (sender.hasPermission("bank.reload")) sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>"));
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
+    public static boolean help(final @NotNull CommandSender sender) {
+        sendMessage(sender, "<dark_gray>---</dark_gray>");
+        sendMessage(sender, "<green>Available commands:");
+        sendMessage(sender, "");
+        if (sender.hasPermission("bank.balance.self"))
+            sendMessage(sender, "<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>");
+        if (sender.hasPermission("bank.balance.other"))
+            sendMessage(sender, "<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player [player]</gray></green> <white>- List another player's accounts</click>");
+        if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other"))
+            sendMessage(sender, "<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>");
+        if (sender.hasPermission("bank.history"))
+            sendMessage(sender, "<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>");
+        if (sender.hasPermission("bank.account.create"))
+            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
+        if (sender.hasPermission("bank.account.create.other"))
+            sendMessage(sender, "<click:suggest_command:/bank create --player ><green>/bank create <gray><PERSONAL|BUSINESS> --player [player]</gray></green> <white>- Create an account for another player</click>");
+        if (sender.hasPermission("bank.delete"))
+            sendMessage(sender, "<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>");
+        if (sender.hasPermission("bank.instrument.create"))
+            sendMessage(sender, "<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>");
+        if (sender.hasPermission("bank.whois"))
+            sendMessage(sender, "<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>");
+        if (sender.hasPermission("bank.pos.create"))
+            sendMessage(sender, "<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>");
+        if (sender.hasPermission("bank.set.balance"))
+            sendMessage(sender, "<click:suggest_command:/bank setbalance ><green>/bank setbalance <gray><account> <balance|Infinity></gray></green> <white>- Set an account's balance</click>");
+        if (sender.hasPermission("bank.set.name"))
+            sendMessage(sender, "<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>");
+        if (sender.hasPermission("bank.reload"))
+            sendMessage(sender, "<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>");
+        return sendMessage(sender, "<dark_gray>---</dark_gray>");
     }
 
     /**
@@ -220,252 +227,178 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      *  <li>{@code balance --player <player>} List all accounts owned by the specified player. Permission: `bank.balance.other`</li>
      * </ul>
      */
-    public static void balance(@NotNull CommandSender sender, String[] args, String label) throws NullPointerException {
+    public static boolean balance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) throws NullPointerException {
         if (args.length == 0) {
-            if (!sender.hasPermission("bank.balance.self")) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-                return;
-            }
-            @NotNull OfflinePlayer player = BankAccounts.getOfflinePlayer(sender);
-            listAccounts(sender, player);
+            if (!sender.hasPermission("bank.balance.self"))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return listAccounts(sender, BankAccounts.getOfflinePlayer(sender));
         }
-        else switch (args[0]) {
-            case "--player" -> {
-                if (!sender.hasPermission("bank.balance.other")) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-                    return;
-                }
-                if (args.length == 1) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> balance --player <player>",
-                            Placeholder.unparsed("command", label)
-                    ));
-                    return;
-                }
-                @NotNull OfflinePlayer player = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
-                listAccounts(sender, player);
-            }
-            default -> {
-                if (!sender.hasPermission("bank.balance.self")) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-                    return;
-                }
-                Optional<Account> account = Account.get(args[0]);
-                if (account.isEmpty()) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-                else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId().equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId())) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-                    return;
-                }
-                else sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), account.get()));
-            }
+        else if (args[0].equals("--player")) {
+            if (!sender.hasPermission("bank.balance.other"))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            if (args.length == 1) return sendUsage(sender, label, "balance --player <player>");
+            return listAccounts(sender, BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]));
+        }
+        else {
+            if (!sender.hasPermission("bank.balance.self"))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+            if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+            else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId()
+                    .equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId()))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            else return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                        .getConfig().getString("messages.balance")), account.get()));
         }
     }
 
-    private static void listAccounts(@NotNull CommandSender sender, @NotNull OfflinePlayer player) {
-        Account[] accounts = Account.get(player);
-        if (accounts.length == 0) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-accounts"))));
-        else if (accounts.length == 1) sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance")), accounts[0]));
+    private static boolean listAccounts(final @NotNull CommandSender sender, final @NotNull OfflinePlayer player) {
+        final @NotNull Account @NotNull [] accounts = Account.get(player);
+        if (accounts.length == 0) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_ACCOUNTS);
+        else if (accounts.length == 1)
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString("messages.balance")), accounts[0]));
         else {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.list-accounts.header"))));
-            for (Account account : accounts) sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.list-accounts.entry")), account));
+            sendMessage(sender, BankConfig.MESSAGES_LIST_ACCOUNTS_HEADER);
+            for (final @NotNull Account account : accounts)
+                sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
+                        .getString("messages.list-accounts.entry")), account));
         }
+        return true;
     }
 
     /**
      * Reload plugin configuration
      */
-    public static void reload(@NotNull CommandSender sender) {
-        if (!sender.hasPermission("bank.reload")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
+    public static boolean reload(final @NotNull CommandSender sender) {
+        if (!sender.hasPermission("bank.reload")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
         BankAccounts.reload();
-        sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.reload"))));
+        return sendMessage(sender, BankConfig.MESSAGES_RELOAD);
     }
 
     /**
      * Create account
      * create [type] [--player <player>]
      */
-    public static void create(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.account.create")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
+    public static boolean create(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.account.create"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
         @NotNull OfflinePlayer target = BankAccounts.getOfflinePlayer(sender);
         if (Arrays.asList(args).contains("--player")) {
-            if (!sender.hasPermission("bank.account.create.other")) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-                return;
-            }
+            if (!sender.hasPermission("bank.account.create.other"))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
             else {
                 // find value of --player
                 int index = Arrays.asList(args).indexOf("--player");
                 // index out of bounds
-                if (index == -1 || index >= args.length - 1) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS> --player <player>",
-                            Placeholder.unparsed("command", label)
-                    ));
-                    return;
-                }
+                if (index == -1 || index >= args.length - 1)
+                    return sendUsage(sender, label, "create <PERSONAL|BUSINESS> --player <player>");
                 target = BankAccounts.getInstance().getServer().getOfflinePlayer(args[index + 1]);
             }
         }
-        if (args.length == 0) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS>" + (sender.hasPermission("bank.account.create.other") ? " [--player <player>]" : ""),
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
+        if (args.length == 0)
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission("bank.account.create.other") ? "[--player <player>]" : ""));
         // check if target is the same as sender
-        if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()) && !sender.hasPermission("bank.account.create")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
-        if (optionalType.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> create <PERSONAL|BUSINESS>" + (sender.hasPermission("bank.account.create.other") ? " [--player <player>]" : ""),
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        @NotNull Account.Type type = optionalType.get();
+        if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender)
+                .getUniqueId()) && !sender.hasPermission("bank.account.create"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        final @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
+        if (optionalType.isEmpty())
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission("bank.account.create.other") ? "[--player <player>]" : ""));
         if (!sender.hasPermission("bank.account.create.bypass")) {
-            Account[] accounts = Account.get(target, type);
-            int limit = BankAccounts.getInstance().getConfig().getInt("account-limits." + Account.Type.getType(type));
-            if (limit != -1 && accounts.length >= limit) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.max-accounts")),
-                        Placeholder.unparsed("type", type.name),
-                        Placeholder.unparsed("limit", String.valueOf(BankAccounts.getInstance().getConfig().getInt("account-limits." + Account.Type.getType(type))))
-                ));
-                return;
-            }
+            final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
+            int limit = BankAccounts.getInstance().getConfig()
+                    .getInt("account-limits." + Account.Type.getType(optionalType.get()));
+            if (limit != -1 && accounts.length >= limit)
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType.get().name), Placeholder.unparsed("limit", String.valueOf(BankAccounts
+                        .getInstance().getConfig()
+                        .getInt("account-limits." + Account.Type.getType(optionalType.get())))));
         }
 
-        Account account = new Account(target, type, null, BigDecimal.ZERO, false);
+        final @NotNull Account account = new Account(target, optionalType.get(), null, BigDecimal.ZERO, false);
         account.insert();
 
-        sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-created")), account));
+        return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
+                .getString("messages.account-created")), account));
     }
 
     /**
      * Set account balance
      * setbal <account> <bal>
      */
-    public static void setBalance(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.set.balance")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        if (args.length < 2) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty()) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+    public static boolean setBalance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.set.balance"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (args.length < 2)
+            return sendUsage(sender, label, "setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         else {
-            BigDecimal balance;
+            final BigDecimal balance;
             try {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
             }
             catch (NumberFormatException e) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
-                        Placeholder.unparsed("number", args[1])
-                ));
-                return;
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
             }
             account.get().balance = balance;
             account.get().update();
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.balance-set")), account.get()));
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString("messages.balance-set")), account.get()));
         }
     }
 
     /**
      * Set account name
      */
-    public static void setName(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.set.name")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        if (args.length < 2) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> setname " + (args.length > 0 ? args[0] : "<account>") + " [name]",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty())
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
+    public static boolean setName(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.set.name"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (args.length < 2)
+            return sendUsage(sender, label, "setname " + (args.length > 0 ? args[0] : "<account>") + " [name]");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         else {
-            if (!sender.hasPermission("bank.set.name.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-                return;
-            }
-            if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.rename-personal"))));
-                return;
-            }
+            if (!sender.hasPermission("bank.set.name.other") && !account.get().owner.getUniqueId()
+                    .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL)
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_RENAME_PERSONAL);
             String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.length() == 0 ? null : name;
 
-            if (name != null && (name.contains("<") || name.contains(">"))) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
-                        Placeholder.unparsed("characters", "<>")
-                ));
-                return;
-            }
+            if (name != null && (name.contains("<") || name.contains(">")))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_DISALLOWED_CHARACTERS, Placeholder.unparsed("characters", "<>"));
 
             account.get().name = name;
             account.get().update();
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.name-set")), account.get()));
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString("messages.name-set")), account.get()));
         }
     }
 
     /**
      * Delete account
      */
-    public static void delete(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.delete")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> delete <account>",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty())
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-        else {
-            if (!sender.hasPermission("bank.delete.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-                return;
-            }
-            if (account.get().balance != null && account.get().balance.compareTo(BigDecimal.ZERO) != 0) {
-                sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.closing-balance")), account.get()));
-                return;
-            }
-            if (account.get().frozen) {
-                sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), account.get()));
-                return;
-            }
-            if (
-                    BankAccounts.getInstance().getConfig().getBoolean("prevent-close-last-personal")
-                    && account.get().type == Account.Type.PERSONAL
-                    && !sender.hasPermission("bank.delete.personal")
-                    && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1
-            ) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.closing-personal"))));
-                return;
-            }
-            account.get().delete();
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.account-deleted")), account.get()));
-        }
+    public static boolean delete(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.delete")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (args.length < 1) return sendUsage(sender, label, "delete <account>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (!sender.hasPermission("bank.delete.other") && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+        final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
+        if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_BALANCE);
+        if (account.get().frozen) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_FROZEN);
+        if (BankAccounts.getInstance().getConfig()
+                .getBoolean("prevent-close-last-personal") && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_PERSONAL);
+        account.get().delete();
+        return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
+                .getString("messages.account-deleted")), account.get()));
     }
 
     /**
@@ -473,113 +406,85 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      * <p>
      * {@code transfer [--confirm] <from> <to> <amount> [description]}
      */
-    public static void transfer(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
+    public static boolean transfer(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
         boolean confirm = args.length > 0 && args[0].equals("--confirm");
-        if (confirm) args = Arrays.copyOfRange(args, 1, args.length);
-        if (args.length < 3) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> transfer " + (args.length > 0 ? args[0] : "<from>") + " " + (args.length > 1 ? args[1] : "<to>") + " <amount> [description]",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> from = Account.get(args[0]);
+        @NotNull String[] argsCopy = args;
+        if (confirm) argsCopy = Arrays.copyOfRange(argsCopy, 1, argsCopy.length);
+        if (args.length < 3)
+            return sendUsage(sender, label, "transfer " + (argsCopy.length > 0 ? argsCopy[0] : "<from>") + " " + (argsCopy.length > 1 ? argsCopy[1] : "<to>") + " <amount> [description]");
+        final @NotNull Optional<@NotNull Account> from = Account.get(args[0]);
         // account does not exist
-        if (from.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-            return;
-        }
+        if (from.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         // sender does not own account
-        if (!from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-            return;
-        }
+        if (!from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
         // account is frozen
-        if (from.get().frozen) {
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), from.get()));
-            return;
-        }
+        if (from.get().frozen)
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), from.get()));
         // recipient does not exist
-        Optional<Account> to = Account.get(args[1]);
-        if (to.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-            return;
-        }
+        final @NotNull Optional<@NotNull Account> to = Account.get(args[1]);
+        if (to.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         // to is same as from
-        if (from.get().id.equals(to.get().id)) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.same-from-to"))));
-            return;
-        }
+        if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_SAME_FROM_TO);
         // to is frozen
-        if (to.get().frozen) {
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), to.get()));
-            return;
-        }
+        if (to.get().frozen)
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), to.get()));
         // to is foreign
-        if (!sender.hasPermission("bank.transfer.other") && !to.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.transfer-self-only"))));
-            return;
+        if (!sender.hasPermission("bank.transfer.other") && !to.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TRANSFER_SELF_ONLY);
         }
         // to is not foreign
-        if (!sender.hasPermission("bank.transfer.self") && to.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.transfer-other-only"))));
-            return;
-        }
+        if (!sender.hasPermission("bank.transfer.self") && to.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TRANSFER_OTHER_ONLY);
 
-        @NotNull BigDecimal amount;
+        final @NotNull BigDecimal amount;
         try {
             amount = BigDecimal.valueOf(Double.parseDouble(args[2])).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
-                    Placeholder.unparsed("number", args[2])
-            ));
-            return;
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[2]));
         }
         // amount is 0 or less
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.negative-transfer"))));
-            return;
-        }
+        if (amount.compareTo(BigDecimal.ZERO) <= 0)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NEGATIVE_TRANSFER);
         // account has insufficient funds
-        if (!from.get().hasFunds(amount)) {
-            sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), from.get()));
-            return;
-        }
+        if (!from.get().hasFunds(amount))
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), from.get()));
 
         String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
-        if (description != null && (description.contains("<") || description.contains(">"))) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
-                    Placeholder.unparsed("characters", "<>")
-            ));
-            return;
-        }
+        if (description != null && (description.contains("<") || description.contains(">")))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_DISALLOWED_CHARACTERS, Placeholder.unparsed("characters", "<>"));
 
         if (!confirm && BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.enabled")) {
-            // show confirmation if amount is above this
-            BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().getConfig().getDouble("transfer-confirmation.min-amount"));
-            // show confirmation if accounts have different owners or if bypassOwnAccounts is false
-            boolean bypassOwnAccounts = BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.bypass-own-accounts");
-            if (amount.compareTo(minAmount) < 0 || (bypassOwnAccounts && from.get().owner.getUniqueId().equals(to.get().owner.getUniqueId()))) {
-                // no confirmation needed
-            }
-            else {
-                sender.sendMessage(transferConfirmation(from.get(), to.get(), amount, description));
-                return;
+            final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().getConfig()
+                    .getDouble(BankConfig.TRANSFER_CONFIRMATION_MIN_AMOUNT.getKey()));
+            boolean bypassOwnAccounts = BankAccounts.getInstance().getConfig()
+                    .getBoolean(BankConfig.TRANSFER_CONFIRMATION_BYPASS_OWN_ACCOUNTS.getKey());
+            if (amount.compareTo(minAmount) >= 0 && (!bypassOwnAccounts || !from.get().owner.getUniqueId()
+                    .equals(to.get().owner.getUniqueId()))) {
+                return sendMessage(sender, transferConfirmation(from.get(), to.get(), amount, description));
             }
         }
 
-        Transaction transfer = from.get().transfer(to.get(), amount, description, null);
-        sender.sendMessage(Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-sent"))));
-        // if owner of receiving account is online and is not the sender, send them a message
-        Player player = to.get().owner.getPlayer();
-        if (player != null && player.isOnline() && !player.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            player.sendMessage(Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.transfer-received"))));
+        final @NotNull Transaction transfer = from.get().transfer(to.get(), amount, description, null);
+        sendMessage(sender, Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance()
+                .getConfig().getString(BankConfig.MESSAGES_TRANSFER_SENT.getKey()))));
+        final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(to.get().owner.getPlayer());
+        if (player.isPresent() && player.get().isOnline() && !player.get().getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            sendMessage(player.get(), Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts
+                    .getInstance().getConfig().getString(BankConfig.MESSAGES_TRANSFER_RECEIVED.getKey()))));
+
+        return true;
     }
 
     /**
@@ -587,28 +492,17 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      * <p>
      * {@code transactions <account> [page|--all]}
      */
-    public static void transactions(@NotNull CommandSender sender, String[] args, String label) {
-        if (!sender.hasPermission("bank.history")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> transactions <account> [page=1|--all]",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-            return;
-        }
-        if (!sender.hasPermission("bank.history.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-            return;
-        }
+    public static boolean transactions(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.history")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (args.length < 1) return sendUsage(sender, label, "transactions <account> [page=1|--all]");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (!sender.hasPermission("bank.history.other") && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
         final int page;
-        @NotNull Optional<Integer> limit = Optional.of(BankAccounts.getInstance().getConfig().getInt("history.per-page"));
+        @NotNull Optional<@NotNull Integer> limit = Optional.of(BankAccounts.getInstance().getConfig()
+                .getInt(BankConfig.HISTORY_PER_PAGE.getKey()));
         if (args.length > 1) {
             if (args[1].equals("--all")) {
                 page = 1;
@@ -619,85 +513,70 @@ public class BankCommand implements CommandExecutor, TabCompleter {
                     page = Integer.parseInt(args[1]);
                     if (page <= 0) throw new NumberFormatException();
                 }
-                catch (NumberFormatException e) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
-                            Placeholder.unparsed("number", args[1])
-                    ));
-                    return;
+                catch (final @NotNull NumberFormatException e) {
+                    return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
                 }
             }
         }
         else page = 1;
-        Transaction[] transactions = limit.map(integer -> Transaction.get(account.get(), integer, page)).orElseGet(() -> Transaction.get(account.get()));
-        if (transactions.length == 0) sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.no-transactions"))));
+        final @NotNull Transaction @NotNull [] transactions = limit
+                .map(integer -> Transaction.get(account.get(), integer, page))
+                .orElseGet(() -> Transaction.get(account.get()));
+        if (transactions.length == 0) sendMessage(sender, BankConfig.MESSAGES_HISTORY_NO_TRANSACTIONS);
         else {
             final int count = Transaction.count(account.get());
-            int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.header")));
-            for (Transaction transaction : transactions) sender.sendMessage(Transaction.historyPlaceholders(transaction, account.get(), Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.entry"))));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.history.footer")));
+            final int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts
+                    .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_HEADER.getKey())));
+            for (final @NotNull Transaction transaction : transactions)
+                sendMessage(sender, Transaction.historyPlaceholders(transaction, account.get(), Objects.requireNonNull(BankAccounts
+                        .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_ENTRY.getKey()))));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts
+                    .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_FOOTER.getKey())));
         }
+        return true;
     }
 
     /**
      * Create instrument
      */
-    public static void instrument(final @NotNull CommandSender sender, final @NotNull String[] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.instrument.create")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
+    public static boolean instrument(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.instrument.create"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
         if (!(sender instanceof Player)) {
-            if (!sender.hasPermission("bank.instrument.create.other")) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.player-only"))));
-                return;
-            }
-            else if (args.length < 2) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> instrument " + (args.length > 0 ? args[0] : "<account>") + " <player>",
-                        Placeholder.unparsed("command", label)
-                ));
-                return;
-            }
+            if (!sender.hasPermission("bank.instrument.create.other"))
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_ONLY);
+            else if (args.length < 2)
+                return sendUsage(sender, label, "instrument " + (args.length > 0 ? args[0] : "<account>") + " <player>");
         }
-        else if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> instrument <account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : ""),
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        final Player target = !(sender instanceof Player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts.getInstance().getServer().getPlayer(args[1]) : (Player) sender;
-        if (target == null || !target.isOnline()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.player-not-found"))));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-            return;
-        }
-        if (!sender.hasPermission("bank.instrument.create.other") && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-            return;
-        }
+        else if (args.length < 1)
+            return sendUsage(sender, label, "instrument <account>" + (sender.hasPermission("bank.instrument.create.other") ? " <player>" : ""));
+        final Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts
+                .getInstance().getServer().getPlayer(args[1]) : player;
+        if (target == null || !target.isOnline())
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_NOT_FOUND);
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (!sender.hasPermission("bank.instrument.create.other") && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
 
-        if (target.getInventory().firstEmpty() == -1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.target-inventory-full")),
-                    Placeholder.unparsed("player", target.getName())
-            ));
-            return;
-        }
+        if (target.getInventory().firstEmpty() == -1)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TARGET_INVENTORY_FULL, Placeholder.unparsed("player", target.getName()));
 
-        if (BankAccounts.getInstance().getConfig().getBoolean("instruments.require-item") && sender instanceof final @NotNull Player player) {
-            final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
-            final ItemStack item = Arrays.stream(player.getInventory().getStorageContents()).filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta()).findFirst().orElse(null);
+        if (BankAccounts.getInstance().getConfig()
+                .getBoolean(BankConfig.INSTRUMENTS_REQUIRE_ITEM.getKey()) && sender instanceof final @NotNull Player player) {
+            final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts
+                    .getInstance().getConfig().getString(BankConfig.INSTRUMENTS_MATERIAL.getKey()))));
+            final ItemStack item = Arrays.stream(player.getInventory().getStorageContents())
+                    .filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta())
+                    .findFirst().orElse(null);
 
             if (!sender.hasPermission("bank.instrument.create.bypass")) {
-                if (item == null) {
-                    sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.instrument-requires-item")),
-                            Placeholder.unparsed("material", Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material")).toLowerCase())
-                    ));
-                    return;
-                }
+                if (item == null)
+                    return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INSTRUMENT_REQUIRES_ITEM, Placeholder.unparsed("material", Objects
+                            .requireNonNull(BankAccounts.getInstance().getConfig()
+                                    .getString(BankConfig.INSTRUMENTS_MATERIAL.getKey())).toLowerCase()));
                 else {
                     final @NotNull ItemStack clone = item.clone();
                     clone.setAmount(1);
@@ -706,45 +585,35 @@ public class BankCommand implements CommandExecutor, TabCompleter {
             }
         }
 
-        final @NotNull ItemStack instrument = account.get().createInstrument();
-        target.getInventory().addItem(instrument);
-        sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.instrument-created"))));
+        target.getInventory().addItem(account.get().createInstrument());
+        return sendMessage(sender, BankConfig.MESSAGES_INSTRUMENT_CREATED);
     }
 
     /**
      * Account whois
      */
-    public static void whois(final @NotNull CommandSender sender, final @NotNull String[] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.whois")) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-            return;
-        }
-        if (args.length < 1) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> whois <account>",
-                    Placeholder.unparsed("command", label)
-            ));
-            return;
-        }
-        Optional<Account> account = Account.get(args[0]);
-        if (account.isEmpty()) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-            return;
-        }
-        sender.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.whois")), account.get()));
+    public static boolean whois(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission("bank.whois")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (args.length < 1) return sendUsage(sender, label, "whois <account>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        return account
+                .map(value -> sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                        .getConfig()
+                        .getString(BankConfig.MESSAGES_WHOIS.getKey())), value)))
+                .orElseGet(() -> sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND));
     }
 
     /**
      * Send transaction history header or footer
-     * @param sender Command sender
+     *
+     * @param sender  Command sender
      * @param account Account
-     * @param page Current page
+     * @param page    Current page
      * @param maxPage Maximum page
      * @param message Message to replace placeholders in
      */
     public static void transactionsHeaderFooter(@NotNull CommandSender sender, @NotNull Account account, int page, int maxPage, @NotNull String message) {
-        message = message
-                .replace("<page>", String.valueOf(page))
-                .replace("<max-page>", String.valueOf(maxPage))
+        message = message.replace("<page>", String.valueOf(page)).replace("<max-page>", String.valueOf(maxPage))
                 .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
                 .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1));
         sender.sendMessage(Account.placeholders(message, account));
@@ -759,13 +628,15 @@ public class BankCommand implements CommandExecutor, TabCompleter {
      *    <li>{@code <description>} Transfer description</li>
      *    <li>{@code <confirm-command>} Command to run to confirm transfer</li>
      * </ul>
-     * @param from Account sending from
-     * @param to Account sending to
-     * @param amount Amount of transfer
+     *
+     * @param from        Account sending from
+     * @param to          Account sending to
+     * @param amount      Amount of transfer
      * @param description Description of transfer
      */
     public static Component transferConfirmation(@NotNull Account from, @NotNull Account to, @NotNull BigDecimal amount, @Nullable String description) {
-        String message = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.confirm-transfer"))
+        String message = Objects
+                .requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.confirm-transfer"))
                 .replace("<amount>", amount.toPlainString())
                 .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
                 .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
