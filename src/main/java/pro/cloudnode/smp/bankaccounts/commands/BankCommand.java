@@ -334,7 +334,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         else {
-            final BigDecimal balance;
+            final @Nullable BigDecimal balance;
             try {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
             }
@@ -364,7 +364,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                 return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
             if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL)
                 return sendMessage(sender, BankConfig.MESSAGES_ERRORS_RENAME_PERSONAL);
-            String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
+            @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.length() == 0 ? null : name;
 
@@ -392,8 +392,9 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_BALANCE);
-        if (account.get().frozen) return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), account.get()));
+        if (account.get().frozen)
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), account.get()));
         if (BankAccounts.getInstance().getConfig()
                 .getBoolean("prevent-close-last-personal") && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_PERSONAL);
@@ -459,7 +460,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
                     .getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), from.get()));
 
-        String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length)).trim() : null;
+        @Nullable String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length))
+                .trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
         if (description != null && (description.contains("<") || description.contains(">")))
@@ -552,7 +554,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
         else if (args.length < 1)
             return sendUsage(sender, label, "instrument <account>" + (sender.hasPermission("bank.instrument.create.other") ? " <player>" : ""));
-        final Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts
+        final @Nullable Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts
                 .getInstance().getServer().getPlayer(args[1]) : player;
         if (target == null || !target.isOnline())
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_NOT_FOUND);
@@ -599,8 +601,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         return account
                 .map(value -> sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                        .getConfig()
-                        .getString(BankConfig.MESSAGES_WHOIS.getKey())), value)))
+                        .getConfig().getString(BankConfig.MESSAGES_WHOIS.getKey())), value)))
                 .orElseGet(() -> sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND));
     }
 
@@ -613,11 +614,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * @param maxPage Maximum page
      * @param message Message to replace placeholders in
      */
-    public static void transactionsHeaderFooter(@NotNull CommandSender sender, @NotNull Account account, int page, int maxPage, @NotNull String message) {
-        message = message.replace("<page>", String.valueOf(page)).replace("<max-page>", String.valueOf(maxPage))
+    public static void transactionsHeaderFooter(final @NotNull CommandSender sender, final @NotNull Account account, final int page, final int maxPage, final @NotNull String message) {
+        sender.sendMessage(Account.placeholders(message.replace("<page>", String.valueOf(page))
+                .replace("<max-page>", String.valueOf(maxPage))
                 .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
-                .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1));
-        sender.sendMessage(Account.placeholders(message, account));
+                .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1)), account));
     }
 
     /**
@@ -635,15 +636,14 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * @param amount      Amount of transfer
      * @param description Description of transfer
      */
-    public static Component transferConfirmation(@NotNull Account from, @NotNull Account to, @NotNull BigDecimal amount, @Nullable String description) {
-        String message = Objects
+    public static @NotNull Component transferConfirmation(final @NotNull Account from, final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description) {
+        return Account.placeholders(Objects
                 .requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.confirm-transfer"))
                 .replace("<amount>", amount.toPlainString())
                 .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
                 .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
                 .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description)
-                .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description));
-        return Account.placeholders(message, new HashMap<>() {{
+                .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description)), new HashMap<>() {{
             put("from", from);
             put("to", to);
         }});
