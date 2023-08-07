@@ -412,3 +412,9 @@ messages:
         <gray>Owned by:</gray> <white><account-owner></white>
         <gray>Type:</gray> <white><account-type></white>
         <gray>ID: <click:copy_to_clipboard:<account-id>><hover:show_text:'<white>Copy to clipboard</white>'><white><account-id></white></hover></click></gray>
+
+
+    # New version available
+    # Placeholders:
+    # <version> - New version
+    update-available: "<hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:https://modrinth.com/plugin/bankaccounts/version/<version>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new version <green><version></green> has been released.</white><newline><gray>Please update to get the latest bug fixes and features.</gray><newline> <green>> Click to view update<green></click></hover>"
