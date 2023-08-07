@@ -71,6 +71,8 @@ public final class ChestShop {
      */
     public final @NotNull String item;
 
+    public final int amount;
+
     /**
      * Creates a new chest shop.
      *
@@ -82,8 +84,9 @@ public final class ChestShop {
      * @param price Chest shop price.
      * @param owner The owner of the chest shop.
      * @param item  The hash of the item being sold/bought.
+     * @param amount The amount of items being sold/bought.
      */
-    public ChestShop(final int x, final int y, final int z, final @NotNull World world, final @NotNull Mode mode, final @NotNull BigDecimal price, final @NotNull Account owner, final @NotNull String item) {
+    public ChestShop(final int x, final int y, final int z, final @NotNull World world, final @NotNull Mode mode, final @NotNull BigDecimal price, final @NotNull Account owner, final @NotNull String item, final int amount) {
         this.x = x;
         this.y = y;
         this.z = z;
@@ -92,6 +95,7 @@ public final class ChestShop {
         this.price = price;
         this.owner = owner;
         this.item = item;
+        this.amount = amount;
     }
 
     private ChestShop(final @NotNull ResultSet rs) throws SQLException {
@@ -105,6 +109,7 @@ public final class ChestShop {
         this.price = new BigDecimal(rs.getString("price"));
         this.owner = Account.get(rs.getString("owner")).orElseGet(Account.ClosedAccount::new);
         this.item = rs.getString("item");
+        this.amount = rs.getInt("amount");
     }
 
     /**
