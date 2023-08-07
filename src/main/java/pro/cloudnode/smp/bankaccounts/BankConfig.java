@@ -2,23 +2,6 @@ package pro.cloudnode.smp.bankaccounts;
 
 import org.jetbrains.annotations.NotNull;
 
-/*public final class BankConfig {
-    public final static @NotNull String DB_DB = "db.db";
-    public final static @NotNull String DB_SQLITE_FILE = "db.sqlite.file";
-    public final static @NotNull String DB_MARIADB_JDBC = "db.mariadb.jdbc";
-    public final static @NotNull String DB_MARIADB_USER = "db.mariadb.user";
-    public final static @NotNull String DB_MARIADB_PASSWORD = "db.mariadb.password";
-    public final static @NotNull String DB_CACHEPREPSTMTS = "db.cachePrepStmts";
-    public final static @NotNull String DB_PREPSTMTCACHESIZE = "db.prepStmtCacheSize";
-    public final static @NotNull String DB_PREPSTMTCACHESQLLIMIT = "db.prepStmtCacheSqlLimit";
-    public final static @NotNull String DB_USESERVERPREPSTMTS = "db.useServerPrepStmts";
-    public final static @NotNull String DB_USELOCALSESSSIONSTATE = "db.useLocalSessionState";
-    public final static @NotNull String DB_REWRITEBATCHEDSTATEMENTS = "db.rewriteBatchedStatements";
-    public final static @NotNull String DB_CACHERESULTSETMETADATA = "db.cacheResultSetMetadata";
-    public final static @NotNull String DB_CACHESERVERCONFIGURATION = "db.cacheServerConfiguration";
-    public final static @NotNull String DB_ELIDESETAUTOCOMMITS = "db.elideSetAutoCommits";
-    public final static @NotNull String DB_MAINTAINTIMESTATS = "db.maintainTimeStats";
-}*/
 public enum BankConfig {
     DB_DB("db.db"),
     DB_SQLITE_FILE("db.sqlite.file"),
@@ -127,7 +110,8 @@ public enum BankConfig {
     MESSAGES_POS_REMOVED("messages.pos-removed"),
     MESSAGES_POS_PURCHASE("messages.pos-purchase"),
     MESSAGES_POS_PURCHASE_SELLER("messages.pos-purchase-seller"),
-    MESSAGES_WHOIS("messages.whois");
+    MESSAGES_WHOIS("messages.whois"),
+    MESSAGES_UPDATE_AVAILABLE("messages.update-available");
 
     private final @NotNull String key;
 

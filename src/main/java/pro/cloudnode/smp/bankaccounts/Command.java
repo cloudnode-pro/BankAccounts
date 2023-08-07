@@ -19,7 +19,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      * @param message      Message to send.
      * @return Always true.
      */
-    protected static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull Component message) {
+    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull Component message) {
         sender.sendMessage(message);
         return true;
     }
@@ -31,7 +31,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      * @param placeholders Placeholders to replace.
      * @return Always true.
      */
-    protected static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull String message, final @NotNull TagResolver @NotNull ... placeholders) {
+    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull String message, final @NotNull TagResolver @NotNull ... placeholders) {
         sendMessage(sender, MiniMessage.miniMessage().deserialize(message, placeholders));
         return true;
     }
@@ -44,7 +44,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      * @param placeholders Placeholders to replace.
      * @return Always true.
      */
-    protected static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull BankConfig path, final @NotNull TagResolver @NotNull ... placeholders) {
+    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull BankConfig path, final @NotNull TagResolver @NotNull ... placeholders) {
         return sendMessage(sender, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(path.getKey())), placeholders);
     }
 
