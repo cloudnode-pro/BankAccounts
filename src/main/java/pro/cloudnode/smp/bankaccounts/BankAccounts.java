@@ -154,7 +154,8 @@ public final class BankAccounts extends JavaPlugin {
             throw e;
         }
         final @NotNull String[] queries = setup.split(";");
-        for (final @NotNull String query : queries) {
+        for (@NotNull String query : queries) {
+            query = query.stripTrailing().stripIndent().replaceAll("^\\s+(?:--.+)*", "");
             if (query.isBlank()) continue;
             try (final @NotNull Connection conn = getDb().getConnection();
                  final @NotNull PreparedStatement stmt = conn.prepareStatement(query)) {
