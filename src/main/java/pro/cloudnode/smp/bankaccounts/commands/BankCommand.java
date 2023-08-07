@@ -186,7 +186,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (sender.hasPermission("bank.balance.self"))
             sendMessage(sender, "<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>");
         if (sender.hasPermission("bank.balance.other"))
-            sendMessage(sender, "<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player [player]</gray></green> <white>- List another player's accounts</click>");
+            sendMessage(sender, "<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player <player></gray></green> <white>- List another player's accounts</click>");
         if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other"))
             sendMessage(sender, "<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>");
         if (sender.hasPermission("bank.history"))
@@ -194,7 +194,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (sender.hasPermission("bank.account.create"))
             sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
         if (sender.hasPermission("bank.account.create.other"))
-            sendMessage(sender, "<click:suggest_command:/bank create --player ><green>/bank create <gray><PERSONAL|BUSINESS> --player [player]</gray></green> <white>- Create an account for another player</click>");
+            sendMessage(sender, "<click:suggest_command:/bank create --player ><green>/bank create <gray><PERSONAL|BUSINESS> --player <player></gray></green> <white>- Create an account for another player</click>");
         if (sender.hasPermission("bank.delete"))
             sendMessage(sender, "<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>");
         if (sender.hasPermission("bank.instrument.create"))
