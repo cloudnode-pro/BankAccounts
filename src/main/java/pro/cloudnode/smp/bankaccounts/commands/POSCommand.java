@@ -1,20 +1,18 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 
 import java.math.BigDecimal;
@@ -32,105 +30,71 @@ import java.util.Optional;
  * <p>
  * {@code /pos <account> <price> [description]}
  */
-public final class POSCommand implements CommandExecutor, TabCompleter {
+public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final String[] args) {
-        if (sender instanceof final @NotNull Player player) {
-            if (!player.hasPermission("bank.pos.create")) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-permission"))));
-                return true;
-            }
+    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        if (!(sender instanceof final @NotNull Player player))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_ONLY);
+        if (!player.hasPermission("bank.pos.create"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
 
-            if (args.length < 2) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize("<yellow>(!) Usage: <white>/<command> " + (args.length > 0 ? args[0] : "<account>") + " <price> [description]",
-                        Placeholder.unparsed("command", label)
-                ));
-                return true;
-            }
+        if (args.length < 2)
+            return sendUsage(sender, label, (args.length > 0 ? args[0] : "<account>") + " <price> [description]");
 
-            final @NotNull Optional<Account> account = Account.get(args[0]);
-            if (account.isEmpty()) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.account-not-found"))));
-                return true;
-            }
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
 
-            if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig().getBoolean("pos.allow-personal") && !player.hasPermission("bank.pos.create.personal")) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-create-business-only"))));
-                return true;
-            }
+        if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig()
+                .getBoolean("pos.allow-personal") && !player.hasPermission("bank.pos.create.personal"))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_CREATE_BUSINESS_ONLY);
 
-            if (account.get().frozen) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen"))));
-                return true;
-            }
+        if (account.get().frozen)
+            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
+                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), account.get()));
 
-            if (!player.hasPermission("bank.pos.create.other") && !account.get().owner.equals(player)) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
-                return true;
-            }
+        if (!player.hasPermission("bank.pos.create.other") && !account.get().owner.equals(player))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
 
-            final @NotNull BigDecimal price;
-            try {
-                price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
-            } catch (NumberFormatException e) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
-                        Placeholder.unparsed("number", args[1])
-                ));
-                return true;
-            }
+        final @NotNull BigDecimal price;
+        try {
+            price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
+        }
+        catch (final @NotNull NumberFormatException e) {
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
+        }
 
-            if (price.compareTo(BigDecimal.ZERO) <= 0) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.invalid-number")),
-                        Placeholder.unparsed("number", args[1])
-                ));
-                return true;
-            }
+        if (price.compareTo(BigDecimal.ZERO) <= 0)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
 
 
-            final @Nullable Block target = player.getTargetBlockExact(5);
-            if (target == null) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.block-too-far"))));
-                return true;
-            }
+        final @Nullable Block target = player.getTargetBlockExact(5);
+        if (target == null) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_BLOCK_TOO_FAR);
 
-            if (target.getType() != Material.CHEST) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-not-chest"))));
-                return true;
-            }
+        if (target.getType() != Material.CHEST) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_NOT_CHEST);
 
-            final @NotNull Chest chest = (Chest) target.getState();
-            if (chest.getInventory().isEmpty()) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-empty"))));
-                return true;
-            }
-            if (POS.get(chest).isPresent()) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-already-exists"))));
-                return true;
-            }
+        final @NotNull Chest chest = (Chest) target.getState();
+        if (chest.getInventory().isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_EMPTY);
+        if (POS.get(chest).isPresent()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_ALREADY_EXISTS);
 
-            final @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
+        @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
+        if (description != null && description.length() > 64) description = description.substring(0, 64);
 
-            if (description != null && (description.contains("<") || description.contains(">"))) {
-                sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.disallowed-characters")),
-                        Placeholder.unparsed("characters", "<>")
-                ));
-                return true;
-            }
+        if (description != null && (description.contains("<") || description.contains(">")))
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_DISALLOWED_CHARACTERS, Placeholder.unparsed("characters", "<>"));
 
-            final POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
-            pos.save();
-            player.sendMessage(replacePlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-created")), pos));
-        } else
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.player-only"))));
-        return true;
+        final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
+        pos.save();
+        return sendMessage(sender, replacePlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
+                .getString("messages.pos-created")), pos));
     }
 
-    public ArrayList<String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final String[] args) {
-        ArrayList<String> suggestions = new ArrayList<>();
+    public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (sender.hasPermission("bank.pos.create") && sender instanceof Player && args.length == 1) {
             final @NotNull Account[] accounts = sender.hasPermission("bank.pos.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
             for (final @NotNull Account account : accounts) {
-                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig().getBoolean("pos.allow-personal") && !sender.hasPermission("bank.pos.create.personal")))
+                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig()
+                        .getBoolean("pos.allow-personal") && !sender.hasPermission("bank.pos.create.personal")))
                     continue;
                 suggestions.add(account.id);
             }
@@ -144,12 +108,10 @@ public final class POSCommand implements CommandExecutor, TabCompleter {
      * @param message Message to replace placeholders in
      * @param pos     POS to get placeholders from
      */
-    public static Component replacePlaceholders(final String message, final POS pos) {
-        return Account.placeholders(message
-                        .replace("<price>", pos.price.toPlainString())
-                        .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
-                        .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
-                        .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description)
-                , pos.seller);
+    public static @NotNull Component replacePlaceholders(final @NotNull String message, final @NotNull POS pos) {
+        return Account.placeholders(message.replace("<price>", pos.price.toPlainString())
+                .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
+                .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
+                .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description), pos.seller);
     }
 }
