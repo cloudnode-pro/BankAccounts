@@ -227,7 +227,7 @@ messages:
     # Placeholders:
     # - <command> - The command name (e.g. "bank")
     # - <arguments> - The command usage arguments (e.g. "send <from> <to> <amount> [description]")
-    command-usage: "<yellow(!) Usage:</yellow> <white>/<command> <arguments></white>"
+    command-usage: "<yellow>(!) Usage:</yellow> <white>/<command> <arguments></white>"
 
     # Errors
     errors:
