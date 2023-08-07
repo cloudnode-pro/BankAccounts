@@ -10,3 +10,6 @@ commands:
     pos:
         description: Create point of sale
         usage: /<command>
+    iteminfo:
+        description: Get item info
+        usage: /<command> [item]

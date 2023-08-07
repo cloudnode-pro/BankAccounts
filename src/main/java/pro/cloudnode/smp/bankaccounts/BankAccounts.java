@@ -12,8 +12,10 @@ import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
+import pro.cloudnode.smp.bankaccounts.commands.ItemInfoCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
+import pro.cloudnode.smp.bankaccounts.events.ChestShopInteract;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PosInteract;
@@ -50,6 +52,7 @@ public final class BankAccounts extends JavaPlugin {
         final @NotNull HashMap<@NotNull String, @NotNull CommandExecutor> commands = new HashMap<>() {{
             put("bank", new BankCommand());
             put("pos", new POSCommand());
+            put("iteminfo", new ItemInfoCommand());
         }};
         for (Map.Entry<@NotNull String, @NotNull CommandExecutor> entry : commands.entrySet()) {
             final PluginCommand command = getCommand(entry.getKey());
@@ -66,6 +69,7 @@ public final class BankAccounts extends JavaPlugin {
                 new Join(),
                 new BlockBreak(),
                 new PosInteract(),
+                new ChestShopInteract(),
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
@@ -275,5 +279,6 @@ public final class BankAccounts extends JavaPlugin {
         public final static @NotNull NamespacedKey POS_BUYER_GUI = namespacedKey("pos-buyer-gui");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CONFIRM = namespacedKey("pos-buyer-gui-confirm");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CANCEL = namespacedKey("pos-buyer-gui-cancel");
+        public final static @NotNull NamespacedKey ITEM_PREVIEW_GUI = namespacedKey("item-preview-gui");
     }
 }

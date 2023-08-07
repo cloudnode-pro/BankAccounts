@@ -154,6 +154,7 @@ public class GUI implements Listener {
                     inventory.close();
                 }
             }
+            case "item-preview" -> event.setCancelled(true);
         }
     }
 
@@ -166,6 +167,7 @@ public class GUI implements Listener {
     public final static @NotNull HashMap<@NotNull String, @NotNull NamespacedKey[]> keys = new HashMap<>() {{
         put("pos-owner", new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI});
         put("pos-buyer", new NamespacedKey[]{BankAccounts.Key.POS_BUYER_GUI_CONFIRM, BankAccounts.Key.POS_BUYER_GUI, BankAccounts.Key.POS_BUYER_GUI_CANCEL});
+        put("item-preview", new NamespacedKey[]{BankAccounts.Key.ITEM_PREVIEW_GUI});
     }};
 
     public final boolean isGuiItem(final @NotNull ItemStack item) {

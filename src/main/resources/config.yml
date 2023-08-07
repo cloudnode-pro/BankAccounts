@@ -220,6 +220,9 @@ pos:
         lore:
             - "<gray>Click to decline this purchase.</gray>"
 
+# Chest shop
+chest-shop:
+    # The first line
 
 # Messages
 messages:
@@ -286,6 +289,10 @@ messages:
         # Provided string includes disallowed characters
         # Placeholder: <characters> - the disallowed characters
         disallowed-characters: "<red>(!) The provided string contains disallowed characters: <gray><characters></gray></red>"
+        # Placeholders:
+        # <item> - the item name
+        invalid-item: "<red>(!) Invalid item: <gray><item></gray></red>"
+        must-hold-item: "<red>(!) You must hold an item in your hand to use this command.</red>"
 
     # Account balance
     # Available placeholders:
@@ -418,3 +425,11 @@ messages:
     # Placeholders:
     # <version> - New version
     update-available: "<hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:https://modrinth.com/plugin/bankaccounts/version/<version>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new version <green><version></green> has been released.</white><newline><gray>Please update to get the latest bug fixes and features.</gray><newline> <green>> Click to view update<green></click></hover>"
+
+    # Item hash message
+    # Placeholders:
+    # <hash> - The item hash
+    # <item> - Use this with `<hover:show_item:<item>>` to show the item when hovering over text
+    # <item_name> - The item name
+    # <cmd> - Command to run to view item
+    item-hash: "<newline><click:run_command:'<cmd>'><hover:show_item:<item>><gray><item_name></gray></hover></click><newline><green>Hash:</green> <hover:show_text:'<white>Click to copy</white>'><click:copy_to_clipboard:<hash>><white><hash></white></click></hover><newline><gray>Click item name to view it</gray><newline>"

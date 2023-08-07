@@ -90,6 +90,8 @@ public enum BankConfig {
     MESSAGES_ERRORS_POS_ITEMS_CHANGED("messages.errors.pos-items-changed"),
     MESSAGES_ERRORS_POS_CREATE_BUSINESS_ONLY("messages.errors.pos-create-business-only"),
     MESSAGES_ERRORS_DISALLOWED_CHARACTERS("messages.errors.disallowed-characters"),
+    MESSAGES_ERRORS_INVALID_ITEM("messages.errors.invalid-item"),
+    MESSAGES_ERRORS_MUST_HOLD_ITEM("messages.errors.must-hold-item"),
     MESSAGES_BALANCE("messages.balance"),
     MESSAGES_LIST_ACCOUNTS_HEADER("messages.list-accounts.header"),
     MESSAGES_LIST_ACCOUNTS_ENTRY("messages.list-accounts.entry"),
@@ -111,7 +113,8 @@ public enum BankConfig {
     MESSAGES_POS_PURCHASE("messages.pos-purchase"),
     MESSAGES_POS_PURCHASE_SELLER("messages.pos-purchase-seller"),
     MESSAGES_WHOIS("messages.whois"),
-    MESSAGES_UPDATE_AVAILABLE("messages.update-available");
+    MESSAGES_UPDATE_AVAILABLE("messages.update-available"),
+    MESSAGES_ITEM_HASH("messages.item-hash");
 
     private final @NotNull String key;
 
