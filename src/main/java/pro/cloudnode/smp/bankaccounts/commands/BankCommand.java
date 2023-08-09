@@ -416,7 +416,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (confirm) argsCopy = Arrays.copyOfRange(argsCopy, 1, argsCopy.length);
         if (args.length < 3)
             return sendUsage(sender, label, "transfer " + (argsCopy.length > 0 ? argsCopy[0] : "<from>") + " " + (argsCopy.length > 1 ? argsCopy[1] : "<to>") + " <amount> [description]");
-        final @NotNull Optional<@NotNull Account> from = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> from = Account.get(argsCopy[0]);
         // account does not exist
         if (from.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         // sender does not own account
@@ -427,7 +427,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
                     .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), from.get()));
         // recipient does not exist
-        final @NotNull Optional<@NotNull Account> to = Account.get(args[1]);
+        final @NotNull Optional<@NotNull Account> to = Account.get(argsCopy[1]);
         if (to.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
         // to is same as from
         if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_SAME_FROM_TO);
@@ -447,10 +447,10 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
 
         final @NotNull BigDecimal amount;
         try {
-            amount = BigDecimal.valueOf(Double.parseDouble(args[2])).setScale(2, RoundingMode.HALF_UP);
+            amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[2])).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[2]));
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", argsCopy[2]));
         }
         // amount is 0 or less
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
@@ -460,7 +460,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
                     .getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), from.get()));
 
-        @Nullable String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(args, 3, args.length))
+        @Nullable String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length))
                 .trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
