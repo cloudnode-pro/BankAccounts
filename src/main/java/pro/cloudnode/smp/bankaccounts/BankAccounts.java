@@ -1,5 +1,7 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.bukkit.NamespacedKey;
@@ -22,6 +24,10 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
@@ -29,6 +35,7 @@ import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -129,6 +136,13 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
+        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
+            checkForUpdates().ifPresent(latestVersion -> {
+                getInstance().getLogger().warning("An update is available: " + latestVersion);
+                getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
+                getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
+            });
+        });
     }
 
     /**
@@ -149,7 +163,8 @@ public final class BankAccounts extends JavaPlugin {
         @NotNull String setup;
         try (final InputStream in = getClassLoader().getResourceAsStream(initFile)) {
             setup = new String(Objects.requireNonNull(in).readAllBytes());
-        } catch (@NotNull IOException e) {
+        }
+        catch (@NotNull IOException e) {
             getLogger().log(Level.SEVERE, "Could not read db setup file.", e);
             throw e;
         }
@@ -168,7 +183,8 @@ public final class BankAccounts extends JavaPlugin {
     private void initDbWrapper() {
         try {
             initDb();
-        } catch (@NotNull SQLException | @NotNull IOException e) {
+        }
+        catch (@NotNull SQLException | @NotNull IOException e) {
             getLogger().log(Level.SEVERE, "Could not initialize database.", e);
             getServer().getPluginManager().disablePlugin(this);
         }
@@ -212,7 +228,8 @@ public final class BankAccounts extends JavaPlugin {
         if (amount == null) return "∞";
         final @NotNull BigDecimal absAmount = amount.abs().setScale(2, RoundingMode.HALF_UP);
         final @NotNull String prefix = (amount.compareTo(BigDecimal.ZERO) < 0 ? "-" : "") + currencySymbol;
-        if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0) return prefix + absAmount.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
+        if (absAmount.compareTo(BigDecimal.valueOf(1000)) < 0)
+            return prefix + absAmount.setScale(2, RoundingMode.HALF_UP).stripTrailingZeros().toPlainString();
 
         final @NotNull Map<BigDecimal, String> bounds = Map.of(
                 BigDecimal.valueOf(1000), "K",
@@ -232,6 +249,7 @@ public final class BankAccounts extends JavaPlugin {
 
     /**
      * Namespaced key
+     *
      * @param key Key
      */
     public static @NotNull NamespacedKey namespacedKey(final @NotNull String key) {
@@ -263,10 +281,46 @@ public final class BankAccounts extends JavaPlugin {
 
     /**
      * Get offline player or console as offline player (UUID 0)
+     *
      * @param sender Command sender
      */
     public static @NotNull OfflinePlayer getOfflinePlayer(@NotNull CommandSender sender) {
         return sender instanceof OfflinePlayer ? (OfflinePlayer) sender : getConsoleOfflinePlayer();
+    }
+
+    /**
+     * Check for plugin updates using Modrinth API
+     *
+     * @return The latest version if an update is available, otherwise empty
+     */
+    public static Optional<String> checkForUpdates() {
+        final @NotNull BankAccounts plugin = BankAccounts.getInstance();
+        final @NotNull String mcVersion = plugin.getServer().getMinecraftVersion();
+        final @NotNull String pluginName = plugin.getPluginMeta().getName();
+        final @NotNull String pluginVersion = plugin.getPluginMeta().getVersion();
+        try {
+            final @NotNull HttpClient client = HttpClient.newHttpClient();
+            final @NotNull HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("https://api.modrinth.com/v2/project/Dc8RS2En/version?featured=true&game_versions=[%22" + mcVersion + "%22]"))
+                    .header("User-Agent",
+                            pluginName + "/" + pluginVersion
+                    )
+                    .GET()
+                    .build();
+            final @NotNull HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null) {
+                final @NotNull JsonObject json = JsonParser.parseString(res.body()).getAsJsonArray().get(0).getAsJsonObject();
+                if (json.has("version_number")) {
+                    final @NotNull String latestVersion = json.get("version_number").getAsString();
+                    if (!latestVersion.equals(pluginVersion))
+                        return Optional.of(latestVersion);
+                }
+            }
+        }
+        catch (final @NotNull Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to check for updates", e);
+        }
+        return Optional.empty();
     }
 
     public static final class Key {
