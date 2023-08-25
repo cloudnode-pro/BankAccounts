@@ -310,9 +310,9 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             int limit = BankAccounts.getInstance().getConfig()
                     .getInt("account-limits." + Account.Type.getType(optionalType.get()));
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType.get().name), Placeholder.unparsed("limit", String.valueOf(BankAccounts
-                        .getInstance().getConfig()
-                        .getInt("account-limits." + Account.Type.getType(optionalType.get())))));
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType
+                        .get().getName()), Placeholder.unparsed("limit", String.valueOf(BankAccounts.getInstance()
+                        .getConfig().getInt("account-limits." + Account.Type.getType(optionalType.get())))));
         }
 
         final @NotNull Account account = new Account(target, optionalType.get(), null, BigDecimal.ZERO, false);
@@ -460,8 +460,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
                     .getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), from.get()));
 
-        @Nullable String description = args.length > 3 ? String.join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length))
-                .trim() : null;
+        @Nullable String description = args.length > 3 ? String
+                .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
         if (description != null && (description.contains("<") || description.contains(">")))
@@ -576,10 +576,10 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                     .findFirst().orElse(null);
 
             if (!sender.hasPermission("bank.instrument.create.bypass")) {
-                if (item == null)
-                    return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INSTRUMENT_REQUIRES_ITEM, Placeholder.unparsed("material", Objects
-                            .requireNonNull(BankAccounts.getInstance().getConfig()
-                                    .getString(BankConfig.INSTRUMENTS_MATERIAL.getKey())).toLowerCase()));
+                if (item == null) return sendMessage(sender, Objects
+                        .requireNonNull(BankAccounts.getInstance().getConfig()
+                                .getString(BankConfig.MESSAGES_ERRORS_INSTRUMENT_REQUIRES_ITEM.getKey()))
+                        .replace("<material-key>", material.translationKey()), Placeholder.unparsed("material", material.name()));
                 else {
                     final @NotNull ItemStack clone = item.clone();
                     clone.setAmount(1);
