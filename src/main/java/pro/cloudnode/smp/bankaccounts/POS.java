@@ -297,6 +297,9 @@ public final class POS {
     public static void openOwnerGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos) {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         int extraRows = 1;
+        // check if the chest is totally full (#35)
+        if (items.length >= 54)
+            extraRows = -1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
@@ -305,6 +308,14 @@ public final class POS {
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
         gui.addItem(items);
+
+        // clear bottom row if the chest is full (#35)
+        if (extraRows == -1) {
+            for (int i = size - 9; i < size; i++) {
+                gui.clear(i);
+            }
+        }
+
 
         final @NotNull ItemStack overview = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
@@ -342,6 +353,26 @@ public final class POS {
         delete.setItemMeta(deleteMeta);
         gui.setItem(size - 1, delete);
 
+        // pagination
+        if (extraRows == -1) {
+            final @NotNull ItemStack more = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
+            if (BankAccounts.getInstance().getConfig().getBoolean("pos.more.glint")) {
+                more.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                more.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+            }
+            final @NotNull ItemMeta moreMeta = more.getItemMeta();
+            moreMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.name"))).decoration(TextDecoration.ITALIC, false));
+            moreMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.more.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+            final @NotNull PersistentDataContainer moreContainer = moreMeta.getPersistentDataContainer();
+            moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.id());
+            more.setItemMeta(moreMeta);
+            gui.setItem(size - 2, more);
+
+            // @todo: there needs to be a better way of saving this
+            // save last 9 items in metadata
+            player.setMetadata("pos-owner-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), Arrays.copyOfRange(items, items.length - 9, items.length)));
+        }
+
         player.openInventory(gui);
     }
 
@@ -362,7 +393,7 @@ public final class POS {
         // check if the chest is totally full (#35)
         if (items.length >= 54)
             extraRows = -1;
-        int size = extraRows * 9 + items.length + 9 - items.length % 9;
+        final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),

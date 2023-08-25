@@ -48,22 +48,97 @@ public class GUI implements Listener {
         )
             event.setCancelled(true);
 
-
         final @NotNull Inventory inventory = Optional.ofNullable(event.getClickedInventory()).orElse(event.getInventory());
         switch (getGui(inventory).orElse(".null")) {
             case "pos-owner" -> {
                 event.setCancelled(true);
-                final @NotNull ItemStack item = getGuiItems(inventory)[0];
-                final @NotNull PersistentDataContainer container = item.getItemMeta().getPersistentDataContainer();
-                final @NotNull Optional<POS> pos = POS.get(Objects.requireNonNull(container.get(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING)));
+                final @NotNull ItemStack[] items = getGuiItems(inventory);
+                final @NotNull ItemStack deleteItem = items[1];
+                final @NotNull Optional<ItemStack> more = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_OWNER_GUI_MORE)).findFirst();
+                final @NotNull Optional<ItemStack> less = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_OWNER_GUI_LESS)).findFirst();
+                final @NotNull PersistentDataContainer container = deleteItem.getItemMeta().getPersistentDataContainer();
+                NamespacedKey[] ownerKeys = new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS};
+                final @NotNull Optional<@NotNull String> id = Arrays.stream(ownerKeys).map(key -> container.get(key, PersistentDataType.STRING)).filter(Objects::nonNull).findFirst();
+                final @NotNull Optional<POS> pos = id.flatMap(POS::get);
+
                 if (pos.isEmpty()) {
                     inventory.close();
                     return;
                 }
-                if (event.getCurrentItem() != null && event.getCurrentItem().equals(item)) {
+                if (event.getCurrentItem() != null && event.getCurrentItem().equals(deleteItem)) {
                     pos.get().delete();
                     event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
                     inventory.close();
+                } else if (event.getCurrentItem() != null && more.isPresent() && event.getCurrentItem().equals(more.get())) {
+                    event.getWhoClicked().sendMessage(Arrays.toString(items));
+                    // shift the items 1 up and get more from the metadata
+                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-more");
+                    if (value.isEmpty()) return;
+                    if (value.get(0).value() == null) return;
+                    ItemStack[] moreItems = (ItemStack[]) value.get(0).value();
+                    assert moreItems != null;
+                    // save the last row
+                    ItemStack[] lastRow = Arrays.copyOfRange(inventory.getContents(), 0, 9);
+                    event.getWhoClicked().removeMetadata("pos-owner-gui-more", BankAccounts.getInstance());
+                    event.getWhoClicked().setMetadata("pos-owner-gui-less", new FixedMetadataValue(BankAccounts.getInstance(), lastRow));
+                    // move all rows from 1 to 5 up by 1
+                    for (int i = 0; i < 36; i++) {
+                        inventory.setItem(i, inventory.getItem(i + 9));
+                    }
+                    // set the last row to the new items
+                    for (int i = 0; i < 9; i++) {
+                        inventory.setItem(36 + i, moreItems[i]);
+                    }
+
+                    // replace the more arrow with a less arrow
+                    final @NotNull ItemStack lessItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
+
+                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.less.glint")) {
+                        lessItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                        lessItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+                    }
+
+                    final @NotNull ItemMeta lessMeta = lessItem.getItemMeta();
+                    lessMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.less.name"))).decoration(TextDecoration.ITALIC, false));
+                    lessMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.less.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+                    final @NotNull PersistentDataContainer moreContainer = lessMeta.getPersistentDataContainer();
+                    moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_LESS, PersistentDataType.STRING, pos.get().id());
+                    lessItem.setItemMeta(lessMeta);
+                    inventory.setItem(inventory.getSize() - 2, lessItem);
+                } else if (event.getCurrentItem() != null && less.isPresent() && event.getCurrentItem().equals(less.get())) {
+                    // shift the items 1 down and get more from the metadata
+                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-less");
+                    if (value.isEmpty()) return;
+                    if (value.get(0).value() == null) return;
+                    ItemStack[] lessItems = (ItemStack[]) value.get(0).value();
+                    assert lessItems != null;
+                    // save the first row
+                    ItemStack[] firstRow = Arrays.copyOfRange(inventory.getContents(), 36, 45);
+                    event.getWhoClicked().removeMetadata("pos-owner-gui-less", BankAccounts.getInstance());
+                    event.getWhoClicked().setMetadata("pos-owner-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), firstRow));
+                    // move all rows from 1 to 5 down by 1
+                    for (int i = 35; i >= 0; i--) {
+                        inventory.setItem(i + 9, inventory.getItem(i));
+                    }
+                    // set the first row to the new items
+                    for (int i = 0; i < 9; i++) {
+                        inventory.setItem(i, lessItems[i]);
+                    }
+
+                    // replace the less arrow with a more arrow
+                    final @NotNull ItemStack moreItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
+                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.more.glint")) {
+                        moreItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+                        moreItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+                    }
+                    final @NotNull ItemMeta moreMeta = moreItem.getItemMeta();
+                    moreMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.name"))).decoration(TextDecoration.ITALIC, false));
+                    moreMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.more.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+                    final @NotNull PersistentDataContainer moreContainer = moreMeta.getPersistentDataContainer();
+                    moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.get().id());
+                    moreItem.setItemMeta(moreMeta);
+                    inventory.setItem(inventory.getSize() - 2, moreItem);
+
                 }
             }
             case "pos-buyer" -> {
@@ -238,7 +313,7 @@ public class GUI implements Listener {
     }
 
     public final static @NotNull HashMap<@NotNull String, @NotNull NamespacedKey[]> keys = new HashMap<>() {{
-        put("pos-owner", new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI});
+        put("pos-owner", new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS});
         put("pos-buyer", new NamespacedKey[]{BankAccounts.Key.POS_BUYER_GUI_CONFIRM, BankAccounts.Key.POS_BUYER_GUI, BankAccounts.Key.POS_BUYER_GUI_CANCEL, BankAccounts.Key.POS_BUYER_GUI_MORE, BankAccounts.Key.POS_BUYER_GUI_LESS});
     }};
 
