@@ -70,7 +70,6 @@ public class GUI implements Listener {
                     event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
                     inventory.close();
                 } else if (event.getCurrentItem() != null && more.isPresent() && event.getCurrentItem().equals(more.get())) {
-                    event.getWhoClicked().sendMessage(Arrays.toString(items));
                     // shift the items 1 up and get more from the metadata
                     List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-more");
                     if (value.isEmpty()) return;
