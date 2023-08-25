@@ -310,7 +310,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             int limit = BankAccounts.getInstance().getConfig()
                     .getInt("account-limits." + Account.Type.getType(optionalType.get()));
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType.get().name), Placeholder.unparsed("limit", String.valueOf(BankAccounts
+                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType.get().getName()), Placeholder.unparsed("limit", String.valueOf(BankAccounts
                         .getInstance().getConfig()
                         .getInt("account-limits." + Account.Type.getType(optionalType.get())))));
         }

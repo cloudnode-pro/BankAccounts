@@ -198,7 +198,7 @@ public class Account {
         return MiniMessage.miniMessage().deserialize(string,
                 Placeholder.unparsed("account", this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name),
                 Placeholder.parsed("account-id", this.id),
-                Placeholder.parsed("account-type", this.type.name),
+                Placeholder.parsed("account-type", this.type.getName()),
                 Placeholder.parsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
                 Formatter.date("date", LocalDateTime.now(ZoneOffset.UTC))
         ).decoration(TextDecoration.ITALIC, false);
@@ -345,7 +345,7 @@ public class Account {
             String prefix = name.isEmpty() ? "" : name + "-";
             string = string.replace("<" + prefix + "account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
                     .replace("<" + prefix + "account-id>", account.id)
-                    .replace("<" + prefix + "account-type>", account.type.name)
+                    .replace("<" + prefix + "account-type>", account.type.getName())
                     .replace("<" + prefix + "account-owner>", account.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : account.owner.getName() == null ? "<i>unknown player</i>" : account.owner.getName())
                     .replace("<" + prefix + "balance>", account.balance == null ? "∞" : account.balance.toPlainString())
                     .replace("<" + prefix + "balance-formatted>", BankAccounts.formatCurrency(account.balance))
@@ -392,19 +392,17 @@ public class Account {
         /**
          * Personal, individual, private account
          */
-        PERSONAL("Personal"),
+        PERSONAL,
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS("Business");
+        BUSINESS;
 
         /**
-         * User-friendly name
+         * Get type name (as set in config)
          */
-        public final @NotNull String name;
-
-        Type(final @NotNull String name) {
-            this.name = name;
+        public @NotNull String getName() {
+            return Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.types." + getType(this)));
         }
 
         /**
@@ -426,9 +424,8 @@ public class Account {
         }
 
         public static @NotNull Optional<@NotNull Type> fromString(final @NotNull String name) {
-            for (final @NotNull Type type : Type.values()) {
-                if (type.name.equalsIgnoreCase(name)) return Optional.of(type);
-            }
+            for (final @NotNull Type type : Type.values())
+                if (type.name().equalsIgnoreCase(name)) return Optional.of(type);
             return Optional.empty();
         }
     }

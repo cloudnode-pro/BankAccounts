@@ -229,6 +229,13 @@ messages:
     # - <arguments> - The command usage arguments (e.g. "send <from> <to> <amount> [description]")
     command-usage: "<yellow>(!) Usage:</yellow> <white>/<command> <arguments></white>"
 
+    # Account types
+    types:
+        # Personal account
+        0: Personal
+        # Business account
+        1: Business
+
     # Errors
     errors:
         # You have no accounts
