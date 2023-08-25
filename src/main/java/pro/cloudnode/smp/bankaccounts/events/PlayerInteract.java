@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
+import pro.cloudnode.smp.bankaccounts.Package;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -52,6 +53,16 @@ public final class PlayerInteract implements Listener {
                     POS.openBuyGui(player, chest, pos.get(), account.get());
                 }
             }
+        } else if (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
+            // check if the player is holding a package
+            if (!Package.isPackage(player.getInventory().getItemInMainHand())) return;
+            Package pkg = Package.fromItem(player.getInventory().getItemInMainHand());
+            if (pkg == null) {
+                return;
+            };
+            event.setCancelled(true);
+
+            pkg.open(player, player.getInventory().getItemInMainHand());
         }
     }
 }

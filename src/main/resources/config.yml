@@ -282,6 +282,9 @@ messages:
         # Target player's inventory is full
         # Placeholder: <player> - the target player's name
         target-inventory-full: "<red>(!) The inventory of <gray><player></gray> is full.</red>"
+        your-inventory-full: "<red>(!) Your inventory is full.</red>"
+        not-package-owner: "<red>(!) You are not the owner of this package.</red>"
+        not-enough-space: "<red>(!) You do not have enough space in your inventory.</red>"
         block-too-far: "<red>(!) The targeted block is too far away.</red>"
         pos-already-exists: "<red>(!) A POS already exists at this location.</red>"
         pos-not-chest: "<red>(!) The targeted block is not a chest.</red>"
@@ -331,6 +334,9 @@ messages:
 
     # Account deleted (same placeholders as balance)
     account-deleted: "<green>(!) Successfully deleted account <white><account></white>"
+
+    # Package open
+    package-opened: "<green>(!) Successfully opened package.</green>"
 
     # Transfer confirmation
     # Placeholders are the same as balance. Add prefix `from-` for account sending and `to-` for account receiving
