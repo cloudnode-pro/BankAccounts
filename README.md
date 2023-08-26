@@ -1,4 +1,4 @@
-[![Banner](https://i.ibb.co/B338K1f/banner.png)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Banner](https://i.ibb.co/2yFTQ8X/banner-optimised.png)](https://modrinth.com/plugin/Dc8RS2En/)
 
 # Bank Accounts
 [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml)
