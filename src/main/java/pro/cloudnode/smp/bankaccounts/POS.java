@@ -298,10 +298,7 @@ public final class POS {
     public static void openOwnerGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos) {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         int extraRows = 1;
-        // check if the chest is totally full (#35)
-        if (items.length >= 54)
-            extraRows = -1;
-        final int size = extraRows * 9 + items.length + 9 - items.length % 9;
+        final int size = Math.min(extraRows * 9 + items.length + 9 - items.length % 9, 54);
         final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -310,11 +307,9 @@ public final class POS {
         ));
         gui.addItem(items);
 
-        // clear bottom row if the chest is full (#35)
-        if (extraRows == -1) {
-            for (int i = size - 9; i < size; i++) {
-                gui.clear(i);
-            }
+        // clear the bottom row to have space for the buttons
+        for (int i = size - 9; i < size; i++) {
+            gui.clear(i);
         }
 
         final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
@@ -342,7 +337,7 @@ public final class POS {
         gui.setItem(size - 1, GUI.getButton(GUI.Button.DELETE, pos, true));
 
         // pagination
-        if (extraRows == -1) {
+        if (items.length >= 54) {
             gui.setItem(size - 2, GUI.getButton(GUI.Button.MORE, pos, true));
 
             // @todo: there needs to be a better way of saving this
@@ -367,10 +362,7 @@ public final class POS {
     public static void openBuyGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos, final @NotNull Account account) {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         int extraRows = 1;
-        // check if the chest is totally full (#35)
-        if (items.length >= 54)
-            extraRows = -1;
-        final int size = extraRows * 9 + items.length + 9 - items.length % 9;
+        final int size = Math.min(extraRows * 9 + items.length + 9 - items.length % 9, 54);
         final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -378,11 +370,10 @@ public final class POS {
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
         gui.addItem(items);
-        // clear bottom row if the chest is full (#35)
-        if (extraRows == -1) {
-            for (int i = size - 9; i < size; i++) {
-                gui.clear(i);
-            }
+
+        // clear the bottom row to have space for the buttons
+        for (int i = size - 9; i < size; i++) {
+            gui.clear(i);
         }
 
 
@@ -414,7 +405,7 @@ public final class POS {
         gui.setItem(size - 3, GUI.getButton(GUI.Button.DECLINE, pos, account));
 
         // pagination
-        if (extraRows == -1) {
+        if (items.length >= 54) {
             gui.setItem(size - 1, GUI.getButton(GUI.Button.MORE, pos, account));
 
             // @todo: there needs to be a better way of saving this
