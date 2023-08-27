@@ -28,7 +28,6 @@ import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
 import pro.cloudnode.smp.bankaccounts.Transaction;
-import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -53,9 +52,9 @@ public class GUI implements Listener {
             case "pos-owner" -> {
                 event.setCancelled(true);
                 final @NotNull ItemStack[] items = getGuiItems(inventory);
-                final @NotNull ItemStack deleteItem = items[1];
-                final @NotNull Optional<ItemStack> more = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_OWNER_GUI_MORE)).findFirst();
-                final @NotNull Optional<ItemStack> less = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_OWNER_GUI_LESS)).findFirst();
+                final @NotNull ItemStack deleteItem = findItem(items, BankAccounts.Key.POS_OWNER_GUI).get();
+                final @NotNull Optional<ItemStack> more = findItem(items, BankAccounts.Key.POS_OWNER_GUI_MORE);
+                final @NotNull Optional<ItemStack> less = findItem(items, BankAccounts.Key.POS_OWNER_GUI_LESS);
                 final @NotNull PersistentDataContainer container = deleteItem.getItemMeta().getPersistentDataContainer();
                 NamespacedKey[] ownerKeys = new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS};
                 final @NotNull Optional<@NotNull String> id = Arrays.stream(ownerKeys).map(key -> container.get(key, PersistentDataType.STRING)).filter(Objects::nonNull).findFirst();
@@ -90,7 +89,7 @@ public class GUI implements Listener {
                     }
 
                     // replace the more arrow with a less arrow
-                    inventory.setItem(inventory.getSize() - 2, getButton(Button.LESS, pos.get(), pos.get().seller));
+                    inventory.setItem(inventory.getSize() - 2, getButton(Button.LESS, pos.get(), pos.get().seller, true));
                 } else if (event.getCurrentItem() != null && less.isPresent() && event.getCurrentItem().equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
                     List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-less");
@@ -112,18 +111,18 @@ public class GUI implements Listener {
                     }
 
                     // replace the less arrow with a more arrow
-                    inventory.setItem(inventory.getSize() - 2, getButton(Button.MORE, pos.get(), pos.get().seller));
+                    inventory.setItem(inventory.getSize() - 2, getButton(Button.MORE, pos.get(), pos.get().seller, true));
 
                 }
             }
             case "pos-buyer" -> {
                 event.setCancelled(true);
                 final @NotNull ItemStack[] items = getGuiItems(inventory);
-                final @NotNull ItemStack confirm = items[0];
-                final @NotNull ItemStack info = items[1];
-                final @NotNull ItemStack cancel = items[2];
-                final @NotNull Optional<ItemStack> more = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_BUYER_GUI_MORE)).findFirst();
-                final @NotNull Optional<ItemStack> less = Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.POS_BUYER_GUI_LESS)).findFirst();
+                final @NotNull ItemStack confirm = findItem(items, BankAccounts.Key.POS_BUYER_GUI_CONFIRM).get();
+                final @NotNull ItemStack info = findItem(items, BankAccounts.Key.POS_BUYER_GUI).get();
+                final @NotNull ItemStack cancel = findItem(items, BankAccounts.Key.POS_BUYER_GUI_CANCEL).get();
+                final @NotNull Optional<ItemStack> more = findItem(items, BankAccounts.Key.POS_BUYER_GUI_MORE);
+                final @NotNull Optional<ItemStack> less = findItem(items, BankAccounts.Key.POS_BUYER_GUI_LESS);
 
                 final @NotNull String[] checksums = info.getItemMeta().getPersistentDataContainer().get(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING).split(",");
 
@@ -265,9 +264,29 @@ public class GUI implements Listener {
     }
 
     public final static @NotNull HashMap<@NotNull String, @NotNull NamespacedKey[]> keys = new HashMap<>() {{
-        put("pos-owner", new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS});
-        put("pos-buyer", new NamespacedKey[]{BankAccounts.Key.POS_BUYER_GUI_CONFIRM, BankAccounts.Key.POS_BUYER_GUI, BankAccounts.Key.POS_BUYER_GUI_CANCEL, BankAccounts.Key.POS_BUYER_GUI_MORE, BankAccounts.Key.POS_BUYER_GUI_LESS});
+        put("pos-owner", new NamespacedKey[]{
+                BankAccounts.Key.POS_OWNER_GUI,
+                BankAccounts.Key.POS_OWNER_GUI_MORE,
+                BankAccounts.Key.POS_OWNER_GUI_LESS,
+        });
+        put("pos-buyer", new NamespacedKey[]{
+                BankAccounts.Key.POS_BUYER_GUI_CONFIRM,
+                BankAccounts.Key.POS_BUYER_GUI,
+                BankAccounts.Key.POS_BUYER_GUI_CANCEL,
+                BankAccounts.Key.POS_BUYER_GUI_MORE,
+                BankAccounts.Key.POS_BUYER_GUI_LESS
+        });
     }};
+
+    /**
+     * Finds an item with a given key in an array of items
+     * @param items The items to search
+     * @param key The key to search for
+     * @return The item with the key
+     */
+    public Optional<ItemStack> findItem(final @NotNull ItemStack[] items, final @NotNull NamespacedKey key) {
+        return Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(key)).findFirst();
+    }
 
     public final boolean isGuiItem(final @NotNull ItemStack item) {
         return item.hasItemMeta() && keys.entrySet().stream().anyMatch(entry -> Arrays.stream(entry.getValue()).anyMatch(key -> item.getItemMeta().getPersistentDataContainer().has(key)));
@@ -293,7 +312,7 @@ public class GUI implements Listener {
         return Arrays.stream(inventory.getContents()).filter(Objects::nonNull).filter(this::isGuiItem).map(item -> keys.entrySet().stream().filter(entry -> isGuiItem(item, entry.getValue())).findFirst().orElse(null)).filter(Objects::nonNull).map(HashMap.Entry::getKey).findFirst();
     }
 
-    public static enum Button {
+    public enum Button {
         CONFIRM,
         INFO,
         DECLINE,
@@ -311,7 +330,7 @@ public class GUI implements Listener {
      * @param isOwner Whether the player is the owner of the pos
      * @return The button
      */
-    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account, final @NotNull boolean isOwner) {
+    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account, final boolean isOwner) {
         final @NotNull ItemStack item = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos." + button.name().toLowerCase() + ".material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos." + button.name().toLowerCase() + ".glint")) {
             item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -319,12 +338,31 @@ public class GUI implements Listener {
         }
         final @NotNull ItemMeta meta = item.getItemMeta();
         meta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos." + button.name().toLowerCase() + ".name"))).decoration(TextDecoration.ITALIC, false));
-        meta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos." + button.name().toLowerCase() + ".lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line, Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)))).collect(Collectors.toList()));
+        if (account == null) {
+            meta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos." + button.name().toLowerCase() + ".lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line, Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                    Placeholder.unparsed("price", pos.price.toPlainString()),
+                    Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                    Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)))).collect(Collectors.toList()));
+        } else {
+            meta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos." + button.name().toLowerCase() + ".lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line, Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                    Placeholder.unparsed("price", pos.price.toPlainString()),
+                    Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                    Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)),
+                    Placeholder.unparsed("account", account.owner.getName()),
+                    Placeholder.unparsed("account-id", account.id),
+                    Placeholder.unparsed("account-type", account.type.name()),
+                    Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(account.balance)),
+                    Placeholder.unparsed("balance", String.valueOf(account.balance))
+            )).collect(Collectors.toList()));
+        }
         final @NotNull PersistentDataContainer container = meta.getPersistentDataContainer();
-        if (!isOwner) {
+        if (isOwner) {
+            switch (button) {
+                case MORE -> container.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.id());
+                case LESS -> container.set(BankAccounts.Key.POS_OWNER_GUI_LESS, PersistentDataType.STRING, pos.id());
+                case DELETE, CONFIRM -> container.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
+            }
+        } else {
             switch (button) {
                 case CONFIRM -> {
                     if (account != null) container.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
@@ -333,12 +371,6 @@ public class GUI implements Listener {
                 case DECLINE -> container.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
                 case MORE -> container.set(BankAccounts.Key.POS_BUYER_GUI_MORE, PersistentDataType.STRING, pos.id());
                 case LESS -> container.set(BankAccounts.Key.POS_BUYER_GUI_LESS, PersistentDataType.STRING, pos.id());
-            }
-        } else {
-            switch (button) {
-                case MORE -> container.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.id());
-                case LESS -> container.set(BankAccounts.Key.POS_OWNER_GUI_LESS, PersistentDataType.STRING, pos.id());
-                case DELETE -> container.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
             }
         }
 
