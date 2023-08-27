@@ -22,6 +22,7 @@ import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pro.cloudnode.smp.bankaccounts.events.GUI;
 
 import java.math.BigDecimal;
 import java.security.MessageDigest;
@@ -316,7 +317,6 @@ public final class POS {
             }
         }
 
-
         final @NotNull ItemStack overview = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
             overview.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -339,34 +339,11 @@ public final class POS {
         overview.setItemMeta(overviewMeta);
         gui.setItem(size - 5, overview);
 
-        final @NotNull ItemStack delete = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.delete.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.delete.glint")) {
-            delete.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            delete.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-        }
-
-        final @NotNull ItemMeta deleteMeta = delete.getItemMeta();
-        deleteMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.delete.name"))).decoration(TextDecoration.ITALIC, false));
-        deleteMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.delete.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-        final @NotNull PersistentDataContainer deleteContainer = deleteMeta.getPersistentDataContainer();
-        deleteContainer.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
-        delete.setItemMeta(deleteMeta);
-        gui.setItem(size - 1, delete);
+        gui.setItem(size - 1, GUI.getButton(GUI.Button.DELETE, pos, true));
 
         // pagination
         if (extraRows == -1) {
-            final @NotNull ItemStack more = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
-            if (BankAccounts.getInstance().getConfig().getBoolean("pos.more.glint")) {
-                more.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                more.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-            }
-            final @NotNull ItemMeta moreMeta = more.getItemMeta();
-            moreMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.name"))).decoration(TextDecoration.ITALIC, false));
-            moreMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.more.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-            final @NotNull PersistentDataContainer moreContainer = moreMeta.getPersistentDataContainer();
-            moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.id());
-            more.setItemMeta(moreMeta);
-            gui.setItem(size - 2, more);
+            gui.setItem(size - 2, GUI.getButton(GUI.Button.MORE, pos, true));
 
             // @todo: there needs to be a better way of saving this
             // save last 9 items in metadata
@@ -433,48 +410,8 @@ public final class POS {
         overview.setItemMeta(overviewMeta);
         gui.setItem(size - 5, overview);
 
-        final @NotNull ItemStack confirm = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.confirm.glint")) {
-            confirm.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            confirm.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-        }
-        final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.name")), account),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
-        confirmMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.confirm.lore")).stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
-        final @NotNull PersistentDataContainer confirmContainer = confirmMeta.getPersistentDataContainer();
-        confirmContainer.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
-        confirm.setItemMeta(confirmMeta);
-        gui.setItem(size - 7, confirm);
-
-        final @NotNull ItemStack cancel = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.decline.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.cancel.glint")) {
-            cancel.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-            cancel.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-        }
-        final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
-        cancelMeta.displayName(MiniMessage.miniMessage().deserialize("<red><bold>Cancel Purchase</bold></red>").decoration(TextDecoration.ITALIC, false));
-        cancelMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.decline.lore")).stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
-        final @NotNull PersistentDataContainer cancelContainer = cancelMeta.getPersistentDataContainer();
-        cancelContainer.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
-        cancel.setItemMeta(cancelMeta);
-        gui.setItem(size - 3, cancel);
+        gui.setItem(size - 7, GUI.getButton(GUI.Button.CONFIRM, pos));
+        gui.setItem(size - 3, GUI.getButton(GUI.Button.DECLINE, pos));
 
         // pagination
         if (extraRows == -1) {

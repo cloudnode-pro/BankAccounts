@@ -90,20 +90,7 @@ public class GUI implements Listener {
                     }
 
                     // replace the more arrow with a less arrow
-                    final @NotNull ItemStack lessItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
-
-                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.less.glint")) {
-                        lessItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        lessItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-                    }
-
-                    final @NotNull ItemMeta lessMeta = lessItem.getItemMeta();
-                    lessMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.less.name"))).decoration(TextDecoration.ITALIC, false));
-                    lessMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.less.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-                    final @NotNull PersistentDataContainer moreContainer = lessMeta.getPersistentDataContainer();
-                    moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_LESS, PersistentDataType.STRING, pos.get().id());
-                    lessItem.setItemMeta(lessMeta);
-                    inventory.setItem(inventory.getSize() - 2, lessItem);
+                    inventory.setItem(inventory.getSize() - 2, getButton(Button.LESS, pos.get(), pos.get().seller));
                 } else if (event.getCurrentItem() != null && less.isPresent() && event.getCurrentItem().equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
                     List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-less");
@@ -125,18 +112,7 @@ public class GUI implements Listener {
                     }
 
                     // replace the less arrow with a more arrow
-                    final @NotNull ItemStack moreItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
-                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.more.glint")) {
-                        moreItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        moreItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-                    }
-                    final @NotNull ItemMeta moreMeta = moreItem.getItemMeta();
-                    moreMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.name"))).decoration(TextDecoration.ITALIC, false));
-                    moreMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.more.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-                    final @NotNull PersistentDataContainer moreContainer = moreMeta.getPersistentDataContainer();
-                    moreContainer.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.get().id());
-                    moreItem.setItemMeta(moreMeta);
-                    inventory.setItem(inventory.getSize() - 2, moreItem);
+                    inventory.setItem(inventory.getSize() - 2, getButton(Button.MORE, pos.get(), pos.get().seller));
 
                 }
             }
@@ -254,18 +230,7 @@ public class GUI implements Listener {
                     }
 
                     // replace the more arrow with a less arrow
-                    final @NotNull ItemStack lessItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
-                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.less.glint")) {
-                        lessItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        lessItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-                    }
-                    final @NotNull ItemMeta lessMeta = lessItem.getItemMeta();
-                    lessMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.less.name"))).decoration(TextDecoration.ITALIC, false));
-                    lessMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.less.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-                    final @NotNull PersistentDataContainer moreContainer = lessMeta.getPersistentDataContainer();
-                    moreContainer.set(BankAccounts.Key.POS_BUYER_GUI_LESS, PersistentDataType.STRING, pos.get().id());
-                    lessItem.setItemMeta(lessMeta);
-                    inventory.setItem(inventory.getSize() - 1, lessItem);
+                    inventory.setItem(inventory.getSize() - 1, getButton(Button.LESS, pos.get(), buyer.get()));
 
                 } else if (less.isPresent() && item.equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
@@ -287,19 +252,7 @@ public class GUI implements Listener {
                         inventory.setItem(i, lessItems[i]);
                     }
 
-                    // replace the less arrow with a more arrow
-                    final @NotNull ItemStack moreItem = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.material")))), 1);
-                    if (BankAccounts.getInstance().getConfig().getBoolean("pos.more.glint")) {
-                        moreItem.addItemFlags(ItemFlag.HIDE_ENCHANTS);
-                        moreItem.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
-                    }
-                    final @NotNull ItemMeta moreMeta = moreItem.getItemMeta();
-                    moreMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.more.name"))).decoration(TextDecoration.ITALIC, false));
-                    moreMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.more.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
-                    final @NotNull PersistentDataContainer moreContainer = moreMeta.getPersistentDataContainer();
-                    moreContainer.set(BankAccounts.Key.POS_BUYER_GUI_MORE, PersistentDataType.STRING, pos.get().id());
-                    moreItem.setItemMeta(moreMeta);
-                    inventory.setItem(inventory.getSize() - 1, moreItem);
+                    inventory.setItem(inventory.getSize() - 1, getButton(Button.MORE, pos.get(), buyer.get()));
                 }
             }
         }
@@ -338,5 +291,90 @@ public class GUI implements Listener {
 
     public final @NotNull Optional<@NotNull String> getGui(final @NotNull Inventory inventory) {
         return Arrays.stream(inventory.getContents()).filter(Objects::nonNull).filter(this::isGuiItem).map(item -> keys.entrySet().stream().filter(entry -> isGuiItem(item, entry.getValue())).findFirst().orElse(null)).filter(Objects::nonNull).map(HashMap.Entry::getKey).findFirst();
+    }
+
+    public static enum Button {
+        CONFIRM,
+        INFO,
+        DECLINE,
+        MORE,
+        LESS,
+        OVERVIEW,
+        DELETE
+    }
+
+    /**
+     * Get a button for the GUI
+     * @param button The button to get
+     * @param pos The pos
+     * @param account The account
+     * @param isOwner Whether the player is the owner of the pos
+     * @return The button
+     */
+    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account, final @NotNull boolean isOwner) {
+        final @NotNull ItemStack item = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos." + button.name().toLowerCase() + ".material")))), 1);
+        if (BankAccounts.getInstance().getConfig().getBoolean("pos." + button.name().toLowerCase() + ".glint")) {
+            item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
+            item.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
+        }
+        final @NotNull ItemMeta meta = item.getItemMeta();
+        meta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos." + button.name().toLowerCase() + ".name"))).decoration(TextDecoration.ITALIC, false));
+        meta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos." + button.name().toLowerCase() + ".lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line, Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)))).collect(Collectors.toList()));
+        final @NotNull PersistentDataContainer container = meta.getPersistentDataContainer();
+        if (!isOwner) {
+            switch (button) {
+                case CONFIRM -> {
+                    if (account != null) container.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
+                }
+//            case INFO -> @TODO: implement INFO checksums
+                case DECLINE -> container.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
+                case MORE -> container.set(BankAccounts.Key.POS_BUYER_GUI_MORE, PersistentDataType.STRING, pos.id());
+                case LESS -> container.set(BankAccounts.Key.POS_BUYER_GUI_LESS, PersistentDataType.STRING, pos.id());
+            }
+        } else {
+            switch (button) {
+                case MORE -> container.set(BankAccounts.Key.POS_OWNER_GUI_MORE, PersistentDataType.STRING, pos.id());
+                case LESS -> container.set(BankAccounts.Key.POS_OWNER_GUI_LESS, PersistentDataType.STRING, pos.id());
+                case DELETE -> container.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
+            }
+        }
+
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    /**
+     * Get a button for the GUI
+     * @param button The button to get
+     * @param pos The pos
+     * @param isOwner Whether the player is the owner of the pos
+     * @return The button
+     */
+    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, boolean isOwner) {
+        return getButton(button, pos, null, isOwner);
+    }
+
+    /**
+     * Get a button for the buyer GUI
+     * @param button The button to get
+     * @param pos The pos
+     * @return The button
+     */
+    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos) {
+        return getButton(button, pos, false);
+    }
+
+    /**
+     * Get a button for the GUI
+     * @param button The button to get
+     * @param pos The pos
+     * @param account The account
+     * @return The button
+     */
+    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account) {
+        return getButton(button, pos, account, false);
     }
 }
