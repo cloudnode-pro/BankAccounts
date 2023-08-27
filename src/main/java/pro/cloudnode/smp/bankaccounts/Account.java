@@ -238,7 +238,7 @@ public class Account {
      * @param owner Account owner
      * @param type Account type
      */
-    public static @NotNull Account[] get(final @NotNull OfflinePlayer owner, final @Nullable Type type) {
+    public static @NotNull Account @NotNull [] get(final @NotNull OfflinePlayer owner, final @Nullable Type type) {
         final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement(type == null ? "SELECT * FROM `bank_accounts` WHERE `owner` = ?" : "SELECT * FROM `bank_accounts` WHERE `owner` = ? AND `type` = ?")) {
@@ -259,14 +259,24 @@ public class Account {
      * Get accounts by owner
      * @param owner Account owner
      */
-    public static @NotNull Account[] get(final @NotNull OfflinePlayer owner) {
+    public static @NotNull Account @NotNull [] get(final @NotNull OfflinePlayer owner) {
         return get(owner, null);
+    }
+
+    /**
+     * Get owner's Vault account
+     *
+     * @param owner Account owner
+     */
+    public static @NotNull Optional<@NotNull Account> getVault(final @NotNull OfflinePlayer owner) {
+        final @NotNull Account @NotNull [] accounts = get(owner, Type.VAULT);
+        return accounts.length > 0 ? Optional.of(accounts[0]) : Optional.empty();
     }
 
     /**
      * Get all accounts
      */
-    public static @NotNull Account[] get() {
+    public static @NotNull Account @NotNull [] get() {
         final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts`")) {
@@ -278,6 +288,61 @@ public class Account {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts", e);
             return new Account[0];
         }
+    }
+
+    /**
+     * Get server account
+     */
+    public static Optional<Account> getServerAccount() {
+        final @NotNull Account @NotNull [] accounts = get(BankAccounts.getConsoleOfflinePlayer());
+        return accounts.length > 0 ? Optional.of(accounts[0]) : Optional.empty();
+    }
+
+    /**
+     * Count accounts
+     *
+     * @param owner Account owner
+     * @param type Account type
+     */
+    private static int _count(final @Nullable OfflinePlayer owner, final @Nullable Type type) {
+        final @NotNull String query = owner == null ? (type == null ? "SELECT COUNT(*) FROM `bank_accounts`" : "SELECT COUNT(*) FROM `bank_accounts` WHERE `type` = ?") : (type == null ? "SELECT COUNT(*) FROM `bank_accounts` WHERE `owner` = ?" : "SELECT COUNT(*) FROM `bank_accounts` WHERE `owner` = ? AND `type` = ?");
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement(query)) {
+            if (owner != null) stmt.setString(1, owner.getUniqueId().toString());
+            if (type != null) stmt.setInt(owner == null ? 1 : 2, Type.getType(type));
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            return rs.next() ? rs.getInt(1) : 0;
+        }
+        catch (final @NotNull Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not count accounts owner=" + (owner == null ? "all" : owner.getUniqueId() + "(" + owner.getName() + ")") + ", type=" + (type == null ? "all" : type.name()), e);
+            return 0;
+        }
+    }
+
+    /**
+     * Count accounts
+     */
+    public static int count() {
+        return _count(null, null);
+    }
+
+    /**
+     * Count accounts by owner
+     *
+     * @param owner Account owner
+     * @param type Account type
+     */
+    public static int count(final @NotNull OfflinePlayer owner, final @Nullable Type type) {
+        return _count(owner, type);
+    }
+
+    /**
+     * Count accounts by owner
+     *
+     * @param owner Account owner
+     */
+    public static int count(final @NotNull OfflinePlayer owner) {
+        return _count(owner, null);
     }
 
     /**
@@ -396,7 +461,11 @@ public class Account {
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS;
+        BUSINESS,
+        /**
+         * A Vault API account (per-player vault integration account)
+         */
+        VAULT;
 
         /**
          * Get type name (as set in config)

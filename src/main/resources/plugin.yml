@@ -3,6 +3,8 @@ version: '${project.version}'
 main: pro.cloudnode.smp.bankaccounts.BankAccounts
 api-version: "1.20"
 author: Cloudnode
+softdepend:
+    - Vault
 commands:
     bank:
         description: Bank Accounts

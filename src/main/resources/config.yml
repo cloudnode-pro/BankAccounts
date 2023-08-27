@@ -44,28 +44,18 @@ currency:
     format: "#,##0.00"
 
 # Starting balance
-# Set to `null` to disable automatically creating a personal account on first join
+# The amount of money players receive when they first join the server
+# The money is given to the player from the server account (see next section).
+# The server account's balance can become negative from paying starting balances.
 starting-balance: 0
-
-# If set to true, players will not be able to close their LAST personal account.
-# This is recommended if you are using `starting-balance` as an account will be re-created when the player joins again.
-# If you want to prevent a player from using their personal account, you can freeze it.
-# You can BYPASS this setting using `bank.delete.personal`
-prevent-close-last-personal: true
 
 # Server account
 server-account:
-    # If enabled, when the plugin is loaded an account will be created as player with UUID 00000000-0000-0000-0000-000000000000
-    enabled: true
     # Display name for the server account
     name: Central Bank
-    # Account type
-    # Possible values:
-    #   0: Personal account
-    #   1: Business account
-    type: 1
-    # Starting balance
+    # Initial balance of the server (when the plugin is first installed)
     # Use `Infinity` for infinite ∞ balance
+    # If not infinite and player starting balance >0, the server account's balance can become negative
     starting-balance: Infinity
 
 # Maximum number of accounts a player can have
@@ -79,6 +69,7 @@ server-account:
 # Players can open accounts themselves if they have `bank.account.create`. These limits also apply if someone else
 # creates bank accounts for other players with the admin permission `bank.account.create.other`. You can bypass the
 # limits using `bank.account.create.bypass`.
+# Checking accounts (3) are always limited to 1.
 account-limits:
     # Personal accounts
     0: 1
@@ -235,6 +226,9 @@ messages:
         0: Personal
         # Business account
         1: Business
+        # Vault integration account (https://github.com/milkbowl/Vault)
+        # This account type allows integration with other plugins that use Vault.
+        2: Checking Account
 
     # Errors
     errors:

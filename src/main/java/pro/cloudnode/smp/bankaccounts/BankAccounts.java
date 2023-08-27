@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
@@ -13,6 +14,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,6 +51,22 @@ public final class BankAccounts extends JavaPlugin {
 
     public @NotNull HikariDataSource getDb() {
         return dbSource;
+    }
+
+    private Economy economy;
+    public boolean hasEconomy() {
+        return economy != null;
+    }
+    public @NotNull Economy getEconomy() {
+        if (!hasEconomy()) throw new IllegalStateException("Vault is not initialized");
+        return economy;
+    }
+
+    /**
+     * Check if vault plugin is present
+     */
+    public boolean hasVault() {
+        return getServer().getPluginManager().getPlugin("Vault") != null;
     }
 
     @Override
@@ -132,6 +150,17 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Setup Vault
+     */
+    private boolean setupVault() {
+        if (!hasVault()) return false;
+        final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
+        if (rsp.isEmpty()) return false;
+        economy = rsp.get().getProvider();
+        return true;
+    }
+
+    /**
      * Reload plugin
      */
     public static void reload() {
@@ -139,6 +168,7 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
+        getInstance().setupVault();
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
             checkForUpdates().ifPresent(latestVersion -> {
                 getInstance().getLogger().warning("An update is available: " + latestVersion);
@@ -264,8 +294,8 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().getConfig().getBoolean("server-account.enabled")) {
-            final @NotNull Account[] accounts = Account.get(getConsoleOfflinePlayer());
-            if (accounts.length > 0) return;
+            final @NotNull Optional<@NotNull Account> account = Account.getServerAccount();
+            if (account.isPresent()) return;
             final @Nullable String name = getInstance().getConfig().getString("server-account.name");
             final @NotNull Account.Type type = Account.Type.getType(getInstance().getConfig().getInt("server-account.type"));
             final @Nullable BigDecimal balance = Objects.requireNonNull(getInstance().getConfig().getString("server-account.starting-balance")).equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
