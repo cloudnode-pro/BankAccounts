@@ -305,11 +305,9 @@ public final class POS {
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
-        gui.addItem(items);
 
-        // clear the bottom row to have space for the buttons
-        for (int i = size - 9; i < size; i++) {
-            gui.clear(i);
+        for (int i = 0; i < items.length - 9; i++) {
+            gui.setItem(i, items[i]);
         }
 
         final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
@@ -369,13 +367,10 @@ public final class POS {
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
-        gui.addItem(items);
 
-        // clear the bottom row to have space for the buttons
-        for (int i = size - 9; i < size; i++) {
-            gui.clear(i);
+        for (int i = 0; i < items.length - 9; i++) {
+            gui.setItem(i, items[i]);
         }
-
 
         final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
@@ -399,8 +394,8 @@ public final class POS {
         final @NotNull PersistentDataContainer overviewContainer = infoMeta.getPersistentDataContainer();
         overviewContainer.set(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING, String.join(",", POS.checksum(items)));
         info.setItemMeta(infoMeta);
-        gui.setItem(size - 5, info);
 
+        gui.setItem(size - 5, info);
         gui.setItem(size - 7, GUI.getButton(GUI.Button.CONFIRM, pos, account));
         gui.setItem(size - 3, GUI.getButton(GUI.Button.DECLINE, pos, account));
 
