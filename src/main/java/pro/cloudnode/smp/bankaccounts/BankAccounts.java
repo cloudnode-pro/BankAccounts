@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
@@ -22,6 +23,7 @@ import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
+import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -79,6 +81,13 @@ public final class BankAccounts extends JavaPlugin {
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
+
+        // Setup PlaceholderAPI Integration
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PAPIIntegration().register();
+        } else {
+            getLogger().log(Level.WARNING, "PlaceholderAPI not found. Placeholders will not work.");
+        }
     }
 
     @Override
