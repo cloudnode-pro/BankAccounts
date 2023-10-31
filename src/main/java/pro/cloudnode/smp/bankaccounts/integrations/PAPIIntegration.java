@@ -19,7 +19,7 @@ public final class PAPIIntegration extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getVersion() {
-        return BankAccounts.getInstance().getDescription().getVersion();
+        return BankAccounts.getInstance().getPluginMeta().getVersion();
     }
 
     @Override
