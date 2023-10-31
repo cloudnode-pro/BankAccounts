@@ -306,8 +306,20 @@ public final class POS {
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
 
-        for (int i = 0; i < items.length - 9; i++) {
-            gui.setItem(i, items[i]);
+        // pagination
+        if (items.length >= 54) {
+            for (int i = 0; i < items.length - 9; i++) {
+                gui.setItem(i, items[i]);
+            }
+            gui.setItem(size - 2, GUI.getButton(GUI.Button.MORE, pos, true));
+
+            // @todo: there needs to be a better way of saving this
+            // save last 9 items in metadata
+            player.setMetadata("pos-owner-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), Arrays.copyOfRange(items, items.length - 9, items.length)));
+        } else {
+            for (int i = 0; i < items.length ; i++) {
+                gui.setItem(i, items[i]);
+            }
         }
 
         final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
@@ -334,15 +346,6 @@ public final class POS {
 
         gui.setItem(size - 1, GUI.getButton(GUI.Button.DELETE, pos, true));
 
-        // pagination
-        if (items.length >= 54) {
-            gui.setItem(size - 2, GUI.getButton(GUI.Button.MORE, pos, true));
-
-            // @todo: there needs to be a better way of saving this
-            // save last 9 items in metadata
-            player.setMetadata("pos-owner-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), Arrays.copyOfRange(items, items.length - 9, items.length)));
-        }
-
         player.openInventory(gui);
     }
 
@@ -368,8 +371,20 @@ public final class POS {
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ));
 
-        for (int i = 0; i < items.length - 9; i++) {
-            gui.setItem(i, items[i]);
+        // pagination
+        if (items.length >= 54) {
+            for (int i = 0; i < items.length - 9; i++) {
+                gui.setItem(i, items[i]);
+            }
+            gui.setItem(size - 1, GUI.getButton(GUI.Button.MORE, pos, account));
+
+            // @todo: there needs to be a better way of saving this
+            // save last 9 items in metadata
+            player.setMetadata("pos-buyer-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), Arrays.copyOfRange(items, items.length - 9, items.length)));
+        } else {
+            for (int i = 0; i < items.length ; i++) {
+                gui.setItem(i, items[i]);
+            }
         }
 
         final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
@@ -398,15 +413,6 @@ public final class POS {
         gui.setItem(size - 5, info);
         gui.setItem(size - 7, GUI.getButton(GUI.Button.CONFIRM, pos, account));
         gui.setItem(size - 3, GUI.getButton(GUI.Button.DECLINE, pos, account));
-
-        // pagination
-        if (items.length >= 54) {
-            gui.setItem(size - 1, GUI.getButton(GUI.Button.MORE, pos, account));
-
-            // @todo: there needs to be a better way of saving this
-            // save last 9 items in metadata
-            player.setMetadata("pos-buyer-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), Arrays.copyOfRange(items, items.length - 9, items.length)));
-        }
 
         player.openInventory(gui);
     }
