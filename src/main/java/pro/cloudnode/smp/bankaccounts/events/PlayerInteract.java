@@ -44,6 +44,9 @@ public final class PlayerInteract implements Listener {
             } else if (block.get().getState() instanceof final @NotNull Chest chest && !chest.getInventory().isEmpty()) {
                 // handle single chests
                 pos = POS.get(block.get());
+            } else {
+                // return if the block is not a chest
+                return;
             }
 
             if (pos.isEmpty()) return;
