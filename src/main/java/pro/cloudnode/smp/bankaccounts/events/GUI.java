@@ -92,13 +92,13 @@ public class GUI implements Listener {
                     inventory.setItem(inventory.getSize() - 2, getButton(Button.LESS, pos.get(), pos.get().seller, true));
                 } else if (event.getCurrentItem() != null && less.isPresent() && event.getCurrentItem().equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
-                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-less");
+                    final @NotNull List<@NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-less");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
-                    ItemStack[] lessItems = (ItemStack[]) value.get(0).value();
+                    final @NotNull ItemStack @NotNull [] lessItems = (ItemStack[]) value.get(0).value();
                     assert lessItems != null;
                     // save the first row
-                    ItemStack[] firstRow = Arrays.copyOfRange(inventory.getContents(), 36, 45);
+                    final @NotNull ItemStack @NotNull [] firstRow = Arrays.copyOfRange(inventory.getContents(), 36, 45);
                     event.getWhoClicked().removeMetadata("pos-owner-gui-less", BankAccounts.getInstance());
                     event.getWhoClicked().setMetadata("pos-owner-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), firstRow));
                     // move all rows from 1 to 5 down by 1
@@ -121,8 +121,8 @@ public class GUI implements Listener {
                 final @NotNull ItemStack confirm = findItem(items, BankAccounts.Key.POS_BUYER_GUI_CONFIRM).get();
                 final @NotNull ItemStack info = findItem(items, BankAccounts.Key.POS_BUYER_GUI).get();
                 final @NotNull ItemStack cancel = findItem(items, BankAccounts.Key.POS_BUYER_GUI_CANCEL).get();
-                final @NotNull Optional<ItemStack> more = findItem(items, BankAccounts.Key.POS_BUYER_GUI_MORE);
-                final @NotNull Optional<ItemStack> less = findItem(items, BankAccounts.Key.POS_BUYER_GUI_LESS);
+                final @NotNull Optional<@NotNull ItemStack> more = findItem(items, BankAccounts.Key.POS_BUYER_GUI_MORE);
+                final @NotNull Optional<@NotNull ItemStack> less = findItem(items, BankAccounts.Key.POS_BUYER_GUI_LESS);
 
                 final @NotNull String[] checksums = info.getItemMeta().getPersistentDataContainer().get(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING).split(",");
 
@@ -210,13 +210,13 @@ public class GUI implements Listener {
                     inventory.close();
                 } else if (more.isPresent() && item.equals(more.get())) {
                     // shift the items 1 up and get more from the metadata
-                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-more");
+                    final @NotNull List<@NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-more");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
-                    ItemStack[] moreItems = (ItemStack[]) value.get(0).value();
+                    final @NotNull ItemStack @NotNull [] moreItems = (ItemStack[]) value.get(0).value();
                     assert moreItems != null;
                     // save the first row
-                    ItemStack[] firstRow = Arrays.copyOfRange(inventory.getContents(), 0, 9);
+                    final @NotNull ItemStack @NotNull [] firstRow = Arrays.copyOfRange(inventory.getContents(), 0, 9);
                     event.getWhoClicked().removeMetadata("pos-buyer-gui-more", BankAccounts.getInstance());
                     event.getWhoClicked().setMetadata("pos-buyer-gui-less", new FixedMetadataValue(BankAccounts.getInstance(), firstRow));
                     // move all rows from 1 to 5 up by 1
@@ -233,13 +233,13 @@ public class GUI implements Listener {
 
                 } else if (less.isPresent() && item.equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
-                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-less");
+                    final @NotNull List<final @NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-less");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
-                    ItemStack[] lessItems = (ItemStack[]) value.get(0).value();
+                    final @NotNull ItemStack @NotNull [] lessItems = (ItemStack[]) value.get(0).value();
                     assert lessItems != null;
                     // save the last row
-                    ItemStack[] lastRow = Arrays.copyOfRange(inventory.getContents(), 36, 45);
+                    final @NotNull ItemStack @NotNull [] lastRow = Arrays.copyOfRange(inventory.getContents(), 36, 45);
                     event.getWhoClicked().removeMetadata("pos-buyer-gui-less", BankAccounts.getInstance());
                     event.getWhoClicked().setMetadata("pos-buyer-gui-more", new FixedMetadataValue(BankAccounts.getInstance(), lastRow));
                     // move all rows from 1 to 5 down by 1
@@ -284,7 +284,7 @@ public class GUI implements Listener {
      * @param key The key to search for
      * @return The item with the key
      */
-    public Optional<ItemStack> findItem(final @NotNull ItemStack[] items, final @NotNull NamespacedKey key) {
+    public @NotNull Optional<@NotNull ItemStack> findItem(final @NotNull ItemStack @NotNull [] items, final @NotNull NamespacedKey key) {
         return Arrays.stream(items).filter(item -> item.getItemMeta().getPersistentDataContainer().has(key)).findFirst();
     }
 
@@ -330,7 +330,7 @@ public class GUI implements Listener {
      * @param isOwner Whether the player is the owner of the pos
      * @return The button
      */
-    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account, final boolean isOwner) {
+    public static @NotNull ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final @NotNull Account account, final boolean isOwner) {
         final @NotNull ItemStack item = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos." + button.name().toLowerCase() + ".material")))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos." + button.name().toLowerCase() + ".glint")) {
             item.addItemFlags(ItemFlag.HIDE_ENCHANTS);
@@ -385,7 +385,7 @@ public class GUI implements Listener {
      * @param isOwner Whether the player is the owner of the pos
      * @return The button
      */
-    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, boolean isOwner) {
+    public static @NotNull ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, boolean isOwner) {
         return getButton(button, pos, null, isOwner);
     }
 

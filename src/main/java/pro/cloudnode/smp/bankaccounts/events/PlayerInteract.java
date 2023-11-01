@@ -67,7 +67,7 @@ public final class PlayerInteract implements Listener {
                 player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-card"))));
                 return;
             }
-            final @NotNull Optional<Account> account = Account.get(heldItem);
+            final @NotNull Optional<@NotNull Account> account = Account.get(heldItem);
             if (account.isEmpty())
                 player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-invalid-card"))));
             else {
