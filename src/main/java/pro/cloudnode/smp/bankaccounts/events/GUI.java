@@ -73,10 +73,10 @@ public class GUI implements Listener {
                     final @NotNull List<@NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-more");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
-                    ItemStack[] moreItems = (ItemStack[]) value.get(0).value();
+                    final @NotNull ItemStack @NotNull [] moreItems = (ItemStack[]) value.get(0).value();
                     assert moreItems != null;
                     // save the last row
-                    ItemStack[] lastRow = Arrays.copyOfRange(inventory.getContents(), 0, 9);
+                    final @NotNull ItemStack @NotNull [] lastRow = Arrays.copyOfRange(inventory.getContents(), 0, 9);
                     event.getWhoClicked().removeMetadata("pos-owner-gui-more", BankAccounts.getInstance());
                     event.getWhoClicked().setMetadata("pos-owner-gui-less", new FixedMetadataValue(BankAccounts.getInstance(), lastRow));
                     // move all rows from 1 to 5 up by 1
