@@ -33,7 +33,7 @@ public final class PAPIIntegration extends PlaceholderExpansion {
      *  </ul>
     */
     @Override
-    public String onRequest(OfflinePlayer player, String params) {
+    public @NotNull String onRequest(final @NotNull OfflinePlayer player, final @NotNull String params) {
         final @NotNull String[] args = params.split("_");
 
         return switch (args[0]) {
