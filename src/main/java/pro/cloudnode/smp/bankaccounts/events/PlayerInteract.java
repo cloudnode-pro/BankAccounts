@@ -27,7 +27,7 @@ public final class PlayerInteract implements Listener {
         final @NotNull Player player = event.getPlayer();
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             final @NotNull Optional<Block> block = Optional.ofNullable(event.getClickedBlock());
-            Optional<POS> pos = Optional.empty();
+            @NotNull Optional<@NotNull POS> pos = Optional.empty();
 
             if (block.isEmpty()) return;
 
