@@ -297,7 +297,7 @@ public final class POS {
      */
     public static void openOwnerGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos) {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
-        int extraRows = 1;
+        final int extraRows = 1;
         final int size = Math.min(extraRows * 9 + items.length + 9 - items.length % 9, 54);
         final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
