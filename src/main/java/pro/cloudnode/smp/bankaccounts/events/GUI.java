@@ -58,7 +58,7 @@ public class GUI implements Listener {
                 final @NotNull PersistentDataContainer container = deleteItem.getItemMeta().getPersistentDataContainer();
                 final @NotNull NamespacedKey @NotNull [] ownerKeys = new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS};
                 final @NotNull Optional<@NotNull String> id = Arrays.stream(ownerKeys).map(key -> container.get(key, PersistentDataType.STRING)).filter(Objects::nonNull).findFirst();
-                final @NotNull Optional<@NotNUll POS> pos = id.flatMap(POS::get);
+                final @NotNull Optional<@NotNull POS> pos = id.flatMap(POS::get);
 
                 if (pos.isEmpty()) {
                     inventory.close();
@@ -233,7 +233,7 @@ public class GUI implements Listener {
 
                 } else if (less.isPresent() && item.equals(less.get())) {
                     // shift the items 1 down and get more from the metadata
-                    final @NotNull List<final @NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-less");
+                    final @NotNull List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-buyer-gui-less");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
                     final @NotNull ItemStack @NotNull [] lessItems = (ItemStack[]) value.get(0).value();
