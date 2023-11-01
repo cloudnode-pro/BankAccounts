@@ -395,7 +395,7 @@ public class GUI implements Listener {
      * @param pos The pos
      * @return The button
      */
-    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos) {
+    public static @NotNull ItemStack getButton(final @NotNull Button button, final @NotNull POS pos) {
         return getButton(button, pos, false);
     }
 
