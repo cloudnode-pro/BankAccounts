@@ -70,7 +70,7 @@ public class GUI implements Listener {
                     inventory.close();
                 } else if (event.getCurrentItem() != null && more.isPresent() && event.getCurrentItem().equals(more.get())) {
                     // shift the items 1 up and get more from the metadata
-                    List<MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-more");
+                    final @NotNull List<@NotNull MetadataValue> value = event.getWhoClicked().getMetadata("pos-owner-gui-more");
                     if (value.isEmpty()) return;
                     if (value.get(0).value() == null) return;
                     ItemStack[] moreItems = (ItemStack[]) value.get(0).value();
