@@ -406,7 +406,7 @@ public class GUI implements Listener {
      * @param account The account
      * @return The button
      */
-    public static ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account) {
+    public static @NotNull ItemStack getButton(final @NotNull Button button, final @NotNull POS pos, final Account account) {
         return getButton(button, pos, account, false);
     }
 }
