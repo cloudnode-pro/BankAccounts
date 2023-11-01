@@ -51,14 +51,14 @@ public class GUI implements Listener {
         switch (getGui(inventory).orElse(".null")) {
             case "pos-owner" -> {
                 event.setCancelled(true);
-                final @NotNull ItemStack[] items = getGuiItems(inventory);
+                final @NotNull ItemStack @NotNull [] items = getGuiItems(inventory);
                 final @NotNull ItemStack deleteItem = findItem(items, BankAccounts.Key.POS_OWNER_GUI).get();
-                final @NotNull Optional<ItemStack> more = findItem(items, BankAccounts.Key.POS_OWNER_GUI_MORE);
-                final @NotNull Optional<ItemStack> less = findItem(items, BankAccounts.Key.POS_OWNER_GUI_LESS);
+                final @NotNull Optional<@NotNull ItemStack> more = findItem(items, BankAccounts.Key.POS_OWNER_GUI_MORE);
+                final @NotNull Optional<@NotNull ItemStack> less = findItem(items, BankAccounts.Key.POS_OWNER_GUI_LESS);
                 final @NotNull PersistentDataContainer container = deleteItem.getItemMeta().getPersistentDataContainer();
-                NamespacedKey[] ownerKeys = new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS};
+                final @NotNull NamespacedKey @NotNull [] ownerKeys = new NamespacedKey[]{BankAccounts.Key.POS_OWNER_GUI, BankAccounts.Key.POS_OWNER_GUI_MORE, BankAccounts.Key.POS_OWNER_GUI_LESS};
                 final @NotNull Optional<@NotNull String> id = Arrays.stream(ownerKeys).map(key -> container.get(key, PersistentDataType.STRING)).filter(Objects::nonNull).findFirst();
-                final @NotNull Optional<POS> pos = id.flatMap(POS::get);
+                final @NotNull Optional<@NotNUll POS> pos = id.flatMap(POS::get);
 
                 if (pos.isEmpty()) {
                     inventory.close();
