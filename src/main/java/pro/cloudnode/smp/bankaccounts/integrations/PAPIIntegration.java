@@ -22,13 +22,29 @@ public final class PAPIIntegration extends PlaceholderExpansion {
         return BankAccounts.getInstance().getPluginMeta().getVersion();
     }
 
+    /**
+     *  Adds the following placeholders:
+     *  <ul>
+     *      <li>%bankaccounts_balance_&lt;accountID&gt;% - returns balance of account with specified ID</li>
+     *      <li>%bankaccounts_balance_formatted_&lt;accountID&gt;% - returns formatted balance of account with specified ID</li>
+     *      <li>%bankaccounts_owner_&lt;accountID&gt;% - returns name of the owner of account with specified ID</li>
+     *      <li>%bankaccounts_type_&lt;accountID&gt;% - returns type of account with specified ID</li>
+     *      <li>%bankaccounts_name_&lt;accountID&gt;% - returns name of account with specified ID</li>
+     *  </ul>
+    */
     @Override
     public String onRequest(OfflinePlayer player, String params) {
-        if (params.startsWith("balance_")) { // %bankaccounts_balance_<accountID>%
-            final @NotNull String accountID = params.substring("balance_".length());
-            return Account.get(accountID).map(value -> String.valueOf(value.balance)).orElse(null);
-        } else {
-            return null;
-        }
+        final @NotNull String[] args = params.split("_");
+
+        return switch (args[0]) {
+            case "balance" -> switch (args[1]) {
+                case "formatted" -> Account.get(args[2]).map(value -> BankAccounts.formatCurrency(value.balance)).orElse(null);
+                default -> Account.get(args[1]).map(value -> String.valueOf(value.balance)).orElse(null);
+            };
+            case "owner" -> Account.get(args[1]).map(value -> value.owner.getName()).orElse(null);
+            case "type" -> Account.get(args[1]).map(value -> value.type.getName()).orElse(null);
+            case "name" -> Account.get(args[1]).map(value -> value.name).orElse(null);
+            default -> null;
+        };
     }
 }
