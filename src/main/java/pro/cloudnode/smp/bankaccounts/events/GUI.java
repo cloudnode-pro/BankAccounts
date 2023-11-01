@@ -20,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
+import pro.cloudnode.smp.bankaccounts.Package;
 import pro.cloudnode.smp.bankaccounts.Transaction;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
@@ -126,17 +127,16 @@ public class GUI implements Listener {
                         event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), buyer.get()));
                         return;
                     }
-                    if (event.getWhoClicked().getInventory().getSize() - event.getWhoClicked().getInventory().getStorageContents().length < items.length) {
-                        inventory.close();
-                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.target-inventory-full")),
-                                Placeholder.unparsed("player", event.getWhoClicked().getName())
-                        ));
-                        return;
-                    }
+
                     inventory.close();
                     Transaction transaction = buyer.get().transfer(pos.get().seller, pos.get().price, pos.get().description, "pos");
+                    if (event.getWhoClicked().getInventory().getSize() - event.getWhoClicked().getInventory().getStorageContents().length < chestItems.length) {
+                        Package pkg = new Package(chestItems, buyer.get().owner.getUniqueId());
+                        event.getWhoClicked().getInventory().addItem(pkg.getItem());
+                    } else {
+                        event.getWhoClicked().getInventory().addItem(chestItems);
+                    }
                     chest.getInventory().clear();
-                    event.getWhoClicked().getInventory().addItem(chestItems);
                     pos.get().delete();
                     final @NotNull String itemsFormatted = chestItems.length == 1 ? "1 item" : chestItems.length + " items";
                     event.getWhoClicked().sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-purchase"))

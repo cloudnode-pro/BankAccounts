@@ -5,9 +5,11 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -53,16 +55,25 @@ public final class PlayerInteract implements Listener {
                     POS.openBuyGui(player, chest, pos.get(), account.get());
                 }
             }
-        } else if (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK)) {
-            // check if the player is holding a package
-            if (!Package.isPackage(player.getInventory().getItemInMainHand())) return;
-            Package pkg = Package.fromItem(player.getInventory().getItemInMainHand());
-            if (pkg == null) {
-                return;
-            };
-            event.setCancelled(true);
-
-            pkg.open(player, player.getInventory().getItemInMainHand());
+        } else if (event.getAction().equals(Action.RIGHT_CLICK_AIR) || event.getAction().equals(Action.RIGHT_CLICK_BLOCK) || event.getAction().equals(Action.PHYSICAL)) {
+            tryOpenPackage(player, event);
         }
+    }
+
+    @EventHandler
+    public void onBlockPlace(BlockPlaceEvent event) {
+        tryOpenPackage(event.getPlayer(), event);
+    }
+
+    public void tryOpenPackage(Player player, Cancellable event) {
+        if (!Package.isPackage(player.getInventory().getItemInMainHand()) && !Package.isPackage(player.getInventory().getItemInOffHand())) return;
+        event.setCancelled(true);
+
+        Package pkg = (Package.isPackage(player.getInventory().getItemInMainHand())) ? Package.fromItem(player.getInventory().getItemInMainHand()) : Package.fromItem(player.getInventory().getItemInOffHand());
+        if (pkg == null) {
+            return;
+        };
+
+        pkg.open(player, player.getInventory().getItemInMainHand());
     }
 }
