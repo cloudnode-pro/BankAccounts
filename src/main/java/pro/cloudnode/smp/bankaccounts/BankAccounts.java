@@ -86,7 +86,7 @@ public final class BankAccounts extends JavaPlugin {
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIIntegration().register();
         } else {
-            getLogger().log(Level.WARNING, "PlaceholderAPI not found. Placeholders will not work.");
+            getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
         }
     }
 

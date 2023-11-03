@@ -36,16 +36,15 @@ public final class PAPIIntegration extends PlaceholderExpansion {
     public String onRequest(final @NotNull OfflinePlayer player, final @NotNull String params) {
         final @NotNull String[] args = params.split("_");
 
-        if (args.length < 2) return null;
-
+        if (args.length < 1) return null;
         return switch (args[0]) {
-            case "balance" -> switch (args[1]) {
+            case "balance" -> args.length < 2 ? null : switch (args[1]) {
                 case "formatted" -> args.length != 3 ? null : Account.get(args[2]).map(value -> BankAccounts.formatCurrency(value.balance)).orElse(null);
                 default -> Account.get(args[1]).map(value -> String.valueOf(value.balance)).orElse(null);
             };
-            case "owner" -> Account.get(args[1]).map(value -> value.owner.getName()).orElse(null);
-            case "type" -> Account.get(args[1]).map(value -> value.type.getName()).orElse(null);
-            case "name" -> Account.get(args[1]).map(value -> value.name).orElse(null);
+            case "owner" -> args.length < 2 ? null : Account.get(args[1]).map(value -> value.owner.getName()).orElse(null);
+            case "type" -> args.length < 2 ? null : Account.get(args[1]).map(value -> value.type.getName()).orElse(null);
+            case "name" -> args.length < 2 ? null : Account.get(args[1]).map(value -> value.name).orElse(null);
             default -> null;
         };
     }
