@@ -5,6 +5,7 @@ api-version: "1.20"
 author: Cloudnode
 softdepend:
     - Vault
+    - PlaceholderAPI
 commands:
     bank:
         description: Bank Accounts

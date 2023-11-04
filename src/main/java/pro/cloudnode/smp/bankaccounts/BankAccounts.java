@@ -5,6 +5,7 @@ import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import net.milkbowl.vault.economy.Economy;
+import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
@@ -24,6 +25,7 @@ import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
+import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,6 +99,13 @@ public final class BankAccounts extends JavaPlugin {
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
+
+        // Setup PlaceholderAPI Integration
+        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+            new PAPIIntegration().register();
+        } else {
+            getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
+        }
     }
 
     @Override
@@ -341,7 +350,7 @@ public final class BankAccounts extends JavaPlugin {
                     .GET()
                     .build();
             final @NotNull HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null) {
+            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null && !(JsonParser.parseString(res.body()).getAsJsonArray().isEmpty())) {
                 final @NotNull JsonObject json = JsonParser.parseString(res.body()).getAsJsonArray().get(0).getAsJsonObject();
                 if (json.has("version_number")) {
                     final @NotNull String latestVersion = json.get("version_number").getAsString();
@@ -385,8 +394,12 @@ public final class BankAccounts extends JavaPlugin {
     public static final class Key {
         public final static @NotNull NamespacedKey INSTRUMENT_ACCOUNT = namespacedKey("instrument-account");
         public final static @NotNull NamespacedKey POS_OWNER_GUI = namespacedKey("pos-owner-gui");
+        public final static @NotNull NamespacedKey POS_OWNER_GUI_MORE = namespacedKey("pos-owner-gui-more");
+        public final static @NotNull NamespacedKey POS_OWNER_GUI_LESS = namespacedKey("pos-owner-gui-less");
         public final static @NotNull NamespacedKey POS_BUYER_GUI = namespacedKey("pos-buyer-gui");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CONFIRM = namespacedKey("pos-buyer-gui-confirm");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CANCEL = namespacedKey("pos-buyer-gui-cancel");
+        public final static @NotNull NamespacedKey POS_BUYER_GUI_MORE = namespacedKey("pos-buyer-gui-more");
+        public final static @NotNull NamespacedKey POS_BUYER_GUI_LESS = namespacedKey("pos-buyer-gui-less");
     }
 }
