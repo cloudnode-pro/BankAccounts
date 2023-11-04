@@ -35,6 +35,12 @@ db:
     elideSetAutoCommits: true
     maintainTimeStats: false
 
+# Integrations
+integrations:
+    vault:
+        # Enable Vault integration
+        enabled: true
+
 currency:
     # Currency symbol
     symbol: $
@@ -242,7 +248,7 @@ messages:
         1: Business
         # Vault integration account (https://github.com/milkbowl/Vault)
         # This account type allows integration with other plugins that use Vault.
-        2: Checking Account
+        2: Checking
 
     # Errors
     errors:

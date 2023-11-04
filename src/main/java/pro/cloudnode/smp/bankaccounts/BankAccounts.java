@@ -65,10 +65,17 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
+     * Check if Vault integration is enabled
+     */
+    public static boolean isVaultEnabled() {
+        return getInstance().getConfig().getBoolean("integrations.vault.enabled");
+    }
+
+    /**
      * Check if vault plugin is present
      */
-    public boolean hasVault() {
-        return getServer().getPluginManager().getPlugin("Vault") != null;
+    public static boolean hasVault() {
+        return getInstance().getServer().getPluginManager().getPlugin("Vault") != null;
     }
 
     @Override
@@ -99,6 +106,15 @@ public final class BankAccounts extends JavaPlugin {
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
+
+        // Setup Vault Integration
+        if (isVaultEnabled()) {
+            if (!setupVault()) {
+                getLogger().log(Level.WARNING, "Vault not found, vault integration will not work.");
+                return;
+            }
+            getLogger().log(Level.INFO, "Vault found. Enabling integration.");
+        }
 
         // Setup PlaceholderAPI Integration
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
@@ -177,7 +193,8 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        getInstance().setupVault();
+        if (isVaultEnabled()) getInstance().setupVault();
+        
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
             checkForUpdates().ifPresent(latestVersion -> {
                 getInstance().getLogger().warning("An update is available: " + latestVersion);
