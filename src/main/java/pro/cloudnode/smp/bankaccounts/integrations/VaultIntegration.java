@@ -1,16 +1,18 @@
-package pro.cloudnode.smp.bankaccounts;
+package pro.cloudnode.smp.bankaccounts.integrations;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
+import pro.cloudnode.smp.bankaccounts.Account;
+import pro.cloudnode.smp.bankaccounts.BankAccounts;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
-public final class VaultEconomyProvider implements Economy {
+public final class VaultIntegration implements Economy {
 
     /**
      * Check if Vault economy is enabled.
