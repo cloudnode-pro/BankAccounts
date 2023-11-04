@@ -320,7 +320,7 @@ public final class BankAccounts extends JavaPlugin {
                     .GET()
                     .build();
             final @NotNull HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null) {
+            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null && !(JsonParser.parseString(res.body()).getAsJsonArray().isEmpty())) {
                 final @NotNull JsonObject json = JsonParser.parseString(res.body()).getAsJsonArray().get(0).getAsJsonObject();
                 if (json.has("version_number")) {
                     final @NotNull String latestVersion = json.get("version_number").getAsString();
