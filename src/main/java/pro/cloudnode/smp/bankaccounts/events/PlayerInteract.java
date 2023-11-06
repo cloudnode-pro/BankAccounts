@@ -23,36 +23,15 @@ import java.util.Optional;
 
 public final class PlayerInteract implements Listener {
     @EventHandler
-    public void onPlayerInteractEvent(PlayerInteractEvent event) {
+    public void onPlayerInteractEvent(final @NotNull PlayerInteractEvent event) {
         final @NotNull Player player = event.getPlayer();
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
-            final @NotNull Optional<Block> block = Optional.ofNullable(event.getClickedBlock());
-            @NotNull Optional<@NotNull POS> pos = Optional.empty();
+            final @NotNull Optional<@NotNull Block> block = Optional.ofNullable(event.getClickedBlock());
 
-            if (block.isEmpty()) return;
-
-            // handle double chests by checking if either side is a POS
-            if (block.get().getState() instanceof Chest doubleChest && doubleChest.getInventory() instanceof DoubleChestInventory) {
-                final @NotNull Chest leftChest = (Chest) Objects.requireNonNull(((DoubleChestInventory) doubleChest.getInventory()).getLeftSide().getHolder());
-                final @NotNull Chest rightChest = (Chest) Objects.requireNonNull(((DoubleChestInventory) doubleChest.getInventory()).getRightSide().getHolder());
-
-                if (POS.get(leftChest).isPresent()) {
-                    pos = POS.get(leftChest);
-                } else if (POS.get(rightChest).isPresent()) {
-                    pos = POS.get(rightChest);
-                }
-            } else if (block.get().getState() instanceof final @NotNull Chest chest && !chest.getInventory().isEmpty()) {
-                // handle single chests
-                pos = POS.get(block.get());
-            } else {
-                // return if the block is not a chest
-                return;
-            }
-
+            if (block.isEmpty() || !(block.get().getState() instanceof final @NotNull Chest chest) || chest.getInventory().isEmpty() || chest.getInventory() instanceof DoubleChestInventory) return;
+            final @NotNull Optional<@NotNull POS> pos = POS.get(block.get());
             if (pos.isEmpty()) return;
             event.setCancelled(true);
-
-            Chest chest = (Chest) block.get().getState(); // the handling of double chests is done inside POS#get
 
             if (player.getUniqueId().equals(pos.get().seller.owner.getUniqueId())) {
                 POS.openOwnerGui(player, chest, pos.get());
