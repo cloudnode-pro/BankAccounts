@@ -37,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
 public final class POS {
@@ -449,6 +450,9 @@ public final class POS {
      * @param checksums The checksums to verify against
      */
     public static boolean verifyChecksum(final @NotNull ItemStack @NotNull [] items, final @NotNull String @NotNull [] checksums) {
-        return Arrays.equals(checksum(items), checksums);
+        if (items.length != checksums.length)
+            throw new IllegalArgumentException("The number of items and checksums must be the same.");
+
+        return IntStream.range(0, items.length).allMatch(i -> verifyChecksum(items[i], checksums[i]));
     }
 }
