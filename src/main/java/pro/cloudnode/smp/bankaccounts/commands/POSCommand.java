@@ -8,6 +8,7 @@ import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
@@ -72,6 +73,8 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
 
         if (!(target.getState() instanceof final @NotNull Chest chest))
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_NOT_CHEST);
+        if (chest.getInventory() instanceof DoubleChestInventory)
+            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_DOUBLE_CHEST);
         if (chest.getInventory().isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_EMPTY);
         if (POS.get(chest).isPresent()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_ALREADY_EXISTS);
 

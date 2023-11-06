@@ -82,6 +82,7 @@ public enum BankConfig {
     MESSAGES_ERRORS_BLOCK_TOO_FAR("messages.errors.block-too-far"),
     MESSAGES_ERRORS_POS_ALREADY_EXISTS("messages.errors.pos-already-exists"),
     MESSAGES_ERRORS_POS_NOT_CHEST("messages.errors.pos-not-chest"),
+    MESSAGES_ERRORS_POS_DOUBLE_CHEST("messages.errors.pos-double-chest"),
     MESSAGES_ERRORS_POS_EMPTY("messages.errors.pos-empty"),
     MESSAGES_ERRORS_POS_INVALID_CARD("messages.errors.pos-invalid-card"),
     MESSAGES_ERRORS_POS_NO_PERMISSION("messages.errors.pos-no-permission"),
