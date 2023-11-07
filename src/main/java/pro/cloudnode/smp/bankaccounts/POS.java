@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -25,20 +24,15 @@ import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 
 import java.math.BigDecimal;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -299,7 +293,7 @@ public final class POS {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = Math.min(extraRows * 9 + items.length + 9 - items.length % 9, 54);
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_TITLE.getKey())),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
@@ -322,19 +316,19 @@ public final class POS {
             }
         }
 
-        final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
+        final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_INFO_MATERIAL.getKey())))), 1);
+        if (BankAccounts.getInstance().getConfig().getBoolean(BankConfig.POS_INFO_GLINT.getKey())) {
             info.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             info.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta infoMeta = info.getItemMeta();
-        infoMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.name-owner")),
+        infoMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_INFO_NAME_OWNER.getKey())),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        infoMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.info.lore-owner")).stream()
+        infoMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList(BankConfig.POS_INFO_LORE_OWNER.getKey())).stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(line,
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -364,7 +358,7 @@ public final class POS {
         final @NotNull ItemStack[] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = Math.min(extraRows * 9 + items.length + 9 - items.length % 9, 54);
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_TITLE.getKey())),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
@@ -387,19 +381,19 @@ public final class POS {
             }
         }
 
-        final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
+        final @NotNull ItemStack info = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_INFO_MATERIAL.getKey())))), 1);
         if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
             info.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             info.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta infoMeta = info.getItemMeta();
-        infoMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.name-buyer")), pos.seller),
+        infoMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.POS_INFO_NAME_BUYER.getKey())), pos.seller),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        infoMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.info.lore-buyer")).stream()
+        infoMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList(BankConfig.POS_INFO_LORE_BUYER.getKey())).stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, pos.seller),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),

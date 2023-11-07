@@ -99,16 +99,16 @@ public final class BankAccounts extends JavaPlugin {
      * Setup database source
      */
     private void setupDbSource() {
-        switch (Objects.requireNonNull(getConfig().getString("db.db"))) {
+        switch (Objects.requireNonNull(getConfig().getString(BankConfig.DB_DB.getKey()))) {
             case "sqlite" -> {
                 config.setDriverClassName("org.sqlite.JDBC");
-                config.setJdbcUrl("jdbc:sqlite:" + getDataFolder().getAbsolutePath() + "/" + Objects.requireNonNull(getConfig().getString("db.sqlite.file")));
+                config.setJdbcUrl("jdbc:sqlite:" + getDataFolder().getAbsolutePath() + "/" + Objects.requireNonNull(getConfig().getString(BankConfig.DB_SQLITE_FILE.getKey())));
             }
             case "mariadb" -> {
                 config.setDriverClassName(org.mariadb.jdbc.Driver.class.getName());
-                config.setJdbcUrl(Objects.requireNonNull(getConfig().getString("db.mariadb.jdbc")));
-                config.setUsername(Objects.requireNonNull(getConfig().getString("db.mariadb.user")));
-                config.setPassword(Objects.requireNonNull(getConfig().getString("db.mariadb.password")));
+                config.setJdbcUrl(Objects.requireNonNull(getConfig().getString(BankConfig.DB_MARIADB_JDBC.getKey())));
+                config.setUsername(Objects.requireNonNull(getConfig().getString(BankConfig.DB_MARIADB_USER.getKey())));
+                config.setPassword(Objects.requireNonNull(getConfig().getString(BankConfig.DB_MARIADB_PASSWORD.getKey())));
             }
             default -> {
                 getLogger().log(Level.SEVERE, "Invalid database type.");
@@ -116,26 +116,26 @@ public final class BankAccounts extends JavaPlugin {
                 return;
             }
         }
-        if (getConfig().isBoolean("db.cachePrepStmts"))
-            config.addDataSourceProperty("cachePrepStmts", getConfig().getString("db.cachePrepStmts"));
-        if (getConfig().isInt("db.prepStmtCacheSize"))
-            config.addDataSourceProperty("prepStmtCacheSize", getConfig().getString("db.prepStmtCacheSize"));
-        if (getConfig().isInt("db.prepStmtCacheSqlLimit"))
-            config.addDataSourceProperty("prepStmtCacheSqlLimit", getConfig().getString("db.prepStmtCacheSqlLimit"));
-        if (getConfig().isBoolean("db.useServerPrepStmts"))
-            config.addDataSourceProperty("useServerPrepStmts", getConfig().getString("db.useServerPrepStmts"));
-        if (getConfig().isBoolean("db.useLocalSessionState"))
-            config.addDataSourceProperty("useLocalSessionState", getConfig().getString("db.useLocalSessionState"));
-        if (getConfig().isBoolean("db.rewriteBatchedStatements"))
-            config.addDataSourceProperty("rewriteBatchedStatements", getConfig().getString("db.rewriteBatchedStatements"));
-        if (getConfig().isBoolean("db.cacheResultSetMetadata"))
-            config.addDataSourceProperty("cacheResultSetMetadata", getConfig().getString("db.cacheResultSetMetadata"));
-        if (getConfig().isBoolean("db.cacheServerConfiguration"))
-            config.addDataSourceProperty("cacheServerConfiguration", getConfig().getString("db.cacheServerConfiguration"));
-        if (getConfig().isBoolean("db.elideSetAutoCommits"))
-            config.addDataSourceProperty("elideSetAutoCommits", getConfig().getString("db.elideSetAutoCommits"));
-        if (getConfig().isBoolean("db.maintainTimeStats"))
-            config.addDataSourceProperty("maintainTimeStats", getConfig().getString("db.maintainTimeStats"));
+        if (getConfig().isBoolean(BankConfig.DB_CACHEPREPSTMTS.getKey()))
+            config.addDataSourceProperty("cachePrepStmts", getConfig().getString(BankConfig.DB_CACHEPREPSTMTS.getKey()));
+        if (getConfig().isInt(BankConfig.DB_PREPSTMTCACHESIZE.getKey()))
+            config.addDataSourceProperty("prepStmtCacheSize", getConfig().getString(BankConfig.DB_PREPSTMTCACHESIZE.getKey()));
+        if (getConfig().isInt(BankConfig.DB_PREPSTMTCACHESQLLIMIT.getKey()))
+            config.addDataSourceProperty("prepStmtCacheSqlLimit", getConfig().getString(BankConfig.DB_PREPSTMTCACHESQLLIMIT.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_USESERVERPREPSTMTS.getKey()))
+            config.addDataSourceProperty("useServerPrepStmts", getConfig().getString(BankConfig.DB_USESERVERPREPSTMTS.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_USELOCALSESSSIONSTATE.getKey()))
+            config.addDataSourceProperty("useLocalSessionState", getConfig().getString(BankConfig.DB_USELOCALSESSSIONSTATE.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_REWRITEBATCHEDSTATEMENTS.getKey()))
+            config.addDataSourceProperty("rewriteBatchedStatements", getConfig().getString(BankConfig.DB_REWRITEBATCHEDSTATEMENTS.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_CACHERESULTSETMETADATA.getKey()))
+            config.addDataSourceProperty("cacheResultSetMetadata", getConfig().getString(BankConfig.DB_CACHERESULTSETMETADATA.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_CACHESERVERCONFIGURATION.getKey()))
+            config.addDataSourceProperty("cacheServerConfiguration", getConfig().getString(BankConfig.DB_CACHESERVERCONFIGURATION.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_ELIDESETAUTOCOMMITS.getKey()))
+            config.addDataSourceProperty("elideSetAutoCommits", getConfig().getString(BankConfig.DB_ELIDESETAUTOCOMMITS.getKey()));
+        if (getConfig().isBoolean(BankConfig.DB_MAINTAINTIMESTATS.getKey()))
+            config.addDataSourceProperty("maintainTimeStats", getConfig().getString(BankConfig.DB_MAINTAINTIMESTATS.getKey()));
 
         dbSource = new HikariDataSource(config);
     }
@@ -165,7 +165,7 @@ public final class BankAccounts extends JavaPlugin {
             put("mariadb", "db-init/mysql.sql");
             put("sqlite", "db-init/sql.sql");
         }};
-        final @NotNull String db = Objects.requireNonNull(getConfig().getString("db.db"));
+        final @NotNull String db = Objects.requireNonNull(getConfig().getString(BankConfig.DB_DB.getKey()));
         if (!initFiles.containsKey(db)) {
             getLogger().log(Level.SEVERE, "Invalid database type.");
             getServer().getPluginManager().disablePlugin(this);
@@ -213,7 +213,7 @@ public final class BankAccounts extends JavaPlugin {
      * Get currency symbol
      */
     public static @NotNull String getCurrencySymbol() {
-        final @Nullable String symbol = getInstance().getConfig().getString("currency.symbol");
+        final @Nullable String symbol = getInstance().getConfig().getString(BankConfig.CURRENCY_SYMBOL.getKey());
         return symbol != null ? symbol : "$";
     }
 
@@ -224,7 +224,7 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static String formatCurrency(final @Nullable BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
-        final @Nullable String format = getInstance().getConfig().getString("currency.format");
+        final @Nullable String format = getInstance().getConfig().getString(BankConfig.CURRENCY_FORMAT.getKey());
         return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + new DecimalFormat(format != null ? format : "#,##0.00").format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
@@ -272,12 +272,12 @@ public final class BankAccounts extends JavaPlugin {
      * Create server account, if enabled in config
      */
     private static void createServerAccount() {
-        if (getInstance().getConfig().getBoolean("server-account.enabled")) {
+        if (getInstance().getConfig().getBoolean(BankConfig.SERVER_ACCOUNT_ENABLED.getKey())) {
             final @NotNull Account[] accounts = Account.get(getConsoleOfflinePlayer());
             if (accounts.length > 0) return;
-            final @Nullable String name = getInstance().getConfig().getString("server-account.name");
-            final @NotNull Account.Type type = Account.Type.getType(getInstance().getConfig().getInt("server-account.type"));
-            final @Nullable BigDecimal balance = Objects.requireNonNull(getInstance().getConfig().getString("server-account.starting-balance")).equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble("server-account.starting-balance"));
+            final @Nullable String name = getInstance().getConfig().getString(BankConfig.SERVER_ACCOUNT_NAME.getKey());
+            final @NotNull Account.Type type = Account.Type.getType(getInstance().getConfig().getInt(BankConfig.SERVER_ACCOUNT_TYPE.getKey()));
+            final @Nullable BigDecimal balance = Objects.requireNonNull(getInstance().getConfig().getString(BankConfig.SERVER_ACCOUNT_STARTING_BALANCE.getKey())).equals("Infinity") ? null : BigDecimal.valueOf(getInstance().getConfig().getDouble(BankConfig.SERVER_ACCOUNT_STARTING_BALANCE.getKey()));
             new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
         }
     }

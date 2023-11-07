@@ -155,19 +155,19 @@ public class Account {
      * Create payment instrument
      */
     public final @NotNull ItemStack createInstrument() {
-        final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
+        final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.INSTRUMENTS_MATERIAL.getKey()))));
         final @NotNull ItemStack instrument = new ItemStack(material);
 
-        final @NotNull String name = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.name"));
-        final @NotNull List<String> lore = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("instruments.lore"));
-        final boolean glint = BankAccounts.getInstance().getConfig().getBoolean("instruments.glint.enabled");
+        final @NotNull String name = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.INSTRUMENTS_NAME.getKey()));
+        final @NotNull List<String> lore = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList(BankConfig.INSTRUMENTS_LORE.getKey()));
+        final boolean glint = BankAccounts.getInstance().getConfig().getBoolean(BankConfig.INSTRUMENTS_GLINT_ENABLED.getKey());
 
         final @NotNull ItemMeta meta = instrument.getItemMeta();
         meta.displayName(this.instrumentPlaceholders(name));
         meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
 
         if (glint) {
-            final @NotNull NamespacedKey key = NamespacedKey.minecraft(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.glint.enchantment")));
+            final @NotNull NamespacedKey key = NamespacedKey.minecraft(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.INSTRUMENTS_GLINT_ENCHANTMENT.getKey())));
             final @NotNull Enchantment enchantment = Objects.requireNonNull(EnchantmentWrapper.getByKey(key));
             meta.addEnchant(enchantment, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

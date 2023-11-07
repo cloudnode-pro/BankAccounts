@@ -10,6 +10,7 @@ import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 
 import java.util.Objects;
@@ -26,7 +27,7 @@ public final class BlockBreak implements Listener {
                     final @NotNull Optional<POS> pos = POS.get(chest);
                     if (pos.isPresent()) {
                         pos.get().delete();
-                        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(pro.cloudnode.smp.bankaccounts.BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
+                        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(pro.cloudnode.smp.bankaccounts.BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_POS_REMOVED.getKey()))));
                     }
                 });
             }

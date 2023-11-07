@@ -26,10 +26,15 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 import pro.cloudnode.smp.bankaccounts.Transaction;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GUI implements Listener {
@@ -66,7 +71,7 @@ public class GUI implements Listener {
                 }
                 if (event.getCurrentItem() != null && event.getCurrentItem().equals(deleteItem)) {
                     pos.get().delete();
-                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
+                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_POS_REMOVED.getKey()))));
                     inventory.close();
                 } else if (event.getCurrentItem() != null && more.isPresent() && event.getCurrentItem().equals(more.get())) {
                     // shift the items 1 up and get more from the metadata
@@ -141,9 +146,9 @@ public class GUI implements Listener {
                 Block block = pos.get().getBlock();
                 if (!(block.getState() instanceof final @NotNull Chest chest)) {
                     inventory.close();
-                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-empty"))));
+                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_EMPTY.getKey()))));
                     final @Nullable Player seller = pos.get().seller.owner.getPlayer();
-                    if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-empty"))));
+                    if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_EMPTY.getKey()))));
                     pos.get().delete();
                     return;
                 }
@@ -156,35 +161,35 @@ public class GUI implements Listener {
                 if (item.equals(confirm)) {
                     if (!POS.verifyChecksum(chestItems, checksums)) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-items-changed"))));
+                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_ITEMS_CHANGED.getKey()))));
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
-                        if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-items-changed"))));
+                        if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_ITEMS_CHANGED.getKey()))));
                         pos.get().delete();
                         return;
                     }
                     if (pos.get().seller.frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), pos.get().seller));
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                         if (seller != null) {
-                            seller.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), pos.get().seller));
-                            seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
+                            seller.sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), pos.get().seller));
+                            seller.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_POS_REMOVED.getKey()))));
                         }
                         return;
                     }
                     if (buyer.get().frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.frozen")), buyer.get()));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), buyer.get()));
                         return;
                     }
                     if (!buyer.get().hasFunds(pos.get().price)) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.insufficient-funds")), buyer.get()));
+                        event.getWhoClicked().sendMessage(Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), buyer.get()));
                         return;
                     }
                     if (event.getWhoClicked().getInventory().getSize() - event.getWhoClicked().getInventory().getStorageContents().length < items.length) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.target-inventory-full")),
+                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_TARGET_INVENTORY_FULL.getKey())),
                                 Placeholder.unparsed("player", event.getWhoClicked().getName())
                         ));
                         return;
@@ -195,13 +200,13 @@ public class GUI implements Listener {
                     event.getWhoClicked().getInventory().addItem(chestItems);
                     pos.get().delete();
                     final @NotNull String itemsFormatted = chestItems.length == 1 ? "1 item" : chestItems.length + " items";
-                    event.getWhoClicked().sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-purchase"))
+                    event.getWhoClicked().sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_POS_PURCHASE.getKey()))
                             .replace("<items>", String.valueOf(chestItems.length))
                             .replace("<items-formatted>", itemsFormatted)
                     ));
                     final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                     if (seller != null)
-                        seller.sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.pos-purchase-seller"))
+                        seller.sendMessage(Transaction.placeholders(transaction, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_POS_PURCHASE_SELLER.getKey()))
                                 .replace("<items>", String.valueOf(chestItems.length))
                                 .replace("<items-formatted>", itemsFormatted)
                         ));

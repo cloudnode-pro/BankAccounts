@@ -37,7 +37,7 @@ public enum BankConfig {
     INSTRUMENTS_NAME("instruments.name"),
     INSTRUMENTS_LORE("instruments.lore"),
     INSTRUMENTS_GLINT_ENABLED("instruments.glint.enabled"),
-    INSTRUMENTS_ENCHANTMENT("instruments.glint.enchantment"),
+    INSTRUMENTS_GLINT_ENCHANTMENT("instruments.glint.enchantment"),
     POS_ALLOW_PERSONAL("pos.allow-personal"),
     POS_TITLE("pos.title"),
     POS_INFO_MATERIAL("pos.info.material"),

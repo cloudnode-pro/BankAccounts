@@ -45,7 +45,7 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
 
         if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig()
-                .getBoolean("pos.allow-personal") && !player.hasPermission("bank.pos.create.personal"))
+                .getBoolean(BankConfig.POS_ALLOW_PERSONAL.getKey()) && !player.hasPermission("bank.pos.create.personal"))
             return sendMessage(sender, BankConfig.MESSAGES_ERRORS_POS_CREATE_BUSINESS_ONLY);
 
         if (account.get().frozen)
@@ -85,7 +85,7 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
         return sendMessage(sender, replacePlaceholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
-                .getString("messages.pos-created")), pos));
+                .getString(BankConfig.MESSAGES_POS_CREATED.getKey())), pos));
     }
 
     public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
@@ -94,7 +94,7 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
             final @NotNull Account[] accounts = sender.hasPermission("bank.pos.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
             for (final @NotNull Account account : accounts) {
                 if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().getConfig()
-                        .getBoolean("pos.allow-personal") && !sender.hasPermission("bank.pos.create.personal")))
+                        .getBoolean(BankConfig.POS_ALLOW_PERSONAL.getKey()) && !sender.hasPermission("bank.pos.create.personal")))
                     continue;
                 suggestions.add(account.id);
             }
