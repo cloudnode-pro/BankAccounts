@@ -63,6 +63,7 @@ public final class BankAccounts extends JavaPlugin {
     }
     public @NotNull Economy getEconomy() {
         if (!hasEconomy()) throw new IllegalStateException("Vault is not initialized");
+        if (!isVaultEnabled()) throw new IllegalStateException("Vault integration is not enabled");
         return economy;
     }
 
@@ -122,15 +123,12 @@ public final class BankAccounts extends JavaPlugin {
         dbSource.close();
     }
 
-    public boolean setupVault() {
+    public void setupVault() {
         if (!hasVault()) {
             getLogger().log(Level.WARNING, "Vault not found, vault integration will not work.");
-            return false;
+            return;
         }
-//        if (isEconomyRegistered()) {
-//            return false;
-//        }
-        // unregister
+
         final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
         if (rsp.isPresent()) {
             economy = rsp.get().getProvider();
@@ -141,13 +139,12 @@ public final class BankAccounts extends JavaPlugin {
 
         try {
             getLogger().log(Level.INFO, "Vault found. Enabling integration.");
-            getServer().getServicesManager().register(Economy.class, new VaultIntegration(this), this, ServicePriority.Normal);
+            this.economy = new VaultIntegration(this);
+            getServer().getServicesManager().register(Economy.class, this.economy, this, ServicePriority.Normal);
         } catch (final @NotNull Exception e) {
             getLogger().log(Level.WARNING, "Failed to register vault economy.", e);
-            return false;
         }
 
-        return true;
     }
 
     /**
@@ -193,21 +190,6 @@ public final class BankAccounts extends JavaPlugin {
             config.addDataSourceProperty("maintainTimeStats", getConfig().getString("db.maintainTimeStats"));
 
         dbSource = new HikariDataSource(config);
-    }
-
-    /**
-     * Check if economy is already registered
-     */
-    private boolean isEconomyRegistered() {
-        final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
-	    if (rsp.isPresent()) {
-            economy = rsp.get().getProvider();
-            getLogger().log(Level.WARNING, "Economy already registered by " + rsp.get().getPlugin().getName() + ", vault integration will not work.");
-            getServer().getServicesManager().unregister(economy);
-            // um, what
-            return false; // this is a bad idea
-        }
-        return rsp.isPresent();
     }
 
     /**

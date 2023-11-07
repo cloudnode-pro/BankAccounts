@@ -39,7 +39,7 @@ db:
 integrations:
     vault:
         # Enable Vault integration
-        enabled: true
+        enabled: false
 
 currency:
     # Currency symbol
