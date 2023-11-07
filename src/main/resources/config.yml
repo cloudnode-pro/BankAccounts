@@ -220,20 +220,6 @@ pos:
         lore:
             - "<gray>Click to decline this purchase.</gray>"
 
-    more:
-        material: ARROW
-        glint: false
-        name: "<green><bold>View more</bold></green>"
-        lore:
-            - "<gray>Click to view more items.</gray>"
-
-    less:
-        material: ARROW
-        glint: false
-        name: "<green><bold>View less</bold></green>"
-        lore:
-            - "<gray>Click to view less items.</gray>"
-
 
 # Messages
 messages:

@@ -364,12 +364,8 @@ public final class BankAccounts extends JavaPlugin {
     public static final class Key {
         public final static @NotNull NamespacedKey INSTRUMENT_ACCOUNT = namespacedKey("instrument-account");
         public final static @NotNull NamespacedKey POS_OWNER_GUI = namespacedKey("pos-owner-gui");
-        public final static @NotNull NamespacedKey POS_OWNER_GUI_MORE = namespacedKey("pos-owner-gui-more");
-        public final static @NotNull NamespacedKey POS_OWNER_GUI_LESS = namespacedKey("pos-owner-gui-less");
         public final static @NotNull NamespacedKey POS_BUYER_GUI = namespacedKey("pos-buyer-gui");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CONFIRM = namespacedKey("pos-buyer-gui-confirm");
         public final static @NotNull NamespacedKey POS_BUYER_GUI_CANCEL = namespacedKey("pos-buyer-gui-cancel");
-        public final static @NotNull NamespacedKey POS_BUYER_GUI_MORE = namespacedKey("pos-buyer-gui-more");
-        public final static @NotNull NamespacedKey POS_BUYER_GUI_LESS = namespacedKey("pos-buyer-gui-less");
     }
 }
