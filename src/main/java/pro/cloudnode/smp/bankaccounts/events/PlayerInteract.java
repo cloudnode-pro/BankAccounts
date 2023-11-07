@@ -13,6 +13,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 
 import java.util.Objects;
@@ -33,20 +34,20 @@ public final class PlayerInteract implements Listener {
                     return;
                 }
                 if (!player.hasPermission("bank.pos.use")) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-no-permission"))));
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_NO_PERMISSION.getKey()))));
                     return;
                 }
                 final @NotNull ItemStack heldItem = player.getInventory().getItemInMainHand();
-                if (heldItem.getType() == Material.AIR) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.no-card"))));
+                if (heldItem.getType() != Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.INSTRUMENTS_MATERIAL.getKey()))))) {
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_NO_CARD.getKey()))));
                     return;
                 }
-                final @NotNull Optional<Account> account = Account.get(heldItem);
+                final @NotNull Optional<@NotNull Account> account = Account.get(heldItem);
                 if (account.isEmpty())
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.pos-invalid-card"))));
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_INVALID_CARD.getKey()))));
                 else {
                     if (!player.hasPermission("bank.pos.use.other") && !account.get().owner.getUniqueId().equals(player.getUniqueId())) {
-                        player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.errors.not-account-owner"))));
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER.getKey()))));
                         return;
                     }
                     POS.openBuyGui(player, chest, pos.get(), account.get());
