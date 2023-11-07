@@ -2,6 +2,7 @@ package pro.cloudnode.smp.bankaccounts.integrations;
 
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
+import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Range;
@@ -13,13 +14,21 @@ import java.util.List;
 import java.util.Optional;
 
 public final class VaultIntegration implements Economy {
+    private final @NotNull BankAccounts plugin;
+    
+    /**
+     * Constructor
+     */
+    public VaultIntegration(final @NotNull BankAccounts plugin) {
+        this.plugin = plugin;
+    }
 
     /**
      * Check if Vault economy is enabled.
      */
     @Override
     public boolean isEnabled() {
-        return BankAccounts.getInstance().hasVault();
+        return BankAccounts.hasVault();
     }
 
     /**
@@ -27,7 +36,7 @@ public final class VaultIntegration implements Economy {
      */
     @Override
     public @NotNull String getName() {
-        return BankAccounts.getInstance().getPluginMeta().getName();
+        return this.plugin.getPluginMeta().getName();
     }
 
     /**
@@ -78,7 +87,7 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public boolean hasAccount(final @NotNull String player) {
-        return hasAccount(BankAccounts.getInstance().getServer().getOfflinePlayer(player));
+        return hasAccount(this.plugin.getServer().getOfflinePlayer(player));
     }
 
     /**
@@ -97,7 +106,7 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public boolean hasAccount(final @NotNull String player, final @NotNull String world) {
-        return hasAccount(BankAccounts.getInstance().getServer().getOfflinePlayer(player), world);
+        return hasAccount(this.plugin.getServer().getOfflinePlayer(player), world);
     }
 
     /**
@@ -116,7 +125,7 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public double getBalance(final @NotNull String player) {
-        return getBalance(BankAccounts.getInstance().getServer().getOfflinePlayer(player));
+        return getBalance(this.plugin.getServer().getOfflinePlayer(player));
     }
 
     /**
@@ -137,11 +146,13 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public double getBalance(final @NotNull String player, final @NotNull String world) {
-        return getBalance(BankAccounts.getInstance().getServer().getOfflinePlayer(player), world);
+        return getBalance(this.plugin.getServer().getOfflinePlayer(player), world);
     }
 
     /**
      * Get balance of player in world.
+     *
+     * @implNote Multi-world is not supported, this will always return the balance of the player, the same in any world.
      */
     @Override
     public double getBalance(final @NotNull OfflinePlayer player, final @NotNull String world) {
@@ -156,7 +167,7 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public boolean has(final @NotNull String player, final double amount) {
-        return has(BankAccounts.getInstance().getServer().getOfflinePlayer(player), amount);
+        return has(this.plugin.getServer().getOfflinePlayer(player), amount);
     }
 
     /**
@@ -177,7 +188,7 @@ public final class VaultIntegration implements Economy {
     @Deprecated
     @Override
     public boolean has(final @NotNull String player, final @NotNull String world, final double amount) {
-        return has(BankAccounts.getInstance().getServer().getOfflinePlayer(player), world, amount);
+        return has(this.plugin.getServer().getOfflinePlayer(player), world, amount);
     }
 
     /**
@@ -196,8 +207,8 @@ public final class VaultIntegration implements Economy {
      */
     @Deprecated
     @Override
-    public @NotNull EconomyResponse withdrawPlayer(final @NotNull String player, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
-        return withdrawPlayer(BankAccounts.getInstance().getServer().getOfflinePlayer(player), amount);
+    public @NotNull EconomyResponse withdrawPlayer(final @NotNull String player, final double amount) {
+        return withdrawPlayer(this.plugin.getServer().getOfflinePlayer(player), amount);
     }
 
     /**
@@ -206,7 +217,7 @@ public final class VaultIntegration implements Economy {
      * @param amount A positive amount to withdraw.
      */
     @Override
-    public @NotNull EconomyResponse withdrawPlayer(final @NotNull OfflinePlayer player, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
+    public @NotNull EconomyResponse withdrawPlayer(final @NotNull OfflinePlayer player, final double amount) {
         final @NotNull Optional<@NotNull Account> account = Account.getVault(player);
         assert account.isPresent();
         if (!account.get().hasFunds(BigDecimal.valueOf(amount)))
@@ -223,8 +234,8 @@ public final class VaultIntegration implements Economy {
      */
     @Deprecated
     @Override
-    public @NotNull EconomyResponse withdrawPlayer(final @NotNull String player, final @NotNull String world, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
-        return withdrawPlayer(BankAccounts.getInstance().getServer().getOfflinePlayer(player), world, amount);
+    public @NotNull EconomyResponse withdrawPlayer(final @NotNull String player, final @NotNull String world, final double amount) {
+        return withdrawPlayer(this.plugin.getServer().getOfflinePlayer(player), world, amount);
     }
 
     /**
@@ -233,7 +244,7 @@ public final class VaultIntegration implements Economy {
      * @param amount A positive amount to withdraw.
      */
     @Override
-    public @NotNull EconomyResponse withdrawPlayer(final @NotNull OfflinePlayer player, final @NotNull String world, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
+    public @NotNull EconomyResponse withdrawPlayer(final @NotNull OfflinePlayer player, final @NotNull String world, final double amount) {
         return withdrawPlayer(player, amount);
     }
 
@@ -245,8 +256,8 @@ public final class VaultIntegration implements Economy {
      */
     @Deprecated
     @Override
-    public @NotNull EconomyResponse depositPlayer(final @NotNull String player, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
-        return depositPlayer(BankAccounts.getInstance().getServer().getOfflinePlayer(player), amount);
+    public @NotNull EconomyResponse depositPlayer(final @NotNull String player, final double amount) {
+        return depositPlayer(this.plugin.getServer().getOfflinePlayer(player), amount);
     }
 
     /**
@@ -255,12 +266,17 @@ public final class VaultIntegration implements Economy {
      * @param amount A positive amount to deposit.
      */
     @Override
-    public @NotNull EconomyResponse depositPlayer(final @NotNull OfflinePlayer player, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
+    public @NotNull EconomyResponse depositPlayer(final @NotNull OfflinePlayer player, final double amount) {
         final @NotNull Optional<@NotNull Account> account = Account.getVault(player);
         assert account.isPresent();
         final @NotNull Account serverAccount = Account.getServerAccount().orElse(new Account.ClosedAccount());
         if (!serverAccount.hasFunds(BigDecimal.valueOf(amount)))
             return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.POSITIVE_INFINITY), EconomyResponse.ResponseType.FAILURE, "Insufficient funds in server account");
+        try {
+            serverAccount.transfer(account.get(), BigDecimal.valueOf(amount), null, null);
+        } catch (final @NotNull Exception e) {
+            return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.POSITIVE_INFINITY), EconomyResponse.ResponseType.FAILURE, "Failed to transfer funds from server account to player account");
+        }
         return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.POSITIVE_INFINITY), EconomyResponse.ResponseType.SUCCESS, null);
     }
 
@@ -272,8 +288,8 @@ public final class VaultIntegration implements Economy {
      */
     @Deprecated
     @Override
-    public @NotNull EconomyResponse depositPlayer(final @NotNull String player, final @NotNull String world, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
-        return depositPlayer(BankAccounts.getInstance().getServer().getOfflinePlayer(player), world, amount);
+    public @NotNull EconomyResponse depositPlayer(final @NotNull String player, final @NotNull String world, final double amount) {
+        return depositPlayer(this.plugin.getServer().getOfflinePlayer(player), world, amount);
     }
 
     /**
@@ -282,7 +298,7 @@ public final class VaultIntegration implements Economy {
      * @param amount A positive amount to deposit.
      */
     @Override
-    public @NotNull EconomyResponse depositPlayer(final @NotNull OfflinePlayer player, final @NotNull String world, final @Range(from = 0, to = Long.MAX_VALUE) double amount) {
+    public @NotNull EconomyResponse depositPlayer(final @NotNull OfflinePlayer player, final @NotNull String world, final double amount) {
         return depositPlayer(player, amount);
     }
 

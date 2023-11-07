@@ -16,6 +16,7 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,6 +27,7 @@ import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
+import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -107,15 +109,6 @@ public final class BankAccounts extends JavaPlugin {
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
 
-        // Setup Vault Integration
-        if (isVaultEnabled()) {
-            if (!setupVault()) {
-                getLogger().log(Level.WARNING, "Vault not found, vault integration will not work.");
-                return;
-            }
-            getLogger().log(Level.INFO, "Vault found. Enabling integration.");
-        }
-
         // Setup PlaceholderAPI Integration
         if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIIntegration().register();
@@ -127,6 +120,34 @@ public final class BankAccounts extends JavaPlugin {
     @Override
     public void onDisable() {
         dbSource.close();
+    }
+
+    public boolean setupVault() {
+        if (!hasVault()) {
+            getLogger().log(Level.WARNING, "Vault not found, vault integration will not work.");
+            return false;
+        }
+//        if (isEconomyRegistered()) {
+//            return false;
+//        }
+        // unregister
+        final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
+        if (rsp.isPresent()) {
+            economy = rsp.get().getProvider();
+            getLogger().log(Level.WARNING, "Economy already registered by " + rsp.get().getPlugin().getName());
+            getServer().getServicesManager().unregister(economy);
+            getLogger().log(Level.WARNING, "Unregistered economy provider.");
+        }
+
+        try {
+            getLogger().log(Level.INFO, "Vault found. Enabling integration.");
+            getServer().getServicesManager().register(Economy.class, new VaultIntegration(this), this, ServicePriority.Normal);
+        } catch (final @NotNull Exception e) {
+            getLogger().log(Level.WARNING, "Failed to register vault economy.", e);
+            return false;
+        }
+
+        return true;
     }
 
     /**
@@ -175,14 +196,18 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     /**
-     * Setup Vault
+     * Check if economy is already registered
      */
-    private boolean setupVault() {
-        if (!hasVault()) return false;
+    private boolean isEconomyRegistered() {
         final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
-        if (rsp.isEmpty()) return false;
-        economy = rsp.get().getProvider();
-        return true;
+	    if (rsp.isPresent()) {
+            economy = rsp.get().getProvider();
+            getLogger().log(Level.WARNING, "Economy already registered by " + rsp.get().getPlugin().getName() + ", vault integration will not work.");
+            getServer().getServicesManager().unregister(economy);
+            // um, what
+            return false; // this is a bad idea
+        }
+        return rsp.isPresent();
     }
 
     /**
@@ -193,7 +218,9 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        if (isVaultEnabled()) getInstance().setupVault();
+        if (isVaultEnabled()) {
+            getInstance().setupVault();
+        }
         
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
             checkForUpdates().ifPresent(latestVersion -> {

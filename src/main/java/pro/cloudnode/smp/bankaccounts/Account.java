@@ -133,9 +133,7 @@ public class Account {
     public final @NotNull Transaction transfer(final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description, final @Nullable String instrument) {
         if (frozen) throw new IllegalStateException("Your account is frozen");
         if (to.frozen) throw new IllegalStateException("Recipient account is frozen");
-        if (amount.compareTo(BigDecimal.ZERO) <= 0) throw new IllegalArgumentException("Amount must be greater than zero");
         if (!hasFunds(amount)) throw new IllegalStateException("Insufficient funds");
-
         final @NotNull Transaction transaction = new Transaction(this, to, amount, description, instrument);
         transaction.save();
         this.updateBalance(amount.negate());
