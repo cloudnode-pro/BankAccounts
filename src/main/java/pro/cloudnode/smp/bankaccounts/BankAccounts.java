@@ -156,7 +156,7 @@ public final class BankAccounts extends JavaPlugin {
     private void setupDbSource() {
         switch (Objects.requireNonNull(getConfig().getString("db.db"))) {
             case "sqlite" -> {
-                config.setDriverClassName(org.sqlite.JDBC.class.getName());
+                config.setDriverClassName("org.sqlite.JDBC");
                 config.setJdbcUrl("jdbc:sqlite:" + getDataFolder().getAbsolutePath() + "/" + Objects.requireNonNull(getConfig().getString("db.sqlite.file")));
             }
             case "mariadb" -> {
