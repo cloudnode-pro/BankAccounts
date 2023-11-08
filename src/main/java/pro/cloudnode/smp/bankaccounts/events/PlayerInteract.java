@@ -9,6 +9,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
@@ -25,7 +26,7 @@ public final class PlayerInteract implements Listener {
         final @NotNull Player player = event.getPlayer();
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK) {
             final @NotNull Optional<Block> block = Optional.ofNullable(event.getClickedBlock());
-            if (block.isPresent() && block.get().getState() instanceof final @NotNull Chest chest && !chest.getInventory().isEmpty()) {
+            if (block.isPresent() && block.get().getState() instanceof final @NotNull Chest chest && !chest.getInventory().isEmpty() && !(chest.getInventory() instanceof DoubleChestInventory)) {
                 final @NotNull Optional<POS> pos = POS.get(block.get());
                 if (pos.isEmpty()) return;
                 event.setCancelled(true);
