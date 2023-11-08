@@ -220,20 +220,6 @@ pos:
         lore:
             - "<gray>Click to decline this purchase.</gray>"
 
-    more:
-        material: ARROW
-        glint: false
-        name: "<green><bold>View more</bold></green>"
-        lore:
-            - "<gray>Click to view more items.</gray>"
-
-    less:
-        material: ARROW
-        glint: false
-        name: "<green><bold>View less</bold></green>"
-        lore:
-            - "<gray>Click to view less items.</gray>"
-
 
 # Messages
 messages:
@@ -299,6 +285,7 @@ messages:
         block-too-far: "<red>(!) The targeted block is too far away.</red>"
         pos-already-exists: "<red>(!) A POS already exists at this location.</red>"
         pos-not-chest: "<red>(!) The targeted block is not a chest.</red>"
+        pos-double-chest: "<red>(!) The POS cannot be a double chest.</red>"
         pos-empty: "<red>(!) The chest is empty. POS cancelled.</red>"
         pos-invalid-card: "<red>(!) You need a valid bank card to use POS.</red>"
         pos-no-permission: "<red>(!) You do not have permission to use POS.</red>"
