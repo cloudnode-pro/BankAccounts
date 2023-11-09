@@ -14,6 +14,7 @@ import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
+import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.util.Optional;
 
@@ -31,7 +32,7 @@ public final class PlayerInteract implements Listener {
                     POS.openOwnerGui(player, chest, pos.get());
                     return;
                 }
-                if (!player.hasPermission("bank.pos.use")) {
+                if (!player.hasPermission(Permissions.POS_USE)) {
                     player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosNoPermission()));
                     return;
                 }
@@ -44,7 +45,7 @@ public final class PlayerInteract implements Listener {
                 if (account.isEmpty())
                     player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosInvalidCard()));
                 else {
-                    if (!player.hasPermission("bank.pos.use.other") && !account.get().owner.getUniqueId().equals(player.getUniqueId())) {
+                    if (!player.hasPermission(Permissions.POS_USE_OTHER) && !account.get().owner.getUniqueId().equals(player.getUniqueId())) {
                         player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsNotAccountOwner()));
                         return;
                     }

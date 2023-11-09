@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.Permissions;
 import pro.cloudnode.smp.bankaccounts.Transaction;
 
 import java.math.BigDecimal;
@@ -26,36 +27,36 @@ import java.util.stream.Collectors;
 public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
     @Override
     public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
-        if (!sender.hasPermission("bank.command")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.COMMAND)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         return run(sender, label, args);
     }
 
     @Override
     public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
-        if (!sender.hasPermission("bank.command")) return suggestions;
+        if (!sender.hasPermission(Permissions.COMMAND)) return suggestions;
         if (args.length == 1) {
             suggestions.add("help");
-            if (sender.hasPermission("bank.balance.self"))
+            if (sender.hasPermission(Permissions.BALANCE_SELF))
                 suggestions.addAll(Arrays.asList("balance", "bal", "account", "accounts"));
-            if (sender.hasPermission("bank.reload")) suggestions.add("reload");
-            if (sender.hasPermission("bank.account.create")) suggestions.addAll(Arrays.asList("create", "new"));
-            if (sender.hasPermission("bank.set.balance")) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
-            if (sender.hasPermission("bank.set.name")) suggestions.addAll(Arrays.asList("setname", "rename"));
-            if (sender.hasPermission("bank.delete")) suggestions.add("delete");
-            if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other"))
+            if (sender.hasPermission(Permissions.RELOAD)) suggestions.add("reload");
+            if (sender.hasPermission(Permissions.ACCOUNT_CREATE)) suggestions.addAll(Arrays.asList("create", "new"));
+            if (sender.hasPermission(Permissions.SET_BALANCE)) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
+            if (sender.hasPermission(Permissions.SET_NAME)) suggestions.addAll(Arrays.asList("setname", "rename"));
+            if (sender.hasPermission(Permissions.DELETE)) suggestions.add("delete");
+            if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
                 suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
-            if (sender.hasPermission("bank.history")) suggestions.addAll(Arrays.asList("transactions", "history"));
-            if (sender.hasPermission("bank.instrument.create")) suggestions.addAll(Arrays.asList("instrument", "card"));
-            if (sender.hasPermission("bank.whois")) suggestions.addAll(Arrays.asList("whois", "who", "info"));
+            if (sender.hasPermission(Permissions.HISTORY)) suggestions.addAll(Arrays.asList("transactions", "history"));
+            if (sender.hasPermission(Permissions.INSTRUMENT_CREATE)) suggestions.addAll(Arrays.asList("instrument", "card"));
+            if (sender.hasPermission(Permissions.WHOIS)) suggestions.addAll(Arrays.asList("whois", "who", "info"));
         }
         else {
             switch (args[0]) {
                 case "balance", "bal", "account", "accounts" -> {
-                    if (!sender.hasPermission("bank.balance.self") && !sender.hasPermission("bank.balance.other"))
+                    if (!sender.hasPermission(Permissions.BALANCE_SELF) && !sender.hasPermission(Permissions.BALANCE_OTHER))
                         return suggestions;
                     if (args.length == 2) {
-                        if (sender.hasPermission("bank.balance.other")) suggestions.add("--player");
+                        if (sender.hasPermission(Permissions.BALANCE_OTHER)) suggestions.add("--player");
                         if (sender instanceof OfflinePlayer player) {
                             final @NotNull Account @NotNull [] accounts = Account.get(player);
                             for (Account account : accounts) suggestions.add(account.id);
@@ -65,23 +66,23 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                             for (final @NotNull Account account : accounts) suggestions.add(account.id);
                         }
                     }
-                    else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission("bank.balance.other"))
+                    else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission(Permissions.BALANCE_OTHER))
                         suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.owner.getName())
                                 .filter(Objects::nonNull).collect(Collectors.toSet()));
                 }
                 case "create", "new" -> {
-                    if (!sender.hasPermission("bank.account.create")) return suggestions;
+                    if (!sender.hasPermission(Permissions.ACCOUNT_CREATE)) return suggestions;
                     if (args.length == 2) {
                         suggestions.addAll(Arrays.asList("PERSONAL", "BUSINESS"));
                     }
-                    else if (args.length == 3 && sender.hasPermission("bank.account.create.other"))
+                    else if (args.length == 3 && sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
                         suggestions.add("--player");
-                    else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission("bank.account.create.other"))
+                    else if (args.length == 4 && args[2].equals("--player") && sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
                         suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.owner.getName())
                                 .filter(Objects::nonNull).collect(Collectors.toSet()));
                 }
                 case "setbal", "setbalance" -> {
-                    if (!sender.hasPermission("bank.set.balance")) return suggestions;
+                    if (!sender.hasPermission(Permissions.SET_BALANCE)) return suggestions;
                     if (args.length == 2) {
                         final @NotNull Account @NotNull [] accounts = Account.get();
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
@@ -89,51 +90,51 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                     if (args.length == 3) suggestions.add("Infinity");
                 }
                 case "setname", "rename" -> {
-                    if (!sender.hasPermission("bank.set.name")) return suggestions;
+                    if (!sender.hasPermission(Permissions.SET_NAME)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.set.name.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.SET_NAME_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                 }
                 case "delete" -> {
-                    if (!sender.hasPermission("bank.delete")) return suggestions;
+                    if (!sender.hasPermission(Permissions.DELETE)) return suggestions;
                     if (args.length == 2) suggestions.addAll(Arrays
-                            .stream(sender.hasPermission("bank.delete.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
-                            .filter(account -> sender.hasPermission("bank.delete.person") || account.type != Account.Type.PERSONAL)
+                            .stream(sender.hasPermission(Permissions.DELETE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .filter(account -> sender.hasPermission(Permissions.DELETE_PERSONAL) || account.type != Account.Type.PERSONAL)
                             .map(account -> account.id).collect(Collectors.toSet()));
                 }
                 case "transfer", "send", "pay" -> {
-                    if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other"))
+                    if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
                         return suggestions;
                     if (args.length == 2) {
                         final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                     else if (args.length == 3) suggestions.addAll(Arrays
-                            .stream(sender.hasPermission("bank.transfer.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .stream(sender.hasPermission(Permissions.TRANSFER_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
                             .filter(account -> !account.id.equals(args[1])).map(account -> account.id)
                             .collect(Collectors.toSet()));
                 }
                 case "transactions", "history" -> {
-                    if (!sender.hasPermission("bank.history")) return suggestions;
+                    if (!sender.hasPermission(Permissions.HISTORY)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.history.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.HISTORY_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
                     else if (args.length == 3) suggestions.add("--all");
                 }
                 case "instrument", "card" -> {
-                    if (!sender.hasPermission("bank.instrument.create")) return suggestions;
+                    if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission("bank.instrument.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
-                    else if (args.length == 3 && sender.hasPermission("bank.instrument.create.other"))
+                    else if (args.length == 3 && sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER))
                         suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream()
                                 .map(Player::getName).toList());
                 }
                 case "whois", "who", "info" -> {
-                    if (!sender.hasPermission("bank.whois")) return suggestions;
+                    if (!sender.hasPermission(Permissions.WHOIS)) return suggestions;
                     if (args.length == 2)
                         suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).toList());
                 }
@@ -182,31 +183,31 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         sendMessage(sender, "<dark_gray>---</dark_gray>");
         sendMessage(sender, "<green>Available commands:");
         sendMessage(sender, "");
-        if (sender.hasPermission("bank.balance.self"))
+        if (sender.hasPermission(Permissions.BALANCE_SELF))
             sendMessage(sender, "<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>");
-        if (sender.hasPermission("bank.balance.other"))
+        if (sender.hasPermission(Permissions.BALANCE_OTHER))
             sendMessage(sender, "<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player <player></gray></green> <white>- List another player's accounts</click>");
-        if (sender.hasPermission("bank.transfer.self") || sender.hasPermission("bank.transfer.other"))
+        if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
             sendMessage(sender, "<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>");
-        if (sender.hasPermission("bank.history"))
+        if (sender.hasPermission(Permissions.HISTORY))
             sendMessage(sender, "<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>");
-        if (sender.hasPermission("bank.account.create"))
+        if (sender.hasPermission(Permissions.ACCOUNT_CREATE))
             sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
-        if (sender.hasPermission("bank.account.create.other"))
+        if (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
             sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS> --player <player></gray></green> <white>- Create an account for another player</click>");
-        if (sender.hasPermission("bank.delete"))
+        if (sender.hasPermission(Permissions.DELETE))
             sendMessage(sender, "<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>");
-        if (sender.hasPermission("bank.instrument.create"))
-            sendMessage(sender, "<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission("bank.instrument.create.other") ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>");
-        if (sender.hasPermission("bank.whois"))
+        if (sender.hasPermission(Permissions.INSTRUMENT_CREATE))
+            sendMessage(sender, "<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>");
+        if (sender.hasPermission(Permissions.WHOIS))
             sendMessage(sender, "<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>");
-        if (sender.hasPermission("bank.pos.create"))
+        if (sender.hasPermission(Permissions.POS_CREATE))
             sendMessage(sender, "<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>");
-        if (sender.hasPermission("bank.set.balance"))
+        if (sender.hasPermission(Permissions.SET_BALANCE))
             sendMessage(sender, "<click:suggest_command:/bank setbalance ><green>/bank setbalance <gray><account> <balance|Infinity></gray></green> <white>- Set an account's balance</click>");
-        if (sender.hasPermission("bank.set.name"))
+        if (sender.hasPermission(Permissions.SET_NAME))
             sendMessage(sender, "<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>");
-        if (sender.hasPermission("bank.reload"))
+        if (sender.hasPermission(Permissions.RELOAD))
             sendMessage(sender, "<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>");
         return sendMessage(sender, "<dark_gray>---</dark_gray>");
     }
@@ -228,22 +229,22 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean balance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) throws NullPointerException {
         if (args.length == 0) {
-            if (!sender.hasPermission("bank.balance.self"))
+            if (!sender.hasPermission(Permissions.BALANCE_SELF))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             return listAccounts(sender, BankAccounts.getOfflinePlayer(sender));
         }
         else if (args[0].equals("--player")) {
-            if (!sender.hasPermission("bank.balance.other"))
+            if (!sender.hasPermission(Permissions.BALANCE_OTHER))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             if (args.length == 1) return sendUsage(sender, label, "balance --player <player>");
             return listAccounts(sender, BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]));
         }
         else {
-            if (!sender.hasPermission("bank.balance.self"))
+            if (!sender.hasPermission(Permissions.BALANCE_SELF))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
             if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
-            else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId()
+            else if (!sender.hasPermission(Permissions.BALANCE_OTHER) && !account.get().owner.getUniqueId()
                     .equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
             else return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalance(), account.get()));
@@ -268,7 +269,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Reload plugin configuration
      */
     public static boolean reload(final @NotNull CommandSender sender) {
-        if (!sender.hasPermission("bank.reload")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.RELOAD)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         BankAccounts.reload();
         return sendMessage(sender, BankAccounts.getInstance().config().messagesReload());
     }
@@ -278,11 +279,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * create [type] [--player <player>]
      */
     public static boolean create(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.account.create"))
+        if (!sender.hasPermission(Permissions.ACCOUNT_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         @NotNull OfflinePlayer target = BankAccounts.getOfflinePlayer(sender);
         if (Arrays.asList(args).contains("--player")) {
-            if (!sender.hasPermission("bank.account.create.other"))
+            if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             else {
                 // find value of --player
@@ -294,15 +295,15 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             }
         }
         if (args.length == 0)
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission("bank.account.create.other") ? "[--player <player>]" : ""));
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
         // check if target is the same as sender
         if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender)
-                .getUniqueId()) && !sender.hasPermission("bank.account.create"))
+                .getUniqueId()) && !sender.hasPermission(Permissions.ACCOUNT_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
         if (optionalType.isEmpty())
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission("bank.account.create.other") ? "[--player <player>]" : ""));
-        if (!sender.hasPermission("bank.account.create.bypass")) {
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
+        if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_BYPASS)) {
             final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
             int limit = BankAccounts.getInstance().config().accountLimits(optionalType.get());
             if (limit != -1 && accounts.length >= limit)
@@ -321,7 +322,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * setbal <account> <bal>
      */
     public static boolean setBalance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.set.balance"))
+        if (!sender.hasPermission(Permissions.SET_BALANCE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>");
@@ -345,17 +346,17 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Set account name
      */
     public static boolean setName(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.set.name"))
+        if (!sender.hasPermission(Permissions.SET_NAME))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setname " + (args.length > 0 ? args[0] : "<account>") + " [name]");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         else {
-            if (!sender.hasPermission("bank.set.name.other") && !account.get().owner.getUniqueId()
+            if (!sender.hasPermission(Permissions.SET_NAME_OTHER) && !account.get().owner.getUniqueId()
                     .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-            if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL)
+            if (!sender.hasPermission(Permissions.SET_NAME_PERSONAL) && account.get().type == Account.Type.PERSONAL)
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenamePersonal());
             @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
@@ -375,11 +376,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Delete account
      */
     public static boolean delete(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.delete")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.DELETE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "delete <account>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
-        if (!sender.hasPermission("bank.delete.other") && !account.get().owner.getUniqueId()
+        if (!sender.hasPermission(Permissions.DELETE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
@@ -388,7 +389,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (account.get().frozen)
             return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
         if (BankAccounts.getInstance().config()
-                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
+                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
         return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountDeleted(), account.get()));
@@ -400,7 +401,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * {@code transfer [--confirm] <from> <to> <amount> [description]}
      */
     public static boolean transfer(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other"))
+        if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         boolean confirm = args.length > 0 && args[0].equals("--confirm");
         @NotNull String[] argsCopy = args;
@@ -425,12 +426,12 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         if (to.get().frozen)
             return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), to.get()));
         // to is foreign
-        if (!sender.hasPermission("bank.transfer.other") && !to.get().owner.getUniqueId()
+        if (!sender.hasPermission(Permissions.TRANSFER_OTHER) && !to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferSelfOnly());
         }
         // to is not foreign
-        if (!sender.hasPermission("bank.transfer.self") && to.get().owner.getUniqueId()
+        if (!sender.hasPermission(Permissions.TRANSFER_SELF) && to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
 
@@ -480,11 +481,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * {@code transactions <account> [page|--all]}
      */
     public static boolean transactions(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.history")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.HISTORY)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "transactions <account> [page=1|--all]");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
-        if (!sender.hasPermission("bank.history.other") && !account.get().owner.getUniqueId()
+        if (!sender.hasPermission(Permissions.HISTORY_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final int page;
@@ -524,23 +525,23 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Create instrument
      */
     public static boolean instrument(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.instrument.create"))
+        if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (!(sender instanceof Player)) {
-            if (!sender.hasPermission("bank.instrument.create.other"))
+            if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerOnly());
             else if (args.length < 2)
                 return sendUsage(sender, label, "instrument " + (args.length > 0 ? args[0] : "<account>") + " <player>");
         }
         else if (args.length < 1)
-            return sendUsage(sender, label, "instrument <account>" + (sender.hasPermission("bank.instrument.create.other") ? " <player>" : ""));
-        final @Nullable Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts
+            return sendUsage(sender, label, "instrument <account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " <player>" : ""));
+        final @Nullable Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) && args.length >= 2) ? BankAccounts
                 .getInstance().getServer().getPlayer(args[1]) : player;
         if (target == null || !target.isOnline())
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
-        if (!sender.hasPermission("bank.instrument.create.other") && !account.get().owner.getUniqueId()
+        if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
 
@@ -553,7 +554,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                     .filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta())
                     .findFirst().orElse(null);
 
-            if (!sender.hasPermission("bank.instrument.create.bypass")) {
+            if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE_BYPASS)) {
                 if (item == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInstrumentRequiresItem()
                         .replace("<material-key>", material.translationKey()), Placeholder.unparsed("material", material.name()));
                 else {
@@ -572,7 +573,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Account whois
      */
     public static boolean whois(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.whois")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.WHOIS)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "whois <account>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         return account

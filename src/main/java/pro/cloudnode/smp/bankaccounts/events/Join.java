@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Command;
+import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public final class Join implements Listener {
                         new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(aDouble), false).insert();
                     }
                 }));
-        if (player.hasPermission("bank.notify-update")) {
+        if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {
             BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
                 BankAccounts.checkForUpdates().ifPresent(latestVersion -> {
                     Command.sendMessage(player, BankAccounts.getInstance().config().messagesUpdateAvailable()

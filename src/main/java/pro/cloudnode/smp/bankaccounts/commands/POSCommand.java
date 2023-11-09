@@ -13,6 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
+import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -33,7 +34,7 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
     public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         if (!(sender instanceof final @NotNull Player player))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerOnly());
-        if (!player.hasPermission("bank.pos.create"))
+        if (!player.hasPermission(Permissions.POS_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         if (args.length < 2)
@@ -42,13 +43,13 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
 
-        if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission("bank.pos.create.personal"))
+        if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission(Permissions.POS_CREATE_PERSONAL))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosCreateBusinessOnly());
 
         if (account.get().frozen)
             return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
 
-        if (!player.hasPermission("bank.pos.create.other") && !account.get().owner.equals(player))
+        if (!player.hasPermission(Permissions.POS_CREATE_OTHER) && !account.get().owner.equals(player))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
 
         final @NotNull BigDecimal price;
@@ -86,10 +87,10 @@ public final class POSCommand extends pro.cloudnode.smp.bankaccounts.Command {
 
     public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
-        if (sender.hasPermission("bank.pos.create") && sender instanceof Player && args.length == 1) {
-            final @NotNull Account[] accounts = sender.hasPermission("bank.pos.create.other") ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+        if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof Player && args.length == 1) {
+            final @NotNull Account[] accounts = sender.hasPermission(Permissions.POS_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
             for (final @NotNull Account account : accounts) {
-                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !sender.hasPermission("bank.pos.create.personal")))
+                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !sender.hasPermission(Permissions.POS_CREATE_PERSONAL)))
                     continue;
                 suggestions.add(account.id);
             }
