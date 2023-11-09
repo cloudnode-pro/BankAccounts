@@ -9,7 +9,6 @@ import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentWrapper;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
@@ -155,20 +154,19 @@ public class Account {
      * Create payment instrument
      */
     public final @NotNull ItemStack createInstrument() {
-        final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.material"))));
+        final @NotNull Material material = BankAccounts.getInstance().config().instrumentsMaterial();
         final @NotNull ItemStack instrument = new ItemStack(material);
 
-        final @NotNull String name = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.name"));
-        final @NotNull List<String> lore = Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("instruments.lore"));
-        final boolean glint = BankAccounts.getInstance().getConfig().getBoolean("instruments.glint.enabled");
+        final @NotNull String name = BankAccounts.getInstance().config().instrumentsName();
+        final @NotNull List<@NotNull String> lore = BankAccounts.getInstance().config().instrumentsLore();
+        final boolean glint = BankAccounts.getInstance().config().instrumentsGlintEnabled();
 
         final @NotNull ItemMeta meta = instrument.getItemMeta();
         meta.displayName(this.instrumentPlaceholders(name));
         meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
 
         if (glint) {
-            final @NotNull NamespacedKey key = NamespacedKey.minecraft(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("instruments.glint.enchantment")));
-            final @NotNull Enchantment enchantment = Objects.requireNonNull(EnchantmentWrapper.getByKey(key));
+            final @NotNull Enchantment enchantment = BankAccounts.getInstance().config().instrumentsGlintEnchantment();
             meta.addEnchant(enchantment, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);
         }
@@ -402,7 +400,7 @@ public class Account {
          * Get type name (as set in config)
          */
         public @NotNull String getName() {
-            return Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.types." + getType(this)));
+            return BankAccounts.getInstance().config().messagesTypes(this);
         }
 
         /**

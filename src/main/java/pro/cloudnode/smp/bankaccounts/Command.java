@@ -9,8 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public abstract class Command implements CommandExecutor, TabCompleter {
     /**
      * Send message to sender.
@@ -37,18 +35,6 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Send config message to sender.
-     *
-     * @param sender       Command sender.
-     * @param path         Path to message in config.
-     * @param placeholders Placeholders to replace.
-     * @return Always true.
-     */
-    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull BankConfig path, final @NotNull TagResolver @NotNull ... placeholders) {
-        return sendMessage(sender, Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(path.getKey())), placeholders);
-    }
-
-    /**
      * Send command usage to sender.
      *
      * @param sender    Command sender.
@@ -57,6 +43,6 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      * @return Always true.
      */
     protected static boolean sendUsage(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String arguments) {
-        return sendMessage(sender, BankConfig.MESSAGES_COMMAND_USAGE, Placeholder.unparsed("command", label), Placeholder.unparsed("arguments", arguments));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(), Placeholder.unparsed("command", label), Placeholder.unparsed("arguments", arguments));
     }
 }
