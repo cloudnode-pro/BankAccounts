@@ -9,8 +9,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.Objects;
-
 public abstract class Command implements CommandExecutor, TabCompleter {
     /**
      * Send message to sender.

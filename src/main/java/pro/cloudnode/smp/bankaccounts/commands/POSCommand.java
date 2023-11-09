@@ -2,7 +2,6 @@ package pro.cloudnode.smp.bankaccounts.commands;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.command.Command;
@@ -13,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
-import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 
 import java.math.BigDecimal;
@@ -21,7 +19,6 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
-import java.util.Objects;
 import java.util.Optional;
 
 /**

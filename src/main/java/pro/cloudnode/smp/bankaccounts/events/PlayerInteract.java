@@ -1,7 +1,6 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -14,10 +13,8 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
-import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.POS;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public final class PlayerInteract implements Listener {

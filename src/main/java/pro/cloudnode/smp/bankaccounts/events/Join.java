@@ -6,22 +6,12 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
-import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.Command;
 
 import java.math.BigDecimal;
-import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public final class Join implements Listener {
     @EventHandler

@@ -21,7 +21,6 @@ import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
 import pro.cloudnode.smp.bankaccounts.Transaction;
-import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 
 import java.util.Arrays;
 import java.util.HashMap;
