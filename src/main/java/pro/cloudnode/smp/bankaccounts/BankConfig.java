@@ -436,11 +436,6 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.errors.pos-no-permission"));
     }
 
-    // messages.errors.card-no-permission
-    public @NotNull String messagesErrorsCardNoPermission() {
-        return Objects.requireNonNull(config.getString("messages.errors.card-no-permission"));
-    }
-
     // messages.errors.no-card
     public @NotNull String messagesErrorsNoCard() {
         return Objects.requireNonNull(config.getString("messages.errors.no-card"));
