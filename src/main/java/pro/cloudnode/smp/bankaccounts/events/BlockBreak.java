@@ -26,7 +26,7 @@ public final class BlockBreak implements Listener {
                     final @NotNull Optional<POS> pos = POS.get(chest);
                     if (pos.isPresent()) {
                         pos.get().delete();
-                        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(pro.cloudnode.smp.bankaccounts.BankAccounts.getInstance().getConfig().getString("messages.pos-removed"))));
+                        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesPosRemoved()));
                     }
                 });
             }

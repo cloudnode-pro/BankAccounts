@@ -12,7 +12,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
-import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.Transaction;
 
 import java.math.BigDecimal;
@@ -27,7 +26,7 @@ import java.util.stream.Collectors;
 public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
     @Override
     public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
-        if (!sender.hasPermission("bank.command")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (!sender.hasPermission("bank.command")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         return run(sender, label, args);
     }
 
@@ -162,7 +161,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             case "transactions", "history" -> transactions(sender, argsSubset, label);
             case "instrument", "card" -> instrument(sender, argsSubset, label);
             case "whois", "who", "info" -> whois(sender, argsSubset, label);
-            default -> sendMessage(sender, BankConfig.MESSAGES_ERRORS_UNKNOWN_COMMAND);
+            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
 
@@ -230,39 +229,37 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
     public static boolean balance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) throws NullPointerException {
         if (args.length == 0) {
             if (!sender.hasPermission("bank.balance.self"))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             return listAccounts(sender, BankAccounts.getOfflinePlayer(sender));
         }
         else if (args[0].equals("--player")) {
             if (!sender.hasPermission("bank.balance.other"))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             if (args.length == 1) return sendUsage(sender, label, "balance --player <player>");
             return listAccounts(sender, BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]));
         }
         else {
             if (!sender.hasPermission("bank.balance.self"))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-            if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+            if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
             else if (!sender.hasPermission("bank.balance.other") && !account.get().owner.getUniqueId()
                     .equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId()))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
-            else return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                        .getConfig().getString("messages.balance")), account.get()));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+            else return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalance(), account.get()));
         }
     }
 
     private static boolean listAccounts(final @NotNull CommandSender sender, final @NotNull OfflinePlayer player) {
         final @NotNull Account @NotNull [] accounts = Account.get(player);
-        if (accounts.length == 0) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_ACCOUNTS);
+        if (accounts.length == 0) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoAccounts());
         else if (accounts.length == 1)
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString("messages.balance")), accounts[0]));
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalance(), accounts[0]));
         else {
-            sendMessage(sender, BankConfig.MESSAGES_LIST_ACCOUNTS_HEADER);
+            sendMessage(sender, BankAccounts.getInstance().config().messagesListAccountsHeader());
             for (final @NotNull Account account : accounts)
-                sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
-                        .getString("messages.list-accounts.entry")), account));
+                sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().config()
+                        .messagesListAccountsEntry()), account));
         }
         return true;
     }
@@ -271,9 +268,9 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Reload plugin configuration
      */
     public static boolean reload(final @NotNull CommandSender sender) {
-        if (!sender.hasPermission("bank.reload")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (!sender.hasPermission("bank.reload")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         BankAccounts.reload();
-        return sendMessage(sender, BankConfig.MESSAGES_RELOAD);
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesReload());
     }
 
     /**
@@ -282,11 +279,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean create(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission("bank.account.create"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         @NotNull OfflinePlayer target = BankAccounts.getOfflinePlayer(sender);
         if (Arrays.asList(args).contains("--player")) {
             if (!sender.hasPermission("bank.account.create.other"))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
             else {
                 // find value of --player
                 int index = Arrays.asList(args).indexOf("--player");
@@ -301,25 +298,22 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         // check if target is the same as sender
         if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender)
                 .getUniqueId()) && !sender.hasPermission("bank.account.create"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
         if (optionalType.isEmpty())
             return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission("bank.account.create.other") ? "[--player <player>]" : ""));
         if (!sender.hasPermission("bank.account.create.bypass")) {
             final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
-            int limit = BankAccounts.getInstance().getConfig()
-                    .getInt("account-limits." + Account.Type.getType(optionalType.get()));
+            int limit = BankAccounts.getInstance().config().accountLimits(optionalType.get());
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_MAX_ACCOUNTS, Placeholder.unparsed("type", optionalType
-                        .get().getName()), Placeholder.unparsed("limit", String.valueOf(BankAccounts.getInstance()
-                        .getConfig().getInt("account-limits." + Account.Type.getType(optionalType.get())))));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(), Placeholder.unparsed("type", optionalType
+                        .get().getName()), Placeholder.unparsed("limit", String.valueOf(limit)));
         }
 
         final @NotNull Account account = new Account(target, optionalType.get(), null, BigDecimal.ZERO, false);
         account.insert();
 
-        return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
-                .getString("messages.account-created")), account));
+        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountCreated(), account));
     }
 
     /**
@@ -328,23 +322,22 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean setBalance(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission("bank.set.balance"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         else {
             final @Nullable BigDecimal balance;
             try {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
             }
             catch (NumberFormatException e) {
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
             }
             account.get().balance = balance;
             account.get().update();
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString("messages.balance-set")), account.get()));
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalanceSet(), account.get()));
         }
     }
 
@@ -353,28 +346,28 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean setName(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission("bank.set.name"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setname " + (args.length > 0 ? args[0] : "<account>") + " [name]");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         else {
             if (!sender.hasPermission("bank.set.name.other") && !account.get().owner.getUniqueId()
                     .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
             if (!sender.hasPermission("bank.set.name.personal") && account.get().type == Account.Type.PERSONAL)
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_RENAME_PERSONAL);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenamePersonal());
             @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
-            name = name.length() == 0 ? null : name;
+            name = name.isEmpty() ? null : name;
 
             if (name != null && (name.contains("<") || name.contains(">")))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_DISALLOWED_CHARACTERS, Placeholder.unparsed("characters", "<>"));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(), Placeholder.unparsed("characters", "<>"));
 
             account.get().name = name;
             account.get().update();
             return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString("messages.name-set")), account.get()));
+                    .config().messagesNameSet()), account.get()));
         }
     }
 
@@ -382,25 +375,23 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * Delete account
      */
     public static boolean delete(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.delete")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (!sender.hasPermission("bank.delete")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "delete <account>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission("bank.delete.other") && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_BALANCE);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance());
         if (account.get().frozen)
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), account.get()));
-        if (BankAccounts.getInstance().getConfig()
-                .getBoolean("prevent-close-last-personal") && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_CLOSING_PERSONAL);
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
+        if (BankAccounts.getInstance().config()
+                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission("bank.delete.personal") && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
-        return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().getConfig()
-                .getString("messages.account-deleted")), account.get()));
+        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountDeleted(), account.get()));
     }
 
     /**
@@ -410,7 +401,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean transfer(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission("bank.transfer.self") && !sender.hasPermission("bank.transfer.other"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         boolean confirm = args.length > 0 && args[0].equals("--confirm");
         @NotNull String[] argsCopy = args;
         if (confirm) argsCopy = Arrays.copyOfRange(argsCopy, 1, argsCopy.length);
@@ -418,60 +409,55 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendUsage(sender, label, "transfer " + (argsCopy.length > 0 ? argsCopy[0] : "<from>") + " " + (argsCopy.length > 1 ? argsCopy[1] : "<to>") + " <amount> [description]");
         final @NotNull Optional<@NotNull Account> from = Account.get(argsCopy[0]);
         // account does not exist
-        if (from.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (from.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         // sender does not own account
         if (!from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         // account is frozen
         if (from.get().frozen)
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), from.get()));
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), from.get()));
         // recipient does not exist
         final @NotNull Optional<@NotNull Account> to = Account.get(argsCopy[1]);
-        if (to.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (to.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         // to is same as from
-        if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_SAME_FROM_TO);
+        if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsSameFromTo());
         // to is frozen
         if (to.get().frozen)
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_FROZEN.getKey())), to.get()));
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), to.get()));
         // to is foreign
         if (!sender.hasPermission("bank.transfer.other") && !to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TRANSFER_SELF_ONLY);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferSelfOnly());
         }
         // to is not foreign
         if (!sender.hasPermission("bank.transfer.self") && to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TRANSFER_OTHER_ONLY);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
 
         final @NotNull BigDecimal amount;
         try {
             amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[2])).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", argsCopy[2]));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", argsCopy[2]));
         }
         // amount is 0 or less
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NEGATIVE_TRANSFER);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNegativeTransfer());
         // account has insufficient funds
         if (!from.get().hasFunds(amount))
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .getConfig().getString(BankConfig.MESSAGES_ERRORS_INSUFFICIENT_FUNDS.getKey())), from.get()));
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(), from.get()));
 
         @Nullable String description = args.length > 3 ? String
                 .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
         if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_DISALLOWED_CHARACTERS, Placeholder.unparsed("characters", "<>"));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(), Placeholder.unparsed("characters", "<>"));
 
-        if (!confirm && BankAccounts.getInstance().getConfig().getBoolean("transfer-confirmation.enabled")) {
-            final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().getConfig()
-                    .getDouble(BankConfig.TRANSFER_CONFIRMATION_MIN_AMOUNT.getKey()));
-            boolean bypassOwnAccounts = BankAccounts.getInstance().getConfig()
-                    .getBoolean(BankConfig.TRANSFER_CONFIRMATION_BYPASS_OWN_ACCOUNTS.getKey());
+        if (!confirm && BankAccounts.getInstance().config().transferConfirmationEnabled()) {
+            final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().config().transferConfirmationMinAmount());
+            boolean bypassOwnAccounts = BankAccounts.getInstance().config().transferConfirmationBypassOwnAccounts();
             if (amount.compareTo(minAmount) >= 0 && (!bypassOwnAccounts || !from.get().owner.getUniqueId()
                     .equals(to.get().owner.getUniqueId()))) {
                 return sendMessage(sender, transferConfirmation(from.get(), to.get(), amount, description));
@@ -479,13 +465,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
 
         final @NotNull Transaction transfer = from.get().transfer(to.get(), amount, description, null);
-        sendMessage(sender, Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts.getInstance()
-                .getConfig().getString(BankConfig.MESSAGES_TRANSFER_SENT.getKey()))));
+        sendMessage(sender, Transaction.placeholders(transfer, BankAccounts.getInstance().config().messagesTransferSent()));
         final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(to.get().owner.getPlayer());
         if (player.isPresent() && player.get().isOnline() && !player.get().getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            sendMessage(player.get(), Transaction.placeholders(transfer, Objects.requireNonNull(BankAccounts
-                    .getInstance().getConfig().getString(BankConfig.MESSAGES_TRANSFER_RECEIVED.getKey()))));
+            sendMessage(player.get(), Transaction.placeholders(transfer, BankAccounts.getInstance().config().messagesTransferReceived()));
 
         return true;
     }
@@ -496,16 +480,15 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      * {@code transactions <account> [page|--all]}
      */
     public static boolean transactions(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.history")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (!sender.hasPermission("bank.history")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "transactions <account> [page=1|--all]");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission("bank.history.other") && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final int page;
-        @NotNull Optional<@NotNull Integer> limit = Optional.of(BankAccounts.getInstance().getConfig()
-                .getInt(BankConfig.HISTORY_PER_PAGE.getKey()));
+        @NotNull Optional<@NotNull Integer> limit = Optional.of(BankAccounts.getInstance().config().historyPerPage());
         if (args.length > 1) {
             if (args[1].equals("--all")) {
                 page = 1;
@@ -517,7 +500,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                     if (page <= 0) throw new NumberFormatException();
                 }
                 catch (final @NotNull NumberFormatException e) {
-                    return sendMessage(sender, BankConfig.MESSAGES_ERRORS_INVALID_NUMBER, Placeholder.unparsed("number", args[1]));
+                    return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
                 }
             }
         }
@@ -525,17 +508,14 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @NotNull Transaction @NotNull [] transactions = limit
                 .map(integer -> Transaction.get(account.get(), integer, page))
                 .orElseGet(() -> Transaction.get(account.get()));
-        if (transactions.length == 0) sendMessage(sender, BankConfig.MESSAGES_HISTORY_NO_TRANSACTIONS);
+        if (transactions.length == 0) sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryNoTransactions());
         else {
             final int count = Transaction.count(account.get());
             final int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts
-                    .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_HEADER.getKey())));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, BankAccounts.getInstance().config().messagesHistoryHeader());
             for (final @NotNull Transaction transaction : transactions)
-                sendMessage(sender, Transaction.historyPlaceholders(transaction, account.get(), Objects.requireNonNull(BankAccounts
-                        .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_ENTRY.getKey()))));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, Objects.requireNonNull(BankAccounts
-                    .getInstance().getConfig().getString(BankConfig.MESSAGES_HISTORY_FOOTER.getKey())));
+                sendMessage(sender, Transaction.historyPlaceholders(transaction, account.get(), BankAccounts.getInstance().config().messagesHistoryEntry()));
+            transactionsHeaderFooter(sender, account.get(), page, maxPage, BankAccounts.getInstance().config().messagesHistoryFooter());
         }
         return true;
     }
@@ -545,10 +525,10 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static boolean instrument(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission("bank.instrument.create"))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (!(sender instanceof Player)) {
             if (!sender.hasPermission("bank.instrument.create.other"))
-                return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_ONLY);
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerOnly());
             else if (args.length < 2)
                 return sendUsage(sender, label, "instrument " + (args.length > 0 ? args[0] : "<account>") + " <player>");
         }
@@ -557,28 +537,24 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         final @Nullable Player target = !(sender instanceof final @NotNull Player player) || (sender.hasPermission("bank.instrument.create.other") && args.length >= 2) ? BankAccounts
                 .getInstance().getServer().getPlayer(args[1]) : player;
         if (target == null || !target.isOnline())
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_PLAYER_NOT_FOUND);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission("bank.instrument.create.other") && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER);
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
 
         if (target.getInventory().firstEmpty() == -1)
-            return sendMessage(sender, BankConfig.MESSAGES_ERRORS_TARGET_INVENTORY_FULL, Placeholder.unparsed("player", target.getName()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTargetInventoryFull(), Placeholder.unparsed("player", target.getName()));
 
-        if (BankAccounts.getInstance().getConfig()
-                .getBoolean(BankConfig.INSTRUMENTS_REQUIRE_ITEM.getKey()) && sender instanceof final @NotNull Player player) {
-            final @NotNull Material material = Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts
-                    .getInstance().getConfig().getString(BankConfig.INSTRUMENTS_MATERIAL.getKey()))));
+        if (BankAccounts.getInstance().config().instrumentsRequireItem() && sender instanceof final @NotNull Player player) {
+            final @NotNull Material material = BankAccounts.getInstance().config().instrumentsMaterial();
             final ItemStack item = Arrays.stream(player.getInventory().getStorageContents())
                     .filter(itemStack -> itemStack != null && itemStack.getType() == material && !itemStack.hasItemMeta())
                     .findFirst().orElse(null);
 
             if (!sender.hasPermission("bank.instrument.create.bypass")) {
-                if (item == null) return sendMessage(sender, Objects
-                        .requireNonNull(BankAccounts.getInstance().getConfig()
-                                .getString(BankConfig.MESSAGES_ERRORS_INSTRUMENT_REQUIRES_ITEM.getKey()))
+                if (item == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInstrumentRequiresItem()
                         .replace("<material-key>", material.translationKey()), Placeholder.unparsed("material", material.name()));
                 else {
                     final @NotNull ItemStack clone = item.clone();
@@ -589,20 +565,19 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
 
         target.getInventory().addItem(account.get().createInstrument());
-        return sendMessage(sender, BankConfig.MESSAGES_INSTRUMENT_CREATED);
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInstrumentCreated());
     }
 
     /**
      * Account whois
      */
     public static boolean whois(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission("bank.whois")) return sendMessage(sender, BankConfig.MESSAGES_ERRORS_NO_PERMISSION);
+        if (!sender.hasPermission("bank.whois")) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "whois <account>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         return account
-                .map(value -> sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                        .getConfig().getString(BankConfig.MESSAGES_WHOIS.getKey())), value)))
-                .orElseGet(() -> sendMessage(sender, BankConfig.MESSAGES_ERRORS_ACCOUNT_NOT_FOUND));
+                .map(value -> sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesWhois(), value)))
+                .orElseGet(() -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound()));
     }
 
     /**
@@ -638,7 +613,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
      */
     public static @NotNull Component transferConfirmation(final @NotNull Account from, final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description) {
         return Account.placeholders(Objects
-                .requireNonNull(BankAccounts.getInstance().getConfig().getString("messages.confirm-transfer"))
+                .requireNonNull(BankAccounts.getInstance().config().messagesConfirmTransfer())
                 .replace("<amount>", amount.toPlainString())
                 .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
                 .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))

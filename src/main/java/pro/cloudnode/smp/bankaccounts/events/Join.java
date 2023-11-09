@@ -18,6 +18,7 @@ import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -26,20 +27,19 @@ public final class Join implements Listener {
     @EventHandler
     public void onPlayerJoin(final @NotNull PlayerJoinEvent event) {
         final Player player = event.getPlayer();
-        if (!"null".equals(BankAccounts.getInstance().getConfig().getString("starting-balance"))) {
-            Bukkit.getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
-                final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
-                if (accounts.length == 0) {
-                    final double startingBalance = BankAccounts.getInstance().getConfig().getDouble("starting-balance");
-                    new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(startingBalance), false).insert();
-                }
-            });
-        }
+        final @NotNull Optional<@NotNull Double> startingBalance = BankAccounts.getInstance().config()
+                .startingBalance();
+        startingBalance.ifPresent(aDouble -> Bukkit.getScheduler()
+                .runTaskAsynchronously(BankAccounts.getInstance(), () -> {
+                    final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
+                    if (accounts.length == 0) {
+                        new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(aDouble), false).insert();
+                    }
+                }));
         if (player.hasPermission("bank.notify-update")) {
             BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
                 BankAccounts.checkForUpdates().ifPresent(latestVersion -> {
-                    Command.sendMessage(player, Objects.requireNonNull(BankAccounts.getInstance().getConfig()
-                                    .getString(BankConfig.MESSAGES_UPDATE_AVAILABLE.getKey()))
+                    Command.sendMessage(player, BankAccounts.getInstance().config().messagesUpdateAvailable()
                             .replace("<version>", latestVersion));
                 });
             }, 20L);

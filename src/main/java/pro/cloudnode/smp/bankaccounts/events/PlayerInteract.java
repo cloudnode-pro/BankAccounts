@@ -35,20 +35,20 @@ public final class PlayerInteract implements Listener {
                     return;
                 }
                 if (!player.hasPermission("bank.pos.use")) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_NO_PERMISSION.getKey()))));
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosNoPermission()));
                     return;
                 }
                 final @NotNull ItemStack heldItem = player.getInventory().getItemInMainHand();
-                if (heldItem.getType() != Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.INSTRUMENTS_MATERIAL.getKey()))))) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_NO_CARD.getKey()))));
+                if (heldItem.getType() != BankAccounts.getInstance().config().instrumentsMaterial()) {
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsNoCard()));
                     return;
                 }
                 final @NotNull Optional<@NotNull Account> account = Account.get(heldItem);
                 if (account.isEmpty())
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_POS_INVALID_CARD.getKey()))));
+                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosInvalidCard()));
                 else {
                     if (!player.hasPermission("bank.pos.use.other") && !account.get().owner.getUniqueId().equals(player.getUniqueId())) {
-                        player.sendMessage(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString(BankConfig.MESSAGES_ERRORS_NOT_ACCOUNT_OWNER.getKey()))));
+                        player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsNotAccountOwner()));
                         return;
                     }
                     POS.openBuyGui(player, chest, pos.get(), account.get());

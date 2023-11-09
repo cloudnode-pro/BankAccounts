@@ -292,7 +292,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
@@ -300,19 +300,19 @@ public final class POS {
         ));
         gui.addItem(items);
 
-        final @NotNull ItemStack overview = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
+        final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
+        if (BankAccounts.getInstance().config().posInfoGlint()) {
             overview.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.name-owner")),
+        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posInfoNameOwner(),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        overviewMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.info.lore-owner")).stream()
+        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreOwner().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(line,
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -322,14 +322,14 @@ public final class POS {
         overview.setItemMeta(overviewMeta);
         gui.setItem(size - 5, overview);
 
-        final @NotNull ItemStack delete = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.delete.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.delete.glint")) {
+        final @NotNull ItemStack delete = new ItemStack(BankAccounts.getInstance().config().posDeleteMaterial(), 1);
+        if (BankAccounts.getInstance().config().posDeleteGlint()) {
             delete.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             delete.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta deleteMeta = delete.getItemMeta();
-        deleteMeta.displayName(MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.delete.name"))).decoration(TextDecoration.ITALIC, false));
-        deleteMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.delete.lore")).stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+        deleteMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posDeleteName()).decoration(TextDecoration.ITALIC, false));
+        deleteMeta.lore(BankAccounts.getInstance().config().posDeleteLore().stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
         final @NotNull PersistentDataContainer deleteContainer = deleteMeta.getPersistentDataContainer();
         deleteContainer.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
         delete.setItemMeta(deleteMeta);
@@ -353,7 +353,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.title")),
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
@@ -361,19 +361,19 @@ public final class POS {
         ));
         gui.addItem(items);
 
-        final @NotNull ItemStack overview = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.info.glint")) {
+        final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
+        if (BankAccounts.getInstance().config().posInfoGlint()) {
             overview.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.info.name-buyer")), pos.seller),
+        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(BankAccounts.getInstance().config().posInfoNameBuyer(), pos.seller),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        overviewMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.info.lore-buyer")).stream()
+        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, pos.seller),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -385,19 +385,19 @@ public final class POS {
         overview.setItemMeta(overviewMeta);
         gui.setItem(size - 5, overview);
 
-        final @NotNull ItemStack confirm = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.confirm.glint")) {
+        final @NotNull ItemStack confirm = new ItemStack(BankAccounts.getInstance().config().posConfirmMaterial(), 1);
+        if (BankAccounts.getInstance().config().posConfirmGlint()) {
             confirm.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             confirm.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.confirm.name")), account),
+        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(BankAccounts.getInstance().config().posConfirmName(), account),
                 Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                 Placeholder.unparsed("price", pos.price.toPlainString()),
                 Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
                 Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false));
-        confirmMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.confirm.lore")).stream()
+        confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
@@ -409,14 +409,14 @@ public final class POS {
         confirm.setItemMeta(confirmMeta);
         gui.setItem(size - 7, confirm);
 
-        final @NotNull ItemStack cancel = new ItemStack(Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getString("pos.decline.material")))), 1);
-        if (BankAccounts.getInstance().getConfig().getBoolean("pos.cancel.glint")) {
+        final @NotNull ItemStack cancel = new ItemStack(BankAccounts.getInstance().config().posDeclineMaterial(), 1);
+        if (BankAccounts.getInstance().config().posDeclineGlint()) {
             cancel.addItemFlags(ItemFlag.HIDE_ENCHANTS);
             cancel.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
-        cancelMeta.displayName(MiniMessage.miniMessage().deserialize("<red><bold>Cancel Purchase</bold></red>").decoration(TextDecoration.ITALIC, false));
-        cancelMeta.lore(Objects.requireNonNull(BankAccounts.getInstance().getConfig().getStringList("pos.decline.lore")).stream()
+        cancelMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posDeclineName()).decoration(TextDecoration.ITALIC, false));
+        cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
                         Placeholder.unparsed("price", pos.price.toPlainString()),
