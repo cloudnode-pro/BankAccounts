@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Command;
@@ -13,6 +14,7 @@ import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
 import java.util.Optional;
+import java.util.logging.Level;
 
 public final class Join implements Listener {
     @EventHandler
