@@ -76,7 +76,7 @@ public final class BankAccounts extends JavaPlugin {
      * Check if Vault integration is enabled
      */
     public static boolean isVaultEnabled() {
-        return getInstance().getConfig().getBoolean("integrations.vault.enabled");
+        return getInstance().config().integrationsVaultEnabled();
     }
 
     /**
