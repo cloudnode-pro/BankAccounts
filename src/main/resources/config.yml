@@ -289,7 +289,6 @@ messages:
         pos-empty: "<red>(!) The chest is empty. POS cancelled.</red>"
         pos-invalid-card: "<red>(!) You need a valid bank card to use POS.</red>"
         pos-no-permission: "<red>(!) You do not have permission to use POS.</red>"
-        card-no-permission: "<red>(!) You cannot use your card here.</red>"
         no-card: "<red>(!) You must hold your bank card to use this.</red>"
         pos-items-changed: "<red>(!) The items in the chest have changed. POS cancelled.</red>"
         pos-create-business-only: "<red>(!) You can only create a POS with a business account.</red>"
