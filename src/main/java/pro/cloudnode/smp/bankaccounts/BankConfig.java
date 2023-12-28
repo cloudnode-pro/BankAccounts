@@ -291,6 +291,21 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getStringList("pos.decline.lore"));
     }
 
+    // interest.*.rate
+    public double interestRate(final @NotNull Account.Type type) {
+        return config.getDouble("interest." + Account.Type.getType(type) + ".rate");
+    }
+
+    // interest.*.interval
+    public int interestInterval(final @NotNull Account.Type type) {
+        return config.getInt("interest." + Account.Type.getType(type) + ".interval");
+    }
+
+    // interest.*.description
+    public @NotNull String interestDescription(final @NotNull Account.Type type) {
+        return Objects.requireNonNull(config.getString("interest." + Account.Type.getType(type) + ".description"));
+    }
+
     // messages.command-usage
     public @NotNull String messagesCommandUsage() {
         return Objects.requireNonNull(config.getString("messages.command-usage"));
