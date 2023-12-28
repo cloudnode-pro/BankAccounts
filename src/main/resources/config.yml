@@ -85,6 +85,12 @@ account-limits:
     # Business accounts
     1: -1
 
+# Top balance leaderboard
+# Accounts with infinite balance are excluded
+baltop:
+    # How many accounts to show per page
+    per-page: 10
+
 # Transfer confirmation
 transfer-confirmation:
     # If enabled, players will be shown a transfer overview asking them to confirm the transfer

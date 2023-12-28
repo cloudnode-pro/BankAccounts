@@ -141,6 +141,11 @@ public final class BankConfig {
         return config.getInt("account-limits." + Account.Type.getType(type));
     }
 
+    // baltop.per-page
+    public int baltopPerPage() {
+        return config.getInt("baltop.per-page");
+    }
+
     // transfer-confirmation.enabled
     public boolean transferConfirmationEnabled() {
         return config.getBoolean("transfer-confirmation.enabled");
