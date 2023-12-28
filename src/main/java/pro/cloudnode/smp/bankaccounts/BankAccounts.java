@@ -199,6 +199,22 @@ public final class BankAccounts extends JavaPlugin {
         }
     }
 
+    private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
+        if (account.balance == null) return;
+        final @NotNull String description = this.config().interestDescription(account.type)
+                .replace("<rate>", String.valueOf(rate))
+                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate * 100) + "%")
+                .replace("<balance>", account.balance.toPlainString())
+                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
+
+        // interest paid to the bank
+        if (rate < 0) account.transfer(serverAccount, amount, description, null);
+
+        // interest paid to the owner
+        else serverAccount.transfer(account, amount, description, null);
+    }
+
     /**
      * Get instance of the plugin
      */
