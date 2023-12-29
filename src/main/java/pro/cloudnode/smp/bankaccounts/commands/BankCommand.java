@@ -385,7 +385,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance());
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsClosingBalance(), account.get()));
         if (account.get().frozen)
             return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
         if (BankAccounts.getInstance().config()
