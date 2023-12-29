@@ -456,6 +456,16 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.errors.disallowed-characters"));
     }
 
+    // messages.errors.already-frozen
+    public @NotNull String messagesErrorsAlreadyFrozen() {
+        return Objects.requireNonNull(config.getString("messages.errors.already-frozen"));
+    }
+
+    // messages.errors.not-frozen
+    public @NotNull String messagesErrorsNotFrozen() {
+        return Objects.requireNonNull(config.getString("messages.errors.not-frozen"));
+    }
+
     // messages.balance
     public @NotNull String messagesBalance() {
         return Objects.requireNonNull(config.getString("messages.balance"));
@@ -489,6 +499,16 @@ public final class BankConfig {
     // messages.name-set
     public @NotNull String messagesNameSet() {
         return Objects.requireNonNull(config.getString("messages.name-set"));
+    }
+
+    // messages.account-frozen
+    public @NotNull String messagesAccountFrozen() {
+        return Objects.requireNonNull(config.getString("messages.account-frozen"));
+    }
+
+    // messages.account-unfrozen
+    public @NotNull String messagesAccountUnfrozen() {
+        return Objects.requireNonNull(config.getString("messages.account-unfrozen"));
     }
 
     // messages.account-deleted
