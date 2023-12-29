@@ -191,6 +191,11 @@ public final class BankConfig {
         return Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(Objects.requireNonNull(config.getString("instruments.glint.enchantment")))));
     }
 
+    // integrations.vault.enabled
+    public boolean integrationsVaultEnabled() {
+        return config.getBoolean("integrations.vault.enabled");
+    }
+
     // pos.allow-personal
     public boolean posAllowPersonal() {
         return config.getBoolean("pos.allow-personal");

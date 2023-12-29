@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -14,6 +15,8 @@ import org.bukkit.event.Listener;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -24,6 +27,7 @@ import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
+import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -56,6 +60,30 @@ public final class BankAccounts extends JavaPlugin {
 
     public @NotNull HikariDataSource getDb() {
         return dbSource;
+    }
+
+    private Economy economy;
+    public boolean hasEconomy() {
+        return economy != null;
+    }
+    public @NotNull Economy getEconomy() {
+        if (!hasEconomy()) throw new IllegalStateException("Vault is not initialized");
+        if (!isVaultEnabled()) throw new IllegalStateException("Vault integration is not enabled");
+        return economy;
+    }
+
+    /**
+     * Check if Vault integration is enabled
+     */
+    public static boolean isVaultEnabled() {
+        return getInstance().config().integrationsVaultEnabled();
+    }
+
+    /**
+     * Check if vault plugin is present
+     */
+    public static boolean hasVault() {
+        return getInstance().getServer().getPluginManager().getPlugin("Vault") != null;
     }
 
     @Override
@@ -98,6 +126,30 @@ public final class BankAccounts extends JavaPlugin {
     @Override
     public void onDisable() {
         dbSource.close();
+    }
+
+    public void setupVault() {
+        if (!hasVault()) {
+            getLogger().log(Level.WARNING, "Vault not found, vault integration will not work.");
+            return;
+        }
+
+        final @NotNull Optional<RegisteredServiceProvider<Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
+        if (rsp.isPresent()) {
+            economy = rsp.get().getProvider();
+            getLogger().log(Level.WARNING, "Economy already registered by " + rsp.get().getPlugin().getName());
+            getServer().getServicesManager().unregister(economy);
+            getLogger().log(Level.WARNING, "Unregistered economy provider.");
+        }
+
+        try {
+            getLogger().log(Level.INFO, "Vault found. Enabling integration.");
+            this.economy = new VaultIntegration(this);
+            getServer().getServicesManager().register(Economy.class, this.economy, this, ServicePriority.Normal);
+        } catch (final @NotNull Exception e) {
+            getLogger().log(Level.WARNING, "Failed to register vault economy.", e);
+        }
+
     }
 
     /**
@@ -145,6 +197,10 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
+        if (isVaultEnabled()) {
+            getInstance().setupVault();
+        }
+        
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
             checkForUpdates().ifPresent(latestVersion -> {
                 getInstance().getLogger().warning("An update is available: " + latestVersion);
