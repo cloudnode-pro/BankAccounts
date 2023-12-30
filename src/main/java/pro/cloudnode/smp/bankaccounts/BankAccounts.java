@@ -242,6 +242,7 @@ public final class BankAccounts extends JavaPlugin {
 
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
         if (account.balance == null) return;
+        if (account.id.equals(serverAccount.id)) return;
         final @NotNull String description = this.config().interestDescription(account.type)
                 .replace("<rate>", String.valueOf(rate))
                 .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate) + "%")
