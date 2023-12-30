@@ -321,6 +321,10 @@ messages:
         # Provided string includes disallowed characters
         # Placeholder: <characters> - the disallowed characters
         disallowed-characters: "<red>(!) The provided string contains disallowed characters: <gray><characters></gray></red>"
+        # Account is already frozen (placeholders same as balance)
+        already-frozen: "<yellow>(!) This account is already frozen.</yellow>"
+        # Account is not frozen (placeholders same as balance)
+        not-frozen: "<gold>(!) This account is not frozen.</gold>"
 
     # Account balance
     # Available placeholders:
@@ -354,6 +358,12 @@ messages:
 
     # Account name set (same placeholders as balance)
     name-set: "<green>(!) Successfully renamed account <white><account></white>"
+
+    # Account has been successfully frozen (same placeholders as balance)
+    account-frozen: "<aqua>(!) Successfully frozen account <white><account></white>"
+
+    # Account has been successfully unfrozen (same placeholders as balance)
+    account-unfrozen: "<green>(!) Successfully unfrozen account <white><account></white>"
 
     # Account deleted (same placeholders as balance)
     account-deleted: "<green>(!) Successfully deleted account <white><account></white>"
