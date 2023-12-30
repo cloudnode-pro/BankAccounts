@@ -586,6 +586,16 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.whois"));
     }
 
+    // messages.baltop.header
+    public @NotNull String messagesBaltopHeader() {
+        return Objects.requireNonNull(config.getString("messages.baltop.header"));
+    }
+
+    // messages.baltop.entry
+    public @NotNull String messagesBaltopEntry() {
+        return Objects.requireNonNull(config.getString("messages.baltop.entry"));
+    }
+
     // messages.update-available
     public @NotNull String messagesUpdateAvailable() {
         return Objects.requireNonNull(config.getString("messages.update-available"));
