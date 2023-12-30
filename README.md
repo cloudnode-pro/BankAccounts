@@ -18,7 +18,7 @@ A multi-account economy plugin.
 &middot; [**`Download`**](https://modrinth.com/plugin/Dc8RS2En/version/latest)
 
 ## Report Issues
-If you discover any issues with the plugin, please first check the [known issues](https://github.com/cloudnode-pro/BankAccounts/issues). If it is not listed there, please [create a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new). Fixing bugs is the highest priority for this project.
+If you discover any issues with the plugin, please first check the [known issues](https://github.com/cloudnode-pro/BankAccounts/issues?q=is%3Aopen+is%3Aissue+label%3Abug). If it is not listed there, please [create a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new?labels=bug). Fixing bugs is the highest priority for this project.
 
 When reporting an issue, please include as much relevant information as possible, including error logs, screenshots, and steps to reproduce the issue.
 
