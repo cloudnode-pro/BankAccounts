@@ -451,6 +451,15 @@ messages:
         # All placeholders from balance
         # <position> - leaderboard rank number
         entry: "<hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray>#<position></gray> <white><balance-short></white> <green><account></green></hover>"
+        # Baltop player entry
+        # Placeholders:
+        # <position> - leaderboard rank number
+        # <uuid> - Player UUID
+        # <username> - Player username
+        # <balance> - Total balance without formatting, example: 123456.78
+        # <balance-formatted> - Total balance with formatting, example: $123,456.78
+        # <balance-short> - Total balance with formatting, example: $123k
+        entry-player: "<click:suggest_command:/msg <username> ><hover:show_text:'<white><username></white><newline><gray><balance-formatted></gray><newline>'><gray>#<position></gray> <white><balance-short></white> <green><username></green></hover></click>"
 
 
     # New version available

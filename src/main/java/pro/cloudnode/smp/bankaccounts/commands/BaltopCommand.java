@@ -1,5 +1,6 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
+import org.bukkit.OfflinePlayer;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
@@ -8,10 +9,17 @@ import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 
+import java.math.BigDecimal;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.logging.Level;
 
 public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command {
     @Override
@@ -60,7 +68,19 @@ public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command 
                     .replace("<page>", String.valueOf(page))
                     .replace("<cmd-prev>", cmdPrev)
                     .replace("<cmd-next>", cmdNext));
-            sendMessage(sender, "not implemented");
+            final @NotNull BaltopPlayer @NotNull [] players = BaltopPlayer.get(perPage, page);
+            for (int i = 0; i < players.length; i++) {
+                final @NotNull BaltopPlayer entry = players[i];
+                final @NotNull OfflinePlayer player = BankAccounts.getInstance().getServer().getOfflinePlayer(entry.uuid);
+                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntryPlayer()
+                        .replace("<position>", String.valueOf((page - 1) * perPage + i + 1))
+                        .replace("<uuid>", entry.uuid.toString())
+                        .replace("<username>", entry.uuid.toString().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId().toString()) ? "the Server" : Optional.ofNullable(player.getName()).orElse("Unknown Player"))
+                        .replace("<balance>", entry.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(entry.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(entry.balance))
+                );
+            }
         }
         return true;
     }
@@ -72,6 +92,32 @@ public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command 
         }
         catch (final NumberFormatException e) {
             return false;
+        }
+    }
+
+    public static final class BaltopPlayer {
+        public final @NotNull UUID uuid;
+        public final @NotNull BigDecimal balance;
+
+        public BaltopPlayer(final @NotNull ResultSet rs) throws @NotNull SQLException {
+            this.uuid = UUID.fromString(rs.getString("owner"));
+            this.balance = rs.getBigDecimal("balance");
+        }
+
+        public static @NotNull BaltopPlayer @NotNull [] get(final int perPage, final int page) {
+            final @NotNull List<@NotNull BaltopPlayer> entries = new ArrayList<>();
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT `owner`, SUM(`balance`) AS `balance` FROM `bank_accounts` WHERE `balance` IS NOT NULL GROUP BY `owner` LIMIT ? OFFSET ?;")) {
+                stmt.setInt(1, perPage);
+                stmt.setInt(2, (page - 1) * perPage);
+                final @NotNull ResultSet rs = stmt.executeQuery();
+                while (rs.next()) entries.add(new BaltopPlayer(rs));
+                return entries.toArray(new BaltopPlayer[0]);
+            }
+            catch (final @NotNull SQLException e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get top balance players", e);
+                return new BaltopPlayer[0];
+            }
         }
     }
 }

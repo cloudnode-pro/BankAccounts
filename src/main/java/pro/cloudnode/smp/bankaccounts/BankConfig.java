@@ -596,6 +596,11 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.baltop.entry"));
     }
 
+    // messages.baltop.entry.player
+    public @NotNull String messagesBaltopEntryPlayer() {
+        return Objects.requireNonNull(config.getString("messages.baltop.entry-player"));
+    }
+
     // messages.update-available
     public @NotNull String messagesUpdateAvailable() {
         return Objects.requireNonNull(config.getString("messages.update-available"));
