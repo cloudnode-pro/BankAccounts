@@ -12,3 +12,6 @@ commands:
     pos:
         description: Create point of sale
         usage: /<command>
+    baltop:
+        description: Balance leaderboard
+        usage: /<command>

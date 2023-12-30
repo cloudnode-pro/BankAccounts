@@ -17,6 +17,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pro.cloudnode.smp.bankaccounts.commands.BaltopCommand;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
@@ -67,6 +68,7 @@ public final class BankAccounts extends JavaPlugin {
         final @NotNull HashMap<@NotNull String, @NotNull CommandExecutor> commands = new HashMap<>() {{
             put("bank", new BankCommand());
             put("pos", new POSCommand());
+            put("baltop", new BaltopCommand());
         }};
         for (Map.Entry<@NotNull String, @NotNull CommandExecutor> entry : commands.entrySet()) {
             final PluginCommand command = getCommand(entry.getKey());
