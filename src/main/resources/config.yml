@@ -160,8 +160,8 @@ pos:
     # Placeholders:
     # <description> - POS description
     # <price> - Price of the POS contents without formatting, example: 123456.78
-    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
-    # <price-short> - Price of the POS contents with formatting, example: 123k
+    # <price-formatted> - Price of the POS contents with formatting, example: $123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: $123k
     title: "<green><bold>Point of Sale</bold></green> <gray>— <price-formatted></gray>"
 
     # POS info item
@@ -307,8 +307,8 @@ messages:
     # <account-type> - Account type (Personal or Business)
     # <account-owner> - Account owner username
     # <balance> - Account balance without formatting, example: 123456.78
-    # <balance-formatted> - Account balance with formatting, example: 123,456.78
-    # <balance-short> - Account balance with formatting, example: 123k
+    # <balance-formatted> - Account balance with formatting, example: $123,456.78
+    # <balance-short> - Account balance with formatting, example: $123k
     balance: |-
         <green><account></green> <gray>(<account-type> account)</gray>
         <green>Balance:</green> <white><balance-formatted></white>
@@ -347,8 +347,8 @@ messages:
     # Example: <to-account-id>, <from-balance-formatted>
     # Additional placeholders:
     # <amount> - Transfer amount without formatting, example: 123456.78
-    # <amount-formatted> - Transfer amount with formatting, example: 123,456.78
-    # <amount-short> - Transfer amount with formatting, example: 123k
+    # <amount-formatted> - Transfer amount with formatting, example: $123,456.78
+    # <amount-short> - Transfer amount with formatting, example: $123k
     # <description> - Transfer description
     # <confirm-command> - Command to run to confirm transfer
     confirm-transfer: |-
@@ -395,8 +395,8 @@ messages:
     # Same placeholders as balance (account is that of the seller).
     # Additional placeholders:
     # <price> - Price of the POS contents without formatting, example: 123456.78
-    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
-    # <price-short> - Price of the POS contents with formatting, example: 123k
+    # <price-formatted> - Price of the POS contents with formatting, example: $123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: $123k
     # <description> - Bank statement description
     # <x> - X coordinate of the chest
     # <y> - Y coordinate of the chest
