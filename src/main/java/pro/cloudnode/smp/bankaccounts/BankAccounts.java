@@ -244,7 +244,7 @@ public final class BankAccounts extends JavaPlugin {
         if (account.balance == null) return;
         final @NotNull String description = this.config().interestDescription(account.type)
                 .replace("<rate>", String.valueOf(rate))
-                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate * 100) + "%")
+                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate) + "%")
                 .replace("<balance>", account.balance.toPlainString())
                 .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                 .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
