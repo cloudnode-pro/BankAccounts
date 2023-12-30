@@ -249,11 +249,14 @@ public final class BankAccounts extends JavaPlugin {
                 .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                 .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
 
-        // interest paid to the bank
-        if (rate < 0) account.transfer(serverAccount, amount, description, null);
+        try {
+            // interest paid to the bank
+            if (rate < 0) account.transfer(serverAccount, amount, description, null);
 
-        // interest paid to the owner
-        else serverAccount.transfer(account, amount, description, null);
+            // interest paid to the owner
+            else serverAccount.transfer(account, amount, description, null);
+        }
+        catch (@NotNull Exception ignored) {}
     }
 
     /**
