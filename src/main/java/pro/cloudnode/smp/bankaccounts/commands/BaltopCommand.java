@@ -31,8 +31,8 @@ public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command 
     public @NotNull List<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (!sender.hasPermission(Permissions.BALTOP)) return suggestions;
-        if (args.length == 2) suggestions.addAll(Arrays.asList("personal", "business", "player"));
-        else if (args.length == 3) suggestions.add("1");
+        if (args.length == 1) suggestions.addAll(Arrays.asList("personal", "business", "player"));
+        else if (args.length == 2) suggestions.add("1");
         return suggestions;
     }
 
