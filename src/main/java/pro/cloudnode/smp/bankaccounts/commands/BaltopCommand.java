@@ -45,7 +45,7 @@ public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command 
         final @NotNull String labelArgsString = labelArgs.length > 0 ? " " + String.join(" ", labelArgs) : "";
         final @NotNull String argsString = (args.length > 0 ? " " + String.join(" ", args) : "");
         final @NotNull String cmdPrev = "/baltop" + (type.map(s -> " " + s).orElse("")) + " " + Math.max(1, page - 1);
-        final @NotNull String cmdNext = "/baltop" + (type.map(s -> " " + s).orElse("")) + " " + Math.min(1e9, page + 1);
+        final @NotNull String cmdNext = "/baltop" + (type.map(s -> " " + s).orElse("")) + " " + Math.min(1000000000, page + 1);
 
         final @Nullable Account.Type accountType = type.flatMap(Account.Type::fromString).orElse(null);
         if (accountType != null || type.isEmpty()) {
