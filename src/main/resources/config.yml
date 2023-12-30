@@ -229,6 +229,7 @@ interest:
     # Personal accounts
     0:
         # Percent to add to the balance. If negative, it will be subtracted. Set to 0 to disable interest.
+        # Acceptable range: -100–100
         rate: 0
         # Interval time in real-life MINUTES for how often interest is added.
         # Default: 24 hours (i.e. midnight every day).
