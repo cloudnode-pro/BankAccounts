@@ -215,7 +215,7 @@ public final class BankAccounts extends JavaPlugin {
             final int personalInterval = config().interestInterval(Account.Type.PERSONAL);
             final double businessRate = config().interestRate(Account.Type.BUSINESS);
             final int businessInterval = config().interestInterval(Account.Type.BUSINESS);
-            if ((personalInterval <= 0 && businessInterval <= 0) || (personalRate != 0 && businessRate != 0)) return;
+            if ((personalInterval <= 0 && businessInterval <= 0) || (personalRate == 0 && businessRate == 0)) return;
             final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerAccount();
             if (serverAccount.isEmpty() || serverAccount.get().frozen) return;
             final @NotNull Account @NotNull [] accounts = Arrays.stream(Account.get()).filter(account -> !account.frozen && account.balance != null && account.balance.compareTo(BigDecimal.ZERO) > 0).toArray(Account[]::new);
