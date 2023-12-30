@@ -235,7 +235,7 @@ interest:
         interval: 1440
         # Description shown in the transaction history
         # Available placeholders:
-        # - <rate> - Interest rate as decimal (e.g. "0.05")
+        # - <rate> - Interest rate as decimal (e.g. "5")
         # - <rate-formatted> - Formatted interest rate (e.g. "5%")
         # - <balance> - Account balance before interest (e.g. "123456.78")
         # - <balance-formatted> - Formatted balance before interest (e.g. "$123,456.78")
