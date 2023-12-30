@@ -107,7 +107,7 @@ public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command 
         public static @NotNull BaltopPlayer @NotNull [] get(final int perPage, final int page) {
             final @NotNull List<@NotNull BaltopPlayer> entries = new ArrayList<>();
             try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
-                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT `owner`, SUM(`balance`) AS `balance` FROM `bank_accounts` WHERE `balance` IS NOT NULL GROUP BY `owner` LIMIT ? OFFSET ?;")) {
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT `owner`, SUM(`balance`) AS `balance` FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `balance` > 0 GROUP BY `owner` LIMIT ? OFFSET ?;")) {
                 stmt.setInt(1, perPage);
                 stmt.setInt(2, (page - 1) * perPage);
                 final @NotNull ResultSet rs = stmt.executeQuery();

@@ -289,8 +289,8 @@ public class Account {
         final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
         final @NotNull String query;
         final int offset = (page != null ? page - 1 : 0) * (limit != null ? limit : 0);
-        if (type == null) query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
-        else query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `type` = ? ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
+        if (type == null) query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `balance` > 0 ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
+        else query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `balance` > 0 AND `type` = ? ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement(query)) {
             if (type != null) {
