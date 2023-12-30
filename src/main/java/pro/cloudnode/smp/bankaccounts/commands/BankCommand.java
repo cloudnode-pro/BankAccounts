@@ -43,6 +43,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             if (sender.hasPermission(Permissions.ACCOUNT_CREATE)) suggestions.addAll(Arrays.asList("create", "new"));
             if (sender.hasPermission(Permissions.SET_BALANCE)) suggestions.addAll(Arrays.asList("setbal", "setbalance"));
             if (sender.hasPermission(Permissions.SET_NAME)) suggestions.addAll(Arrays.asList("setname", "rename"));
+            if (sender.hasPermission(Permissions.FREEZE)) suggestions.addAll(Arrays.asList("freeze", "disable", "block", "unfreeze", "enable", "unblock"));
             if (sender.hasPermission(Permissions.DELETE)) suggestions.add("delete");
             if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
                 suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
@@ -95,6 +96,12 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                         final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.SET_NAME_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
                         for (final @NotNull Account account : accounts) suggestions.add(account.id);
                     }
+                }
+                case "freeze", "disable", "block", "unfreeze", "enable", "unblock" -> {
+                    if (!sender.hasPermission(Permissions.FREEZE)) return suggestions;
+                    if (args.length == 2) suggestions.addAll(Arrays
+                            .stream(sender.hasPermission(Permissions.FREEZE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .map(account -> account.id).collect(Collectors.toSet()));
                 }
                 case "delete" -> {
                     if (!sender.hasPermission(Permissions.DELETE)) return suggestions;
@@ -157,6 +164,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             case "create", "new" -> create(sender, argsSubset, label);
             case "setbal", "setbalance" -> setBalance(sender, argsSubset, label);
             case "setname", "rename" -> setName(sender, argsSubset, label);
+            case "freeze", "disable", "block" -> freeze(sender, argsSubset, label);
+            case "unfreeze", "enable", "unblock" -> unfreeze(sender, argsSubset, label);
             case "delete" -> delete(sender, argsSubset, label);
             case "transfer", "send", "pay" -> transfer(sender, argsSubset, label);
             case "transactions", "history" -> transactions(sender, argsSubset, label);
@@ -195,6 +204,10 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
             sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS> --player <player></gray></green> <white>- Create an account for another player</click>");
+        if (sender.hasPermission(Permissions.FREEZE)) {
+            sendMessage(sender, "<click:suggest_command:/bank freeze ><green>/bank freeze <gray><account></gray></green> <white>- Freeze an account</click>");
+            sendMessage(sender, "<click:suggest_command:/bank unfreeze ><green>/bank unfreeze <gray><account></gray></green> <white>- Unfreeze an account</click>");
+        }
         if (sender.hasPermission(Permissions.DELETE))
             sendMessage(sender, "<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>");
         if (sender.hasPermission(Permissions.INSTRUMENT_CREATE))
@@ -372,6 +385,36 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
     }
 
+    public static boolean freeze(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.FREEZE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (args.length < 1) return sendUsage(sender, label, "freeze <account>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (!sender.hasPermission(Permissions.FREEZE_OTHER) && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (account.get().frozen)
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsAlreadyFrozen(), account.get()));
+        account.get().frozen = true;
+        account.get().update();
+        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountFrozen(), account.get()));
+    }
+
+    public static boolean unfreeze(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.FREEZE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (args.length < 1) return sendUsage(sender, label, "unfreeze <account>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (!sender.hasPermission(Permissions.FREEZE_OTHER) && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (!account.get().frozen)
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsNotFrozen(), account.get()));
+        account.get().frozen = false;
+        account.get().update();
+        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountUnfrozen(), account.get()));
+    }
+
     /**
      * Delete account
      */
@@ -385,7 +428,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance());
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsClosingBalance(), account.get()));
         if (account.get().frozen)
             return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
         if (BankAccounts.getInstance().config()
