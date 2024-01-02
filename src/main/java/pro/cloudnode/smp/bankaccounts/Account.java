@@ -312,6 +312,15 @@ public class Account {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get top balance accounts", e);
             return new Account[0];
         }
+
+    /*
+     * Get the server account
+     */
+    public static @NotNull Optional<@NotNull Account> getServerAccount() {
+        if (!BankAccounts.getInstance().config().serverAccountEnabled()) return Optional.empty();
+        final @NotNull Account @NotNull [] accounts = get(BankAccounts.getConsoleOfflinePlayer());
+        if (accounts.length == 0) return Optional.empty();
+        return Optional.of(accounts[0]);
     }
 
     /**
