@@ -14,6 +14,7 @@ public final class Permissions {
     public static @NotNull String SET_NAME = "bank.set.name";
     public static @NotNull String FREEZE = "bank.freeze";
     public static @NotNull String DELETE = "bank.delete";
+    public static @NotNull String BALTOP = "bank.baltop";
     public static @NotNull String POS_CREATE = "bank.pos.create";
     public static @NotNull String POS_USE = "bank.pos.use";
     public static @NotNull String RELOAD = "bank.reload";

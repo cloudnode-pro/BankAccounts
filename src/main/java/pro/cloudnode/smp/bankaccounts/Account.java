@@ -279,6 +279,42 @@ public class Account {
     }
 
     /**
+     * Get accounts sorted by balance
+     *
+     * @param limit Max number of accounts to return. If not set, all accounts are returned
+     * @param page Page number starting from 1. Defaults to 1.
+     * @param type If set, only accounts of this type are returned
+     */
+    public static @NotNull Account @NotNull [] getTopBalance(final @Nullable Integer limit, final @Nullable Integer page, final @Nullable Type type) {
+        final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
+        final @NotNull String query;
+        final int offset = (page != null ? page - 1 : 0) * (limit != null ? limit : 0);
+        if (type == null) query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `balance` > 0 ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
+        else query = "SELECT * FROM `bank_accounts` WHERE `balance` IS NOT NULL AND `balance` > 0 AND `type` = ? ORDER BY `balance` DESC" + (limit != null ? " LIMIT ? OFFSET ?" : "");
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement(query)) {
+            if (type != null) {
+                stmt.setInt(1, Type.getType(type));
+                if (limit != null) {
+                    stmt.setInt(2, limit);
+                    stmt.setInt(3, offset);
+                }
+            }
+            else if (limit != null) {
+                stmt.setInt(1, limit);
+                stmt.setInt(2, offset);
+            }
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            while (rs.next()) accounts.add(new Account(rs));
+            return accounts.toArray(new Account[0]);
+        }
+        catch (final @NotNull Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get top balance accounts", e);
+            return new Account[0];
+        }
+    }
+
+    /**
      * Insert into database
      */
     public void insert() {

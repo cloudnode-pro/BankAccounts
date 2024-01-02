@@ -141,6 +141,11 @@ public final class BankConfig {
         return config.getInt("account-limits." + Account.Type.getType(type));
     }
 
+    // baltop.per-page
+    public int baltopPerPage() {
+        return config.getInt("baltop.per-page");
+    }
+
     // transfer-confirmation.enabled
     public boolean transferConfirmationEnabled() {
         return config.getBoolean("transfer-confirmation.enabled");
@@ -579,6 +584,21 @@ public final class BankConfig {
     // messages.whois
     public @NotNull String messagesWhois() {
         return Objects.requireNonNull(config.getString("messages.whois"));
+    }
+
+    // messages.baltop.header
+    public @NotNull String messagesBaltopHeader() {
+        return Objects.requireNonNull(config.getString("messages.baltop.header"));
+    }
+
+    // messages.baltop.entry
+    public @NotNull String messagesBaltopEntry() {
+        return Objects.requireNonNull(config.getString("messages.baltop.entry"));
+    }
+
+    // messages.baltop.entry.player
+    public @NotNull String messagesBaltopEntryPlayer() {
+        return Objects.requireNonNull(config.getString("messages.baltop.entry-player"));
     }
 
     // messages.update-available

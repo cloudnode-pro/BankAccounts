@@ -145,6 +145,11 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                     if (args.length == 2)
                         suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).toList());
                 }
+                case "baltop" -> {
+                    if (!sender.hasPermission(Permissions.BALTOP)) return suggestions;
+                    if (args.length == 2) suggestions.addAll(Arrays.asList("personal", "business", "player"));
+                    else if (args.length == 3) suggestions.add("1");
+                }
             }
         }
         return suggestions;
@@ -171,6 +176,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             case "transactions", "history" -> transactions(sender, argsSubset, label);
             case "instrument", "card" -> instrument(sender, argsSubset, label);
             case "whois", "who", "info" -> whois(sender, argsSubset, label);
+            case "baltop" -> baltop(sender, argsSubset, label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
@@ -214,6 +220,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             sendMessage(sender, "<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>");
         if (sender.hasPermission(Permissions.WHOIS))
             sendMessage(sender, "<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>");
+        if (sender.hasPermission(Permissions.BALTOP))
+            sendMessage(sender, "<click:suggest_command:/baltop ><green>/baltop <gray>[personal|business|player] [page=1]</gray></green> <white>- Top balance leaderboard</click>");
         if (sender.hasPermission(Permissions.POS_CREATE))
             sendMessage(sender, "<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>");
         if (sender.hasPermission(Permissions.SET_BALANCE))
@@ -622,6 +630,10 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         return account
                 .map(value -> sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesWhois(), value)))
                 .orElseGet(() -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound()));
+    }
+
+    public static boolean baltop(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        return BaltopCommand.run(sender, label, args, new String[]{"baltop"});
     }
 
     /**
