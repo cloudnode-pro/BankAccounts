@@ -86,6 +86,12 @@ account-limits:
     # Business accounts
     1: -1
 
+# Top balance leaderboard
+# Accounts with infinite balance are excluded
+baltop:
+    # How many accounts to show per page
+    per-page: 10
+
 # Transfer confirmation
 transfer-confirmation:
     # If enabled, players will be shown a transfer overview asking them to confirm the transfer
@@ -458,6 +464,29 @@ messages:
         <gray>Owned by:</gray> <white><account-owner></white>
         <gray>Type:</gray> <white><account-type></white>
         <gray>ID: <click:copy_to_clipboard:<account-id>><hover:show_text:'<white>Copy to clipboard</white>'><white><account-id></white></hover></click></gray>
+
+    # Top balances
+    baltop:
+        # Baltop header
+        # Placeholders:
+        # <category> - Baltop category
+        # <page> - Current page number
+        # <cmd-prev> - Command to go to previous page
+        # <cmd-next> - Command to go to next page
+        header: "<green><bold>Baltop</bold></green> <gray>(<category>)</gray><newline><click:run_command:<cmd-prev>><hover:show_text:'<white>Click</white>'><green>← Previous</green></hover></click>     <gray>Page <page></gray>        <click:run_command:<cmd-next>><hover:show_text:'<white>Click</white>'><green>Next →</green></hover></click><newline><dark_gray><st>                                            </st></dark_gray>"
+        # Baltop entry
+        # All placeholders from balance
+        # <position> - leaderboard rank number
+        entry: "<hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray>#<position></gray> <white><balance-short></white> <green><account></green></hover>"
+        # Baltop player entry
+        # Placeholders:
+        # <position> - leaderboard rank number
+        # <uuid> - Player UUID
+        # <username> - Player username
+        # <balance> - Total balance without formatting, example: 123456.78
+        # <balance-formatted> - Total balance with formatting, example: $123,456.78
+        # <balance-short> - Total balance with formatting, example: $123k
+        entry-player: "<click:suggest_command:/msg <username> ><hover:show_text:'<white><username></white><newline><gray><balance-formatted></gray><newline>'><gray>#<position></gray> <white><balance-short></white> <green><username></green></hover></click>"
 
 
     # New version available
