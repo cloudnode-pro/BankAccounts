@@ -312,6 +312,7 @@ public class Account {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get top balance accounts", e);
             return new Account[0];
         }
+    }
 
     /*
      * Get the server account
