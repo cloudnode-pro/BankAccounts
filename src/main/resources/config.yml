@@ -56,6 +56,7 @@ prevent-close-last-personal: true
 # Server account
 server-account:
     # If enabled, when the plugin is loaded an account will be created as player with UUID 00000000-0000-0000-0000-000000000000
+    # This is required for features like interest to work.
     enabled: true
     # Display name for the server account
     name: Central Bank
@@ -226,6 +227,32 @@ pos:
         lore:
             - "<gray>Click to decline this purchase.</gray>"
 
+# Interest rate
+# Interest is paid from/to the server account.
+# If the server account has insufficient funds, interest payments will silently fail.
+# NOTE: A transaction is created for each interest payment.
+interest:
+    # Personal accounts
+    0:
+        # Percent to add to the balance. If negative, it will be subtracted. Set to 0 to disable interest.
+        # Acceptable range: -100–100
+        rate: 0
+        # Interval time in real-life MINUTES for how often interest is added.
+        # Default: 24 hours (i.e. midnight every day).
+        interval: 1440
+        # Description shown in the transaction history
+        # Available placeholders:
+        # - <rate> - Interest rate as decimal (e.g. "5")
+        # - <rate-formatted> - Formatted interest rate (e.g. "5%")
+        # - <balance> - Account balance before interest (e.g. "123456.78")
+        # - <balance-formatted> - Formatted balance before interest (e.g. "$123,456.78")
+        # - <balance-short> - Formatted balance before interest (e.g. "$123k")
+        description: "Interest payment (<rate-formatted>)"
+    # Business accounts
+    1:
+        rate: 0
+        interval: 1440
+        description: "Interest payment (<rate-formatted>)"
 
 # Messages
 messages:
