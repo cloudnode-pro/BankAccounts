@@ -634,7 +634,7 @@ public class Account {
         /**
          * Asynchronously delete expired requests
          */
-        public final static @NotNull Supplier<@NotNull BukkitTask> deleteExpiredLater = () -> BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), ChangeOwnerRequest::deleteExpired);
+        public final static @NotNull Runnable deleteExpiredLater = () -> BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), ChangeOwnerRequest::deleteExpired);
 
         /**
          * Get account ownership change request

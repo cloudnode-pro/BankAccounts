@@ -164,7 +164,7 @@ public final class BankAccounts extends JavaPlugin {
     }
 
     private @Nullable BukkitTask minuteLoop = null;
-    public @NotNull HashSet<@NotNull Supplier<@NotNull BukkitTask>> minuteLoopTasks = new HashSet<>();
+    public @NotNull HashSet<@NotNull Runnable> minuteLoopTasks = new HashSet<>();
 
     /**
      * Start a task that runs every minute
@@ -172,7 +172,7 @@ public final class BankAccounts extends JavaPlugin {
     private void startMinuteLoop() {
         if (minuteLoop != null) minuteLoop.cancel();
         minuteLoop = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-            minuteLoopTasks.forEach(Supplier::get);
+            minuteLoopTasks.forEach(Runnable::run);
         }, 0L, 20L * 60);
     }
 
