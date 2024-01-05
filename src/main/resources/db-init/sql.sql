@@ -53,3 +53,11 @@ DROP TABLE `bank_transactions`;
 ALTER TABLE `new_bank_transactions`
     RENAME TO `bank_transactions`;
 -- END OF `bank_transactions` MODIFICATION
+
+CREATE TABLE IF NOT EXISTS `change_owner_requests`
+(
+    `account` CHAR(16) NOT NULL COLLATE BINARY,
+    `new_owner` CHAR(36) NOT NULL COLLATE BINARY,
+    `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`account`, `new_owner`)
+);

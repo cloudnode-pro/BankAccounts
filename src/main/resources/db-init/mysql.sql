@@ -36,3 +36,11 @@ CREATE TABLE IF NOT EXISTS `pos`
 
 ALTER TABLE `bank_transactions`
     CHANGE COLUMN `instrument` `instrument` VARCHAR(24) CHARACTER SET latin1 COLLATE latin1_general_ci NULL DEFAULT NULL AFTER `description`;
+
+CREATE TABLE IF NOT EXISTS `change_owner_requests`
+(
+    `account`   CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+    `new_owner` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+    `created`   DATETIME NOT NULL DEFAULT UTC_TIMESTAMP(),
+    KEY `id` (`account`, `new_owner`)
+);
