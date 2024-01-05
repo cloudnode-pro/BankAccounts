@@ -196,6 +196,26 @@ public final class BankConfig {
         return Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(Objects.requireNonNull(config.getString("instruments.glint.enchantment")))));
     }
 
+    // change-owner.min-balance
+    public double changeOwnerMinBalance() {
+        return config.getDouble("change-owner.min-balance");
+    }
+
+    // change-owner.require-history
+    public boolean changeOwnerRequireHistory() {
+        return config.getBoolean("change-owner.require-history");
+    }
+
+    // change-owner.confirm
+    public boolean changeOwnerConfirm() {
+        return config.getBoolean("change-owner.confirm");
+    }
+
+    // change-owner.timeout
+    public int changeOwnerTimeout() {
+        return config.getInt("change-owner.timeout");
+    }
+
     // pos.allow-personal
     public boolean posAllowPersonal() {
         return config.getBoolean("pos.allow-personal");
@@ -484,6 +504,16 @@ public final class BankConfig {
     // messages.errors.not-frozen
     public @NotNull String messagesErrorsNotFrozen() {
         return Objects.requireNonNull(config.getString("messages.errors.not-frozen"));
+    }
+
+    // messages.errors.change-owner-balance
+    public @NotNull String messagesErrorsChangeOwnerBalance() {
+        return Objects.requireNonNull(config.getString("messages.errors.change-owner-balance"));
+    }
+
+    // messages.errors.change-owner-no-history
+    public @NotNull String messagesErrorsChangeOwnerNoHistory() {
+        return Objects.requireNonNull(config.getString("messages.errors.change-owner-no-history"));
     }
 
     // messages.balance

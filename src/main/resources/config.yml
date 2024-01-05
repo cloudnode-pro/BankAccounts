@@ -155,6 +155,17 @@ instruments:
         # Level 1 is always applied.
         enchantment: unbreaking
 
+# Change account owner
+change-owner:
+    # The minimum balance an account must have to be able to be transferred to another player
+    min-balance: 0
+    # Require the account to have transaction history to be able to be transferred
+    require-history: true
+    # Require confirmation/approval by the new owner
+    confirm: true
+    # In minutes, when should an ownership change request expire
+    timeout: 15
+
 # POS
 # Note: you cannot use <hover> <click> etc. in GUIs
 pos:
@@ -332,6 +343,14 @@ messages:
         already-frozen: "<yellow>(!) This account is already frozen.</yellow>"
         # Account is not frozen (placeholders same as balance)
         not-frozen: "<gold>(!) This account is not frozen.</gold>"
+        # Account balance minimum to change owner not satisfied (placeholders same as balance)
+        # Additional placeholders:
+        # <required-balance> - required min balance, example: 123456.78
+        # <required-balance-formatted> - required min balance with formatting, example: $123,456.78
+        # <required-balance-short> - required min balance with formatting, example: $123k
+        change-owner-balance: "<red>(!) The account balance must be at least <gray><balance-formatted></gray></red>"
+        # Account must have transaction history in order to be transferred
+        change-owner-no-history: "<red>(!) You must have a transaction history in order to change the owner.</red>"
 
     # Account balance
     # Available placeholders:
