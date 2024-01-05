@@ -447,6 +447,40 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
     }
 
     /**
+     * Change ownership of account
+     */
+    public static boolean changeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.CHANGE_OWNER)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (args.length < 2) return sendUsage(sender, label, "changeowner " + (args.length > 0 ? args[0] : "<account>") + " <new-owner>");
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (!sender.hasPermission(Permissions.CHANGE_OWNER_OTHER) && !account.get().owner.getUniqueId()
+                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
+        final double requiredBalance = BankAccounts.getInstance().config().changeOwnerMinBalance();
+        if (balance.isPresent() && balance.get().compareTo(BigDecimal.valueOf(requiredBalance)) < 0)
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsChangeOwnerBalance()
+                    .replace("<required-balance>", String.valueOf(requiredBalance))
+                    .replace("<required-balance-formatted>", BankAccounts.formatCurrency(BigDecimal.valueOf(requiredBalance)))
+                    .replace("<required-balance-short>", BankAccounts.formatCurrencyShort(BigDecimal.valueOf(requiredBalance)))
+            , account.get()));
+        if (BankAccounts.getInstance().config().changeOwnerRequireHistory() && Transaction.count(account.get()) == 0)
+            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsChangeOwnerNoHistory(), account.get()));
+        final @NotNull OfflinePlayer newOwner = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
+        if (newOwner.getUniqueId().equals(account.get().owner.getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyOwnsAccount().replace("<player>", Optional.ofNullable(newOwner.getName()).orElse("<i>that player</i>")));
+        if (BankAccounts.getInstance().config().changeOwnerConfirm() && !sender.hasPermission(Permissions.CHANGE_OWNER_SKIP_CONFIRMATION)) {
+            final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId());
+            request.insert();
+            // TODO: send confirmation message to new owner
+        }
+        new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId()).confirm();
+
+        return true;
+    }
+
+    /**
      * Make a transfer to another account
      * <p>
      * {@code transfer [--confirm] <from> <to> <amount> [description]}
