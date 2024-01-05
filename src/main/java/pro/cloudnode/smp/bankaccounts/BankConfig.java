@@ -516,6 +516,11 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.errors.change-owner-no-history"));
     }
 
+    // messages.errors.already-owns-account
+    public @NotNull String messagesErrorsAlreadyOwnsAccount() {
+        return Objects.requireNonNull(config.getString("messages.errors.already-owns-account"));
+    }
+
     // messages.balance
     public @NotNull String messagesBalance() {
         return Objects.requireNonNull(config.getString("messages.balance"));

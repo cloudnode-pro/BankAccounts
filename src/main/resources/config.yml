@@ -351,6 +351,8 @@ messages:
         change-owner-balance: "<red>(!) The account balance must be at least <gray><balance-formatted></gray></red>"
         # Account must have transaction history in order to be transferred
         change-owner-no-history: "<red>(!) You must have a transaction history in order to change the owner.</red>"
+        # The account is already owned by <player> (the new owner's username)
+        already-owns-account: "<red>(!) This account is already owned by <gray><player></gray>.</red>"
 
     # Account balance
     # Available placeholders:
