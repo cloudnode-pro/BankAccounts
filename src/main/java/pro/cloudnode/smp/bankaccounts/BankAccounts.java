@@ -41,10 +41,13 @@ import java.sql.SQLException;
 import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.logging.Level;
 
 public final class BankAccounts extends JavaPlugin {
@@ -157,6 +160,21 @@ public final class BankAccounts extends JavaPlugin {
             });
         });
         getInstance().startInterestTimer();
+        getInstance().startMinuteLoop();
+        getInstance().minuteLoopTasks.add(Account.ChangeOwnerRequest.deleteExpiredLater);
+    }
+
+    private @Nullable BukkitTask minuteLoop = null;
+    public @NotNull HashSet<@NotNull Supplier<@NotNull BukkitTask>> minuteLoopTasks = new HashSet<>();
+
+    /**
+     * Start a task that runs every minute
+     */
+    private void startMinuteLoop() {
+        if (minuteLoop != null) minuteLoop.cancel();
+        minuteLoop = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            minuteLoopTasks.forEach(Supplier::get);
+        }, 0L, 20L * 60);
     }
 
     /**
