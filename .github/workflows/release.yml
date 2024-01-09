@@ -19,6 +19,9 @@ jobs:
                     java-version: '17'
                     distribution: 'corretto'
 
+            -   name: Set project version
+                run: mvn -B versions:set -DnewVersion=${{ github.event.release.tag_name }} -DgenerateBackupPoms=false
+
             -   name: Build and package Maven project
                 run: mvn clean package
 
