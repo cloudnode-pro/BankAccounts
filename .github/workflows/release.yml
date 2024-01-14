@@ -1,30 +1,42 @@
 name: Maven Release
 
 on:
-    release:
-        types: [ published ]
+  release:
+    types: [ published ]
 
 jobs:
-    package-and-upload:
-        name: Build and Upload JARs
-        runs-on: ubuntu-latest
+  package-and-upload:
+    name: Build and Upload JARs
+    runs-on: ubuntu-latest
 
-        steps:
-            -   name: Checkout code
-                uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-            -   name: Set up Java
-                uses: actions/setup-java@v3
-                with:
-                    java-version: '17'
-                    distribution: 'corretto'
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'corretto'
 
-            -   name: Build and package Maven project
-                run: mvn clean package
+      - name: Set project version
+        run: mvn -B versions:set -DnewVersion=${{ github.event.release.tag_name }} -DgenerateBackupPoms=false
 
-            -   name: Upload to release
-                uses: JasonEtco/upload-to-release@master
-                with:
-                    args: target/BankAccounts-${{ github.event.release.tag_name }}.jar application/java-archive
-                env:
-                    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and package Maven project
+        run: mvn clean package
+
+      - name: Upload to release
+        uses: JasonEtco/upload-to-release@master
+        with:
+          args: target/BankAccounts-${{ github.event.release.tag_name }}.jar application/java-archive
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Modrinth
+        uses: cloudnode-pro/modrinth-publish@main
+        with:
+          token: '${{ secrets.MODRINTH_TOKEN }}'
+          project: Dc8RS2En
+          file: target/BankAccounts-${{ github.event.release.tag_name }}.jar
+          changelog: ${{ github.event.release.body }}
+          loaders: paper
