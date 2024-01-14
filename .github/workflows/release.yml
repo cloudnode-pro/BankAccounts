@@ -31,3 +31,12 @@ jobs:
           args: target/BankAccounts-${{ github.event.release.tag_name }}.jar application/java-archive
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload to Modrinth
+        uses: cloudnode-pro/modrinth-publish@main
+        with:
+          token: '${{ secrets.MODRINTH_TOKEN }}'
+          project: Dc8RS2En
+          file: target/BankAccounts-${{ github.event.release.tag_name }}.jar
+          changelog: ${{ github.event.release.body }}
+          loaders: paper
