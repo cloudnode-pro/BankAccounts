@@ -45,6 +45,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             if (sender.hasPermission(Permissions.SET_NAME)) suggestions.addAll(Arrays.asList("setname", "rename"));
             if (sender.hasPermission(Permissions.FREEZE)) suggestions.addAll(Arrays.asList("freeze", "disable", "block", "unfreeze", "enable", "unblock"));
             if (sender.hasPermission(Permissions.DELETE)) suggestions.add("delete");
+            if (sender.hasPermission(Permissions.CHANGE_OWNER)) suggestions.addAll(Arrays.asList("changeowner", "newowner", "newholder", "changeholder"));
             if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
                 suggestions.addAll(Arrays.asList("transfer", "send", "pay"));
             if (sender.hasPermission(Permissions.HISTORY)) suggestions.addAll(Arrays.asList("transactions", "history"));
@@ -110,6 +111,12 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
                             .filter(account -> sender.hasPermission(Permissions.DELETE_PERSONAL) || account.type != Account.Type.PERSONAL)
                             .map(account -> account.id).collect(Collectors.toSet()));
                 }
+                case "changeowner", "newowner", "newholder", "changeholder" -> {
+                    if (!sender.hasPermission(Permissions.CHANGE_OWNER)) return suggestions;
+                    if (args.length == 2) suggestions.addAll(Arrays
+                            .stream(sender.hasPermission(Permissions.CHANGE_OWNER_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
+                            .map(account -> account.id).collect(Collectors.toSet()));
+                }
                 case "transfer", "send", "pay" -> {
                     if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
                         return suggestions;
@@ -172,6 +179,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             case "freeze", "disable", "block" -> freeze(sender, argsSubset, label);
             case "unfreeze", "enable", "unblock" -> unfreeze(sender, argsSubset, label);
             case "delete" -> delete(sender, argsSubset, label);
+            case "changeowner", "newowner", "newholder", "changeholder" -> changeOwner(sender, argsSubset, label);
             case "transfer", "send", "pay" -> transfer(sender, argsSubset, label);
             case "transactions", "history" -> transactions(sender, argsSubset, label);
             case "instrument", "card" -> instrument(sender, argsSubset, label);
@@ -216,6 +224,8 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
         if (sender.hasPermission(Permissions.DELETE))
             sendMessage(sender, "<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>");
+        if (sender.hasPermission(Permissions.CHANGE_OWNER))
+            sendMessage(sender, "<click:suggest_command:/bank changeowner ><green>/bank changeowner <gray><account> <player></gray></green> <white>- Change account owner</click>");
         if (sender.hasPermission(Permissions.INSTRUMENT_CREATE))
             sendMessage(sender, "<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>");
         if (sender.hasPermission(Permissions.WHOIS))
