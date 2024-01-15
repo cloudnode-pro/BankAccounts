@@ -13,7 +13,6 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
-import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -32,7 +31,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Supplier;
 import java.util.logging.Level;
 
 /**
@@ -639,19 +637,19 @@ public class Account {
         /**
          * Get account ownership change request
          *
-         * @param account Account
+         * @param account Account ID
          * @param newOwner New owner
          */
-        public static @NotNull Optional<@NotNull ChangeOwnerRequest> get(final @NotNull Account account, @NotNull OfflinePlayer newOwner) {
+        public static @NotNull Optional<@NotNull ChangeOwnerRequest> get(final @NotNull String account, @NotNull OfflinePlayer newOwner) {
             try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
                  final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `account` = ? AND `new_owner` = ? LIMIT 1")) {
-                stmt.setString(1, account.id);
+                stmt.setString(1, account);
                 stmt.setString(2, newOwner.getUniqueId().toString());
                 final @NotNull ResultSet rs = stmt.executeQuery();
                 return rs.next() ? Optional.of(new ChangeOwnerRequest(rs)) : Optional.empty();
             }
             catch (final @NotNull Exception e) {
-                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account ownership change request. account: " + account.id + ", newOwner: " + newOwner.getUniqueId(), e);
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account ownership change request. account: " + account + ", newOwner: " + newOwner.getUniqueId(), e);
                 return Optional.empty();
             }
         }

@@ -17,6 +17,7 @@ public final class Permissions {
     public static @NotNull String CHANGE_OWNER = "bank.change.owner";
     public static @NotNull String CHANGE_OWNER_OTHER = "bank.change.owner.other";
     public static @NotNull String CHANGE_OWNER_SKIP_CONFIRMATION = "bank.change.owner.skip-confirmation";
+    public static @NotNull String CHANGE_OWNER_ACCEPT = "bank.change.owner.accept";
     public static @NotNull String BALTOP = "bank.baltop";
     public static @NotNull String POS_CREATE = "bank.pos.create";
     public static @NotNull String POS_USE = "bank.pos.use";

@@ -521,6 +521,16 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("messages.errors.already-owns-account"));
     }
 
+    // messages.errors.change-owner-not-found
+    public @NotNull String messagesErrorsChangeOwnerNotFound() {
+        return Objects.requireNonNull(config.getString("messages.errors.change-owner-not-found"));
+    }
+
+    // messages.errors.change-owner-accept-failed
+    public @NotNull String messagesErrorsChangeOwnerAcceptFailed() {
+        return Objects.requireNonNull(config.getString("messages.errors.change-owner-accept-failed"));
+    }
+
     // messages.balance
     public @NotNull String messagesBalance() {
         return Objects.requireNonNull(config.getString("messages.balance"));

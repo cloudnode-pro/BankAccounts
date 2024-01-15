@@ -353,6 +353,10 @@ messages:
         change-owner-no-history: "<red>(!) You must have a transaction history in order to change the owner.</red>"
         # The account is already owned by <player> (the new owner's username)
         already-owns-account: "<red>(!) This account is already owned by <gray><player></gray>.</red>"
+        # Change owner request not found
+        change-owner-not-found: "<red>(!) This account ownership change request was not found.</red>"
+        # Cannot accept change owner request
+        change-owner-accept-failed: "<red>(!) Failed to accept ownership change request.</red>"
 
     # Account balance
     # Available placeholders:

@@ -180,6 +180,7 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
             case "unfreeze", "enable", "unblock" -> unfreeze(sender, argsSubset, label);
             case "delete" -> delete(sender, argsSubset, label);
             case "changeowner", "newowner", "newholder", "changeholder" -> changeOwner(sender, argsSubset, label);
+            case "acceptchangeowner" -> acceptChangeOwner(sender, argsSubset, label);
             case "transfer", "send", "pay" -> transfer(sender, argsSubset, label);
             case "transactions", "history" -> transactions(sender, argsSubset, label);
             case "instrument", "card" -> instrument(sender, argsSubset, label);
@@ -487,6 +488,33 @@ public class BankCommand extends pro.cloudnode.smp.bankaccounts.Command {
         }
         new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId()).confirm();
 
+        return true;
+    }
+
+    /**
+     * Accept ownership change request
+     */
+    public static boolean acceptChangeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.CHANGE_OWNER_ACCEPT)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (args.length < 1) return sendUsage(sender, label, "acceptchangeowner <account>");
+        final @NotNull Optional<Account.@NotNull ChangeOwnerRequest> request = Account.ChangeOwnerRequest.get(args[0], BankAccounts.getOfflinePlayer(sender));
+        if (request.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNotFound());
+        final @NotNull Optional<@NotNull Account> account = request.get().account();
+        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+
+        if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_BYPASS)) {
+            final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender), account.get().type);
+            int limit = BankAccounts.getInstance().config().accountLimits(account.get().type);
+            if (limit != -1 && accounts.length >= limit)
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(),
+                        Placeholder.unparsed("type", account.get().type.getName()),
+                        Placeholder.unparsed("limit", String.valueOf(limit))
+                );
+        }
+
+        final boolean success = request.get().confirm();
+        if (!success) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerAcceptFailed());
+        // TODO: send success message to new owner
         return true;
     }
 
