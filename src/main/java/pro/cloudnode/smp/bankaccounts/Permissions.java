@@ -26,7 +26,7 @@ public final class Permissions {
     public static @NotNull String INSTRUMENT_CREATE_BYPASS = "bank.instrument.create.bypass";
     public static @NotNull String SET_BALANCE = "bank.set.balance";
     public static @NotNull String SET_NAME_OTHER = "bank.set.name.other";
-    public static @NotNull String SET_NAME_PERSONAL = "b=ank.set.name.personal";
+    public static @NotNull String SET_NAME_PERSONAL = "bank.set.name.personal";
     public static @NotNull String FREEZE_OTHER = "bank.freeze.other";
     public static @NotNull String DELETE_OTHER = "bank.delete.other";
     public static @NotNull String DELETE_PERSONAL = "bank.delete.personal";
