@@ -332,6 +332,8 @@ messages:
         already-frozen: "<yellow>(!) This account is already frozen.</yellow>"
         # Account is not frozen (placeholders same as balance)
         not-frozen: "<gold>(!) This account is not frozen.</gold>"
+        # Invoice negative amount
+        negative-invoice: "<red>(!) The amount to invoice must be greater than zero.</red>"
 
     # Account balance
     # Available placeholders:

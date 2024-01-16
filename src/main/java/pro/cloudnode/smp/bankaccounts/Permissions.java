@@ -17,6 +17,8 @@ public final class Permissions {
     public static @NotNull String BALTOP = "bank.baltop";
     public static @NotNull String POS_CREATE = "bank.pos.create";
     public static @NotNull String POS_USE = "bank.pos.use";
+    public static @NotNull String INVOICE_CREATE = "bank.invoice.create";
+    public static @NotNull String INVOICE_CREATE_OTHER = "bank.invoice.create.other";
     public static @NotNull String RELOAD = "bank.reload";
     public static @NotNull String BALANCE_OTHER = "bank.balance.other";
     public static @NotNull String HISTORY_OTHER = "bank.history.other";

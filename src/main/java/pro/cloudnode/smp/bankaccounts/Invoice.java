@@ -47,6 +47,10 @@ public class Invoice {
         this.transaction = transaction;
     }
 
+    public Invoice(final @NotNull Account seller, final @NotNull BigDecimal amount, final @Nullable String description, final @Nullable OfflinePlayer buyer) {
+        this(StringGenerator.generate(16), seller, amount, description, buyer, new Date(), null);
+    }
+
     public Invoice(final @NotNull ResultSet rs) throws @NotNull SQLException {
         this(
                 rs.getString("id"),

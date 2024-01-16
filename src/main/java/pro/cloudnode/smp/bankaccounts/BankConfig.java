@@ -657,6 +657,11 @@ public final class BankConfig {
         );
     }
 
+    // messages.errors.negative-invoice
+    public @NotNull Component messagesErrorsNegativeInvoice() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.negative-invoice")));
+    }
+
     // messages.balance
     public @NotNull Component messagesBalance(final @NotNull Account account) {
         return MiniMessage.miniMessage().deserialize(
