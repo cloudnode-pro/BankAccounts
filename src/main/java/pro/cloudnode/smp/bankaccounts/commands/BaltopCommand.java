@@ -28,7 +28,7 @@ public final class BaltopCommand extends Command {
     }
 
     @Override
-    public @NotNull List<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public @NotNull List<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (!sender.hasPermission(Permissions.BALTOP)) return suggestions;
         if (args.length == 1) suggestions.addAll(Arrays.asList("personal", "business", "player"));

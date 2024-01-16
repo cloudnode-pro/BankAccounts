@@ -85,7 +85,8 @@ public final class POSCommand extends Command {
         return sendMessage(sender, replacePlaceholders(BankAccounts.getInstance().config().messagesPosCreated(), pos));
     }
 
-    public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    @Override
+    public @NotNull ArrayList<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof Player && args.length == 1) {
             final @NotNull Account[] accounts = sender.hasPermission(Permissions.POS_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));

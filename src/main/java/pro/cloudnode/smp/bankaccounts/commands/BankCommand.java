@@ -32,7 +32,7 @@ public class BankCommand extends Command {
     }
 
     @Override
-    public @NotNull ArrayList<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public @NotNull ArrayList<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
         if (!sender.hasPermission(Permissions.COMMAND)) return suggestions;
         if (args.length == 1) {

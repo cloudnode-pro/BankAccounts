@@ -8,6 +8,10 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.List;
+import java.util.Optional;
 
 public abstract class Command implements CommandExecutor, TabCompleter {
     /**
@@ -55,11 +59,25 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      */
     protected abstract boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args);
 
+    /**
+     * Tab complete
+     *
+     * @param sender Command sender
+     * @param args   Command arguments
+     */
+    protected abstract @Nullable List<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args);
+
     @Override
     public final boolean onCommand(final @NotNull CommandSender sender, final @NotNull org.bukkit.command.Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
             final boolean ignored = execute(sender, label, args);
         });
         return true;
+    }
+
+    @Override
+    public final @Nullable List<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull org.bukkit.command.Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        final @Nullable List<@NotNull String> suggestions = tab(sender, args);
+        return Optional.ofNullable(suggestions).map(s -> s.stream().filter(suggestion -> suggestion.toLowerCase().startsWith(args[args.length - 1].toLowerCase())).toList()).orElse(null);
     }
 }
