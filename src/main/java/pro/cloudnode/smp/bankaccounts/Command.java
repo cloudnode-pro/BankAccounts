@@ -17,14 +17,15 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     /**
      * Send message to sender.
      *
-     * @param sender       Command sender.
-     * @param message      Message to send.
+     * @param sender  Command sender.
+     * @param message Message to send.
      * @return Always true.
      */
     public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull Component message) {
         sender.sendMessage(message);
         return true;
     }
+
     /**
      * Send message to sender.
      *
