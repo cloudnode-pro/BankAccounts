@@ -45,4 +45,21 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     protected static boolean sendUsage(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String arguments) {
         return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(), Placeholder.unparsed("command", label), Placeholder.unparsed("arguments", arguments));
     }
+
+    /**
+     * Execute command
+     *
+     * @param sender Command sender
+     * @param label  Command label
+     * @param args   Command arguments
+     */
+    protected abstract boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args);
+
+    @Override
+    public final boolean onCommand(final @NotNull CommandSender sender, final @NotNull org.bukkit.command.Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+        BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
+            final boolean ignored = execute(sender, label, args);
+        });
+        return true;
+    }
 }

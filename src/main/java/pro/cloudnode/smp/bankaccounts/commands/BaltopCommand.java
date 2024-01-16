@@ -1,12 +1,12 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
 import org.bukkit.OfflinePlayer;
-import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
@@ -21,9 +21,9 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
-public final class BaltopCommand extends pro.cloudnode.smp.bankaccounts.Command {
+public final class BaltopCommand extends Command {
     @Override
-    public boolean onCommand(final @NotNull CommandSender sender, final @NotNull Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
         return run(sender, label, args, new String[0]);
     }
 
