@@ -11,9 +11,7 @@ import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
@@ -226,13 +224,13 @@ public final class BankConfig {
     }
 
     // pos.title
-    public @NotNull Component posTitle(final @Nullable String description, final @NotNull BigDecimal price) {
+    public @NotNull Component posTitle(final @NotNull POS pos) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("pos.title")),
-                Placeholder.unparsed("description", description == null ? "no description" : description),
-                Placeholder.unparsed("price", price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price))
+                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         );
     }
 
@@ -247,31 +245,31 @@ public final class BankConfig {
     }
 
     // pos.info.name-owner
-    public @NotNull Component posInfoNameOwner(final @Nullable String description, final @NotNull BigDecimal price) {
+    public @NotNull Component posInfoNameOwner(final @NotNull POS pos) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("pos.info.name-owner")),
-                Placeholder.unparsed("description", description == null ? "no description" : description),
-                Placeholder.unparsed("price", price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price))
+                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
         ).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.info.name-buyer
-    public @NotNull Component posInfoNameBuyer(final @Nullable String description, final @NotNull BigDecimal price, final @NotNull Account account) {
+    public @NotNull Component posInfoNameBuyer(final @NotNull POS pos) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("pos.info.name-buyer")),
-                Placeholder.unparsed("description", description == null ? "no description" : description),
-                Placeholder.unparsed("price", price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price)),
-                Placeholder.unparsed("account", account.name()),
-                Placeholder.unparsed("account-id", account.id),
-                Placeholder.unparsed("account-type", account.type.getName()),
-                Placeholder.component("account-owner", account.ownerName()),
-                Placeholder.unparsed("balance", account.balance == null ? "∞" : account.balance.toPlainString()),
-                Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(account.balance)),
-                Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(account.balance))
+                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)),
+                Placeholder.unparsed("account", pos.seller.name()),
+                Placeholder.unparsed("account-id", pos.seller.id),
+                Placeholder.unparsed("account-type", pos.seller.type.getName()),
+                Placeholder.component("account-owner", pos.seller.ownerName()),
+                Placeholder.unparsed("balance", pos.seller.balance == null ? "∞" : pos.seller.balance.toPlainString()),
+                Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(pos.seller.balance)),
+                Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(pos.seller.balance))
         ).decoration(TextDecoration.ITALIC, false);
     }
 

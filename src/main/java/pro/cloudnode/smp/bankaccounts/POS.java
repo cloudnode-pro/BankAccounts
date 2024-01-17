@@ -291,7 +291,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos.description, pos.price));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -300,7 +300,7 @@ public final class POS {
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameOwner(pos.description, pos.price));
+        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameOwner(pos));
         overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreOwner().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(line,
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
@@ -342,7 +342,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos.description, pos.price));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -351,7 +351,7 @@ public final class POS {
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameBuyer(pos.description, pos.price, pos.seller));
+        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameBuyer(pos));
         overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, pos.seller),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
