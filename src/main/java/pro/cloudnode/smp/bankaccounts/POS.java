@@ -1,8 +1,5 @@
 package pro.cloudnode.smp.bankaccounts;
 
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -33,7 +30,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
@@ -372,13 +368,7 @@ public final class POS {
         }
         final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
         cancelMeta.displayName(BankAccounts.getInstance().config().posDeclineName());
-        cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore());
         final @NotNull PersistentDataContainer cancelContainer = cancelMeta.getPersistentDataContainer();
         cancelContainer.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
         cancel.setItemMeta(cancelMeta);

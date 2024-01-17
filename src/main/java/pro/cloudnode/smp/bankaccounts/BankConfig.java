@@ -384,8 +384,8 @@ public final class BankConfig {
     }
 
     // pos.decline.lore
-    public @NotNull List<@NotNull String> posDeclineLore() {
-        return Objects.requireNonNull(config.getStringList("pos.decline.lore"));
+    public @NotNull List<@NotNull Component> posDeclineLore() {
+        return Objects.requireNonNull(config.getStringList("pos.decline.lore")).stream().map(string -> MiniMessage.miniMessage().deserialize(string).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // interest.*.rate
