@@ -11,7 +11,6 @@ import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
@@ -652,8 +651,17 @@ public final class BankConfig {
     }
 
     // messages.balance
-    public @NotNull String messagesBalance() {
-        return Objects.requireNonNull(config.getString("messages.balance"));
+    public @NotNull Component messagesBalance(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.balance"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.list-accounts.header

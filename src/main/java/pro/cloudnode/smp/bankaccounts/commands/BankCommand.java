@@ -268,7 +268,7 @@ public class BankCommand extends Command {
             else if (!sender.hasPermission(Permissions.BALANCE_OTHER) && !account.get().owner.getUniqueId()
                     .equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-            else return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalance(), account.get()));
+            else return sendMessage(sender, BankAccounts.getInstance().config().messagesBalance(account.get()));
         }
     }
 
@@ -276,7 +276,7 @@ public class BankCommand extends Command {
         final @NotNull Account @NotNull [] accounts = Account.get(player);
         if (accounts.length == 0) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoAccounts());
         else if (accounts.length == 1)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalance(), accounts[0]));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesBalance(accounts[0]));
         else {
             sendMessage(sender, BankAccounts.getInstance().config().messagesListAccountsHeader());
             for (final @NotNull Account account : accounts)
