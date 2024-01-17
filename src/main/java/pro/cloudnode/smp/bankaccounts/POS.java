@@ -346,13 +346,7 @@ public final class POS {
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
         overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameBuyer(pos));
-        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, pos.seller),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer(pos));
         final @NotNull PersistentDataContainer overviewContainer = overviewMeta.getPersistentDataContainer();
         overviewContainer.set(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING, String.join(",", POS.checksum(items)));
         overview.setItemMeta(overviewMeta);

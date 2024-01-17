@@ -285,8 +285,21 @@ public final class BankConfig {
     }
 
     // pos.info.lore-buyer
-    public @NotNull List<@NotNull String> posInfoLoreBuyer() {
-        return Objects.requireNonNull(config.getStringList("pos.info.lore-buyer"));
+    public @NotNull List<@NotNull Component> posInfoLoreBuyer(final @NotNull POS pos) {
+        return Objects.requireNonNull(config.getStringList("pos.info.lore-buyer")).stream().map(string -> MiniMessage.miniMessage().deserialize(
+                string,
+                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)),
+                Placeholder.unparsed("account", pos.seller.name()),
+                Placeholder.unparsed("account-id", pos.seller.id),
+                Placeholder.unparsed("account-type", pos.seller.type.getName()),
+                Placeholder.component("account-owner", pos.seller.ownerName()),
+                Placeholder.unparsed("balance", pos.seller.balance == null ? "∞" : pos.seller.balance.toPlainString()),
+                Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(pos.seller.balance)),
+                Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(pos.seller.balance))
+        ).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // pos.delete.material
