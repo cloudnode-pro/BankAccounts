@@ -8,7 +8,6 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
-import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
@@ -30,8 +29,7 @@ public final class Join implements Listener {
         if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {
             BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
                 BankAccounts.checkForUpdates().ifPresent(latestVersion -> {
-                    Command.sendMessage(player, BankAccounts.getInstance().config().messagesUpdateAvailable()
-                            .replace("<version>", latestVersion));
+                    player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion));
                 });
             }, 20L);
         }

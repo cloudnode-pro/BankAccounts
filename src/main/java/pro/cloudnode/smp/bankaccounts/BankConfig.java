@@ -1083,7 +1083,10 @@ public final class BankConfig {
     }
 
     // messages.update-available
-    public @NotNull String messagesUpdateAvailable() {
-        return Objects.requireNonNull(config.getString("messages.update-available"));
+    public @NotNull Component messagesUpdateAvailable(final @NotNull String version) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.update-available"))
+                        .replace("<version>", version)
+        );
     }
 }
