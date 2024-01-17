@@ -165,14 +165,11 @@ public class Account {
         final @NotNull Material material = BankAccounts.getInstance().config().instrumentsMaterial();
         final @NotNull ItemStack instrument = new ItemStack(material);
 
-        final @NotNull List<@NotNull String> lore = BankAccounts.getInstance().config().instrumentsLore();
-        final boolean glint = BankAccounts.getInstance().config().instrumentsGlintEnabled();
-
         final @NotNull ItemMeta meta = instrument.getItemMeta();
         meta.displayName(BankAccounts.getInstance().config().instrumentsName(this, LocalDateTime.now(ZoneOffset.UTC)));
-        meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
+        meta.lore(BankAccounts.getInstance().config().instrumentsLore(this, LocalDateTime.now(ZoneOffset.UTC)));
 
-        if (glint) {
+        if (BankAccounts.getInstance().config().instrumentsGlintEnabled()) {
             final @NotNull Enchantment enchantment = BankAccounts.getInstance().config().instrumentsGlintEnchantment();
             meta.addEnchant(enchantment, 1, true);
             meta.addItemFlags(ItemFlag.HIDE_ENCHANTS);

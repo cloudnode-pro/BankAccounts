@@ -195,8 +195,15 @@ public final class BankConfig {
     }
 
     // instruments.lore
-    public @NotNull List<@NotNull String> instrumentsLore() {
-        return Objects.requireNonNull(config.getStringList("instruments.lore"));
+    public @NotNull List<@NotNull Component> instrumentsLore(final @NotNull Account account, final @NotNull TemporalAccessor created) {
+        return Objects.requireNonNull(config.getStringList("instruments.lore")).stream().map(string -> MiniMessage.miniMessage().deserialize(
+                string,
+                Placeholder.unparsed("account", account.name()),
+                Placeholder.unparsed("account-id", account.id),
+                Placeholder.unparsed("account-type", account.type.getName()),
+                Placeholder.component("account-owner", account.ownerName()),
+                Formatter.date("date", created)
+        )).toList();
     }
 
     // instruments.glint.enabled
