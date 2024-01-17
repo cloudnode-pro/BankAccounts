@@ -959,8 +959,8 @@ public final class BankConfig {
     }
 
     // messages.pos-removed
-    public @NotNull String messagesPosRemoved() {
-        return Objects.requireNonNull(config.getString("messages.pos-removed"));
+    public @NotNull Component messagesPosRemoved() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.pos-removed")));
     }
 
     // messages.pos-purchase

@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -55,7 +54,7 @@ public class GUI implements Listener {
                 }
                 if (event.getCurrentItem() != null && event.getCurrentItem().equals(item)) {
                     pos.get().delete();
-                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesPosRemoved()));
+                    event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesPosRemoved());
                     inventory.close();
                 }
             }
@@ -110,7 +109,7 @@ public class GUI implements Listener {
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                         if (seller != null) {
                             seller.sendMessage(BankAccounts.getInstance().config().messagesErrorsFrozen(pos.get().seller));
-                            seller.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesPosRemoved()));
+                            seller.sendMessage(BankAccounts.getInstance().config().messagesPosRemoved());
                         }
                         pos.get().delete();
                         return;
