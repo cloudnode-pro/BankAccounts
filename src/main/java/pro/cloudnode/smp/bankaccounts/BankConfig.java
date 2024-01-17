@@ -927,8 +927,8 @@ public final class BankConfig {
     }
 
     // messages.history.no-transactions
-    public @NotNull String messagesHistoryNoTransactions() {
-        return Objects.requireNonNull(config.getString("messages.history.no-transactions"));
+    public @NotNull Component messagesHistoryNoTransactions() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.history.no-transactions")));
     }
 
     // messages.instrument-created
