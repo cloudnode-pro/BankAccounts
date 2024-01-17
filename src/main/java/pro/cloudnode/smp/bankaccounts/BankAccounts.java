@@ -283,8 +283,7 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static String formatCurrency(final @Nullable BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
-        final @Nullable String format = getInstance().config().currencyFormat();
-        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + new DecimalFormat(format).format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
+        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + getInstance().config().currencyFormat().format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
     /**

@@ -6,6 +6,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
+import java.text.DecimalFormat;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -98,8 +99,8 @@ public final class BankConfig {
     }
 
     // currency.format
-    public @NotNull String currencyFormat() {
-        return Objects.requireNonNull(config.getString("currency.format"));
+    public @NotNull DecimalFormat currencyFormat() {
+        return new DecimalFormat(Objects.requireNonNull(config.getString("currency.format")));
     }
 
     // starting-balance
