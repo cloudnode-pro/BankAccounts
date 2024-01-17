@@ -409,8 +409,12 @@ public final class BankConfig {
     }
 
     // messages.command-usage
-    public @NotNull String messagesCommandUsage() {
-        return Objects.requireNonNull(config.getString("messages.command-usage"));
+    public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.command-usage")),
+                Placeholder.unparsed("command", command),
+                Placeholder.unparsed("arguments", arguments)
+        );
     }
 
     // messages.types.
