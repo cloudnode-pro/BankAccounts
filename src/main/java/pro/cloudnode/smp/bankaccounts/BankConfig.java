@@ -12,7 +12,9 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.HumanEntity;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
@@ -773,18 +775,81 @@ public final class BankConfig {
     }
 
     // messages.confirm-transfer
-    public @NotNull String messagesConfirmTransfer() {
-        return Objects.requireNonNull(config.getString("messages.confirm-transfer"));
+    public @NotNull Component messagesConfirmTransfer(final @NotNull Account from, final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.confirm-transfer"))
+                        .replace("<from-account>", from.name())
+                        .replace("<from-account-id>", from.id)
+                        .replace("<from-account-type>", from.type.getName())
+                        .replace("<from-account-owner>", from.ownerNameUnparsed())
+                        .replace("<from-balance>", from.balance == null ? "∞" : from.balance.toPlainString())
+                        .replace("<from-balance-formatted>", BankAccounts.formatCurrency(from.balance))
+                        .replace("<from-balance-short>", BankAccounts.formatCurrencyShort(from.balance))
+                        .replace("<to-account>", from.name())
+                        .replace("<to-account-id>", from.id)
+                        .replace("<to-account-type>", from.type.getName())
+                        .replace("<to-account-owner>", from.ownerNameUnparsed())
+                        .replace("<to-balance>", from.balance == null ? "∞" : from.balance.toPlainString())
+                        .replace("<to-balance-formatted>", BankAccounts.formatCurrency(from.balance))
+                        .replace("<to-balance-short>", BankAccounts.formatCurrencyShort(from.balance))
+                        .replace("<amount>", amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
+                        .replace("<description>", description == null ? "<gray><i>no description</i>" : description)
+                        .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description))
+        );
     }
 
     // messages.transfer-sent
-    public @NotNull String messagesTransferSent() {
-        return Objects.requireNonNull(config.getString("messages.transfer-sent"));
+    public @NotNull Component messagesTransferSent(final @NotNull Transaction transaction) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.transfer-sent"))
+                        .replace("<from-account>", transaction.from.name())
+                        .replace("<from-account-id>", transaction.from.id)
+                        .replace("<from-account-type>", transaction.from.type.getName())
+                        .replace("<from-account-owner>", transaction.from.ownerNameUnparsed())
+                        .replace("<from-balance>", transaction.from.balance == null ? "∞" : transaction.from.balance.toPlainString())
+                        .replace("<from-balance-formatted>", BankAccounts.formatCurrency(transaction.from.balance))
+                        .replace("<from-balance-short>", BankAccounts.formatCurrencyShort(transaction.from.balance))
+                        .replace("<to-account>", transaction.from.name())
+                        .replace("<to-account-id>", transaction.from.id)
+                        .replace("<to-account-type>", transaction.from.type.getName())
+                        .replace("<to-account-owner>", transaction.from.ownerNameUnparsed())
+                        .replace("<to-balance>", transaction.from.balance == null ? "∞" : transaction.from.balance.toPlainString())
+                        .replace("<to-balance-formatted>", BankAccounts.formatCurrency(transaction.from.balance))
+                        .replace("<to-balance-short>", BankAccounts.formatCurrencyShort(transaction.from.balance))
+                        .replace("<amount>", transaction.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
+                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
+                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
+        );
     }
 
     // messages.transfer-received
-    public @NotNull String messagesTransferReceived() {
-        return Objects.requireNonNull(config.getString("messages.transfer-received"));
+    public @NotNull Component messagesTransferReceived(final @NotNull Transaction transaction) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.transfer-received"))
+                        .replace("<from-account>", transaction.from.name())
+                        .replace("<from-account-id>", transaction.from.id)
+                        .replace("<from-account-type>", transaction.from.type.getName())
+                        .replace("<from-account-owner>", transaction.from.ownerNameUnparsed())
+                        .replace("<from-balance>", transaction.from.balance == null ? "∞" : transaction.from.balance.toPlainString())
+                        .replace("<from-balance-formatted>", BankAccounts.formatCurrency(transaction.from.balance))
+                        .replace("<from-balance-short>", BankAccounts.formatCurrencyShort(transaction.from.balance))
+                        .replace("<to-account>", transaction.from.name())
+                        .replace("<to-account-id>", transaction.from.id)
+                        .replace("<to-account-type>", transaction.from.type.getName())
+                        .replace("<to-account-owner>", transaction.from.ownerNameUnparsed())
+                        .replace("<to-balance>", transaction.from.balance == null ? "∞" : transaction.from.balance.toPlainString())
+                        .replace("<to-balance-formatted>", BankAccounts.formatCurrency(transaction.from.balance))
+                        .replace("<to-balance-short>", BankAccounts.formatCurrencyShort(transaction.from.balance))
+                        .replace("<amount>", transaction.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
+                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
+                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
+        );
     }
 
     // messages.history.header

@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
-import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -19,7 +18,6 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -510,16 +508,16 @@ public class BankCommand extends Command {
             boolean bypassOwnAccounts = BankAccounts.getInstance().config().transferConfirmationBypassOwnAccounts();
             if (amount.compareTo(minAmount) >= 0 && (!bypassOwnAccounts || !from.get().owner.getUniqueId()
                     .equals(to.get().owner.getUniqueId()))) {
-                return sendMessage(sender, transferConfirmation(from.get(), to.get(), amount, description));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesConfirmTransfer(from.get(), to.get(), amount, description));
             }
         }
 
         final @NotNull Transaction transfer = from.get().transfer(to.get(), amount, description, null);
-        sendMessage(sender, Transaction.placeholders(transfer, BankAccounts.getInstance().config().messagesTransferSent()));
+        sendMessage(sender, BankAccounts.getInstance().config().messagesTransferSent(transfer));
         final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(to.get().owner.getPlayer());
         if (player.isPresent() && player.get().isOnline() && !player.get().getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            sendMessage(player.get(), Transaction.placeholders(transfer, BankAccounts.getInstance().config().messagesTransferReceived()));
+            sendMessage(player.get(), BankAccounts.getInstance().config().messagesTransferReceived(transfer));
 
         return true;
     }
@@ -647,33 +645,5 @@ public class BankCommand extends Command {
                 .replace("<max-page>", String.valueOf(maxPage))
                 .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
                 .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1)), account));
-    }
-
-    /**
-     * Transfer confirmation message
-     * <ul>
-     *    <li>{@code <amount>} Transfer amount without formatting, example: 123456.78</li>
-     *    <li>{@code <amount-formatted>} Transfer amount with formatting, example: 123,456.78</li>
-     *    <li>{@code <amount-short>} Transfer amount with formatting, example: 123k</li>
-     *    <li>{@code <description>} Transfer description</li>
-     *    <li>{@code <confirm-command>} Command to run to confirm transfer</li>
-     * </ul>
-     *
-     * @param from        Account sending from
-     * @param to          Account sending to
-     * @param amount      Amount of transfer
-     * @param description Description of transfer
-     */
-    public static @NotNull Component transferConfirmation(final @NotNull Account from, final @NotNull Account to, final @NotNull BigDecimal amount, final @Nullable String description) {
-        return Account.placeholders(Objects
-                .requireNonNull(BankAccounts.getInstance().config().messagesConfirmTransfer())
-                .replace("<amount>", amount.toPlainString())
-                .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                .replace("<description>", description == null ? "<gray><i>no description</i></gray>" : description)
-                .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description)), new HashMap<>() {{
-            put("from", from);
-            put("to", to);
-        }});
     }
 }
