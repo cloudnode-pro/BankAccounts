@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
-import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -43,8 +42,6 @@ public final class BaltopCommand extends Command {
         if (page < 1) page = 1;
         final int perPage = BankAccounts.getInstance().config().baltopPerPage();
 
-        final @NotNull String labelArgsString = labelArgs.length > 0 ? " " + String.join(" ", labelArgs) : "";
-        final @NotNull String argsString = (args.length > 0 ? " " + String.join(" ", args) : "");
         final @NotNull String cmdPrev = "/baltop" + (type.map(s -> " " + s).orElse("")) + " " + Math.max(1, page - 1);
         final @NotNull String cmdNext = "/baltop" + (type.map(s -> " " + s).orElse("")) + " " + Math.min(1000000000, page + 1);
 
@@ -52,36 +49,17 @@ public final class BaltopCommand extends Command {
         if (accountType != null || type.isEmpty()) {
             final @NotNull String category = accountType != null ? BankAccounts.getInstance().config().messagesTypes(accountType) : "All";
             final @NotNull Account @NotNull [] accounts = Account.getTopBalance(perPage, page, accountType);
-            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader()
-                    .replace("<category>", category)
-                    .replace("<page>", String.valueOf(page))
-                    .replace("<cmd-prev>", cmdPrev)
-                    .replace("<cmd-next>", cmdNext));
-            for (int i = 0; i < accounts.length; i++) {
+            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader(category, page, cmdPrev, cmdNext));
+            for (int i = 0; i < accounts.length; ++i) {
                 final @NotNull Account account = accounts[i];
-                sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBaltopEntry()
-                        .replace("<position>", String.valueOf((page - 1) * perPage + i + 1)), account));
+                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntry(account, (page - 1) * perPage + i + 1));
             }
         }
         else {
-            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader()
-                    .replace("<category>", "Players")
-                    .replace("<page>", String.valueOf(page))
-                    .replace("<cmd-prev>", cmdPrev)
-                    .replace("<cmd-next>", cmdNext));
+            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader("Players", page, cmdPrev, cmdNext));
             final @NotNull BaltopPlayer @NotNull [] players = BaltopPlayer.get(perPage, page);
-            for (int i = 0; i < players.length; i++) {
-                final @NotNull BaltopPlayer entry = players[i];
-                final @NotNull OfflinePlayer player = BankAccounts.getInstance().getServer().getOfflinePlayer(entry.uuid);
-                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntryPlayer()
-                        .replace("<position>", String.valueOf((page - 1) * perPage + i + 1))
-                        .replace("<uuid>", entry.uuid.toString())
-                        .replace("<username>", entry.uuid.toString().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId().toString()) ? "the Server" : Optional.ofNullable(player.getName()).orElse("Unknown Player"))
-                        .replace("<balance>", entry.balance.toPlainString())
-                        .replace("<balance-formatted>", BankAccounts.formatCurrency(entry.balance))
-                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(entry.balance))
-                );
-            }
+            for (int i = 0; i < players.length; ++i)
+                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntryPlayer(players[i], (page - 1) * perPage + i + 1));
         }
         return true;
     }

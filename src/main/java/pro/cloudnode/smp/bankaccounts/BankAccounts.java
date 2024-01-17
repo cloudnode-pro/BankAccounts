@@ -11,9 +11,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +35,6 @@ import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -149,13 +145,11 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
-            checkForUpdates().ifPresent(latestVersion -> {
-                getInstance().getLogger().warning("An update is available: " + latestVersion);
-                getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
-                getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
-            });
-        });
+        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
+            getInstance().getLogger().warning("An update is available: " + latestVersion);
+            getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
+            getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
+        }));
         getInstance().startInterestTimer();
     }
 
@@ -245,12 +239,7 @@ public final class BankAccounts extends JavaPlugin {
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
         if (account.balance == null) return;
         if (account.id.equals(serverAccount.id)) return;
-        final @NotNull String description = this.config().interestDescription(account.type)
-                .replace("<rate>", String.valueOf(rate))
-                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate) + "%")
-                .replace("<balance>", account.balance.toPlainString())
-                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
-                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
+        final @NotNull String description = this.config().interestDescription(account.type, rate, account);
 
         try {
             // interest paid to the bank
@@ -283,8 +272,7 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static String formatCurrency(final @Nullable BigDecimal amount) {
         if (amount == null) return getCurrencySymbol() + "∞";
-        final @Nullable String format = getInstance().config().currencyFormat();
-        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + new DecimalFormat(format).format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
+        return (amount.compareTo(BigDecimal.ZERO) < 0 ? "<red>-" : "") + getCurrencySymbol() + getInstance().config().currencyFormat().format(amount.abs().setScale(2, RoundingMode.HALF_UP)) + (amount.compareTo(BigDecimal.ZERO) < 0 ? "</red>" : "");
     }
 
     /**
@@ -392,32 +380,6 @@ public final class BankAccounts extends JavaPlugin {
             plugin.getLogger().log(Level.WARNING, "Failed to check for updates", e);
         }
         return Optional.empty();
-    }
-
-    /**
-     * Check if an inventory can fit items
-     *
-     * @param inventory The inventory that you want to hold the items
-     * @param items The items to check if they can fit in the inventory
-     * @return A HashMap containing items that didn't fit.
-     */
-    public static @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> canFit(final @NotNull Inventory inventory, final @NotNull ItemStack... items) {
-        final @NotNull Inventory inv = getInstance().getServer().createInventory(null, inventory.getSize());
-        inv.setContents(inventory.getContents());
-        final @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> didNotFit = inv.addItem(items);
-        inv.close();
-        return didNotFit;
-    }
-
-    /**
-     * Check if entity's inventory can fit items
-     *
-     * @param entity The entity that you want to hold the items
-     * @param items The items to check if they can fit in the inventory
-     * @return A HashMap containing items that didn't fit.
-     */
-    public static @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> canFit(final @NotNull InventoryHolder entity, final @NotNull ItemStack... items) {
-        return canFit(entity.getInventory(), items);
     }
 
     public static final class Key {
