@@ -358,12 +358,7 @@ public final class POS {
             confirm.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(BankAccounts.getInstance().config().posConfirmName(), account),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
+        confirmMeta.displayName(BankAccounts.getInstance().config().posConfirmName(pos, account));
         confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
