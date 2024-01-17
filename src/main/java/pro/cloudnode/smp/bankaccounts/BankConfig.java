@@ -193,7 +193,7 @@ public final class BankConfig {
                 Placeholder.unparsed("account-type", account.type.getName()),
                 Placeholder.component("account-owner", account.ownerName()),
                 Formatter.date("date", created)
-        );
+        ).decoration(TextDecoration.ITALIC, false);
     }
 
     // instruments.lore
@@ -205,7 +205,7 @@ public final class BankConfig {
                 Placeholder.unparsed("account-type", account.type.getName()),
                 Placeholder.component("account-owner", account.ownerName()),
                 Formatter.date("date", created)
-        )).toList();
+        ).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // instruments.glint.enabled
