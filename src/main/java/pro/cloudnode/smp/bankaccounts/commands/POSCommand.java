@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
-import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
@@ -81,7 +80,7 @@ public final class POSCommand extends Command {
 
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
-        return sendMessage(sender, replacePlaceholders(BankAccounts.getInstance().config().messagesPosCreated(), pos));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesPosCreated(pos));
     }
 
     @Override
@@ -96,18 +95,5 @@ public final class POSCommand extends Command {
             }
         }
         return suggestions;
-    }
-
-    /**
-     * Replace POS placeholders
-     *
-     * @param message Message to replace placeholders in
-     * @param pos     POS to get placeholders from
-     */
-    public static @NotNull Component replacePlaceholders(final @NotNull String message, final @NotNull POS pos) {
-        return Account.placeholders(message.replace("<price>", pos.price.toPlainString())
-                .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
-                .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
-                .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description), pos.seller);
     }
 }

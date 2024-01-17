@@ -937,8 +937,25 @@ public final class BankConfig {
     }
 
     // messages.pos-removed
-    public @NotNull String messagesPosCreated() {
-        return Objects.requireNonNull(config.getString("messages.pos-created"));
+    public @NotNull Component messagesPosCreated(final @NotNull POS pos) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.pos-created"))
+                        .replace("<account>", pos.seller.name())
+                        .replace("<account-id>", pos.seller.id)
+                        .replace("<account-type>", pos.seller.type.getName())
+                        .replace("<account-owner>", pos.seller.ownerNameUnparsed())
+                        .replace("<balance>", pos.seller.balance == null ? "∞" : pos.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(pos.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(pos.seller.balance))
+                        .replace("<price>", pos.price.toPlainString())
+                        .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
+                        .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
+                        .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description)
+                        .replace("<x>", String.valueOf(pos.x))
+                        .replace("<y>", String.valueOf(pos.y))
+                        .replace("<z>", String.valueOf(pos.z))
+                        .replace("<world>", pos.world.getName())
+        );
     }
 
     // messages.pos-removed
