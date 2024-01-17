@@ -560,10 +560,10 @@ public class BankCommand extends Command {
         else {
             final int count = Transaction.count(account.get());
             final int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, BankAccounts.getInstance().config().messagesHistoryHeader());
+            sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryHeader(account.get(), page, maxPage));
             for (final @NotNull Transaction transaction : transactions)
                 sendMessage(sender, Transaction.historyPlaceholders(transaction, account.get(), BankAccounts.getInstance().config().messagesHistoryEntry()));
-            transactionsHeaderFooter(sender, account.get(), page, maxPage, BankAccounts.getInstance().config().messagesHistoryFooter());
+            sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryFooter(account.get(), page, maxPage));
         }
         return true;
     }

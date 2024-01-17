@@ -853,8 +853,21 @@ public final class BankConfig {
     }
 
     // messages.history.header
-    public @NotNull String messagesHistoryHeader() {
-        return Objects.requireNonNull(config.getString("messages.history.header"));
+    public @NotNull Component messagesHistoryHeader(final @NotNull Account account, final int page, final int maxPage) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.history.header"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+                        .replace("<page>", String.valueOf(page))
+                        .replace("<max-page>", String.valueOf(maxPage))
+                        .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
+                        .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1))
+        );
     }
 
     // messages.history.entry
@@ -863,8 +876,21 @@ public final class BankConfig {
     }
 
     // messages.history.footer
-    public @NotNull String messagesHistoryFooter() {
-        return Objects.requireNonNull(config.getString("messages.history.footer"));
+    public @NotNull Component messagesHistoryFooter(final @NotNull Account account, final int page, final int maxPage) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.history.footer"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+                        .replace("<page>", String.valueOf(page))
+                        .replace("<max-page>", String.valueOf(maxPage))
+                        .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
+                        .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1))
+        );
     }
 
     // messages.history.no-transactions
