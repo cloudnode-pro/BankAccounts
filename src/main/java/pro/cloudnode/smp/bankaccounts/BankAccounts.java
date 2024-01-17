@@ -38,7 +38,6 @@ import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import java.text.DecimalFormat;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -245,12 +244,7 @@ public final class BankAccounts extends JavaPlugin {
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
         if (account.balance == null) return;
         if (account.id.equals(serverAccount.id)) return;
-        final @NotNull String description = this.config().interestDescription(account.type)
-                .replace("<rate>", String.valueOf(rate))
-                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate) + "%")
-                .replace("<balance>", account.balance.toPlainString())
-                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
-                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
+        final @NotNull String description = this.config().interestDescription(account.type, rate, account);
 
         try {
             // interest paid to the bank

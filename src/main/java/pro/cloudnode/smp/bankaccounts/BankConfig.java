@@ -399,8 +399,13 @@ public final class BankConfig {
     }
 
     // interest.*.description
-    public @NotNull String interestDescription(final @NotNull Account.Type type) {
-        return Objects.requireNonNull(config.getString("interest." + Account.Type.getType(type) + ".description"));
+    public @NotNull String interestDescription(final @NotNull Account.Type type, final double rate, final @NotNull Account account) {
+        return Objects.requireNonNull(config.getString("interest." + Account.Type.getType(type) + ".description"))
+                .replace("<rate>", String.valueOf(rate))
+                .replace("<rate-formatted>", new DecimalFormat("#.##").format(rate) + "%")
+                .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
     }
 
     // messages.command-usage
