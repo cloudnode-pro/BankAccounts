@@ -334,7 +334,7 @@ public class BankCommand extends Command {
         final @NotNull Account account = new Account(target, optionalType.get(), null, BigDecimal.ZERO, false);
         account.insert();
 
-        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountCreated(), account));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountCreated(account));
     }
 
     /**
@@ -358,7 +358,7 @@ public class BankCommand extends Command {
             }
             account.get().balance = balance;
             account.get().update();
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesBalanceSet(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesBalanceSet(account.get()));
         }
     }
 
@@ -387,8 +387,7 @@ public class BankCommand extends Command {
 
             account.get().name = name;
             account.get().update();
-            return sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance()
-                    .config().messagesNameSet()), account.get()));
+            return sendMessage(sender, Objects.requireNonNull(BankAccounts.getInstance().config().messagesNameSet(account.get())));
         }
     }
 
@@ -404,7 +403,7 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyFrozen(account.get()));
         account.get().frozen = true;
         account.get().update();
-        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountFrozen(), account.get()));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountFrozen(account.get()));
     }
 
     public static boolean unfreeze(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
@@ -419,7 +418,7 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotFrozen(account.get()));
         account.get().frozen = false;
         account.get().update();
-        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountUnfrozen(), account.get()));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountUnfrozen(account.get()));
     }
 
     /**
@@ -442,7 +441,7 @@ public class BankCommand extends Command {
                 .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
-        return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountDeleted(), account.get()));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountDeleted(account.get()));
     }
 
     /**

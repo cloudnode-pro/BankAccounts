@@ -684,38 +684,92 @@ public final class BankConfig {
     }
 
     // messages.reload
-    public @NotNull String messagesReload() {
-        return Objects.requireNonNull(config.getString("messages.reload"));
+    public @NotNull Component messagesReload() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.reload")));
     }
 
     // messages.account-created
-    public @NotNull String messagesAccountCreated() {
-        return Objects.requireNonNull(config.getString("messages.account-created"));
+    public @NotNull Component messagesAccountCreated(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.account-created"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.balance-set
-    public @NotNull String messagesBalanceSet() {
-        return Objects.requireNonNull(config.getString("messages.balance-set"));
+    public @NotNull Component messagesBalanceSet(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.balance-set"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.name-set
-    public @NotNull String messagesNameSet() {
-        return Objects.requireNonNull(config.getString("messages.name-set"));
+    public @NotNull Component messagesNameSet(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.name-set"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.account-frozen
-    public @NotNull String messagesAccountFrozen() {
-        return Objects.requireNonNull(config.getString("messages.account-frozen"));
+    public @NotNull Component messagesAccountFrozen(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.account-frozen"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.account-unfrozen
-    public @NotNull String messagesAccountUnfrozen() {
-        return Objects.requireNonNull(config.getString("messages.account-unfrozen"));
+    public @NotNull Component messagesAccountUnfrozen(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.account-unfrozen"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.account-deleted
-    public @NotNull String messagesAccountDeleted() {
-        return Objects.requireNonNull(config.getString("messages.account-deleted"));
+    public @NotNull Component messagesAccountDeleted(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.account-deleted"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.confirm-transfer
