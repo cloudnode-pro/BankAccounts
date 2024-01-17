@@ -291,12 +291,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos.description, pos.price));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -352,12 +347,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos.description, pos.price));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);

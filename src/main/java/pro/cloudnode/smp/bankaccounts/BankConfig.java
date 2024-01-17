@@ -10,7 +10,9 @@ import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
@@ -223,8 +225,14 @@ public final class BankConfig {
     }
 
     // pos.title
-    public @NotNull String posTitle() {
-        return Objects.requireNonNull(config.getString("pos.title"));
+    public @NotNull Component posTitle(final @Nullable String description, final @NotNull BigDecimal price) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("pos.title")),
+                Placeholder.unparsed("description", description == null ? "no description" : description),
+                Placeholder.unparsed("price", price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price))
+        );
     }
 
     // pos.info.material
