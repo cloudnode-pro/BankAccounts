@@ -630,20 +630,4 @@ public class BankCommand extends Command {
     public static boolean baltop(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         return BaltopCommand.run(sender, label, args, new String[]{"baltop"});
     }
-
-    /**
-     * Send transaction history header or footer
-     *
-     * @param sender  Command sender
-     * @param account Account
-     * @param page    Current page
-     * @param maxPage Maximum page
-     * @param message Message to replace placeholders in
-     */
-    public static void transactionsHeaderFooter(final @NotNull CommandSender sender, final @NotNull Account account, final int page, final int maxPage, final @NotNull String message) {
-        sender.sendMessage(Account.placeholders(message.replace("<page>", String.valueOf(page))
-                .replace("<max-page>", String.valueOf(maxPage))
-                .replace("<cmd-prev>", "/bank transactions " + account.id + " " + (page - 1))
-                .replace("<cmd-next>", "/bank transactions " + account.id + " " + (page + 1)), account));
-    }
 }

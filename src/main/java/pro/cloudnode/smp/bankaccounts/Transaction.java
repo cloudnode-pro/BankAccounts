@@ -1,8 +1,5 @@
 package pro.cloudnode.smp.bankaccounts;
 
-import net.kyori.adventure.text.Component;
-import org.jetbrains.annotations.NotNull;
-
 import javax.annotation.Nullable;
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -14,7 +11,6 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.logging.Level;
@@ -200,32 +196,5 @@ public class Transaction {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not count transactions of account: " + account.id, e);
             return 0;
         }
-    }
-
-
-
-    /**
-     * Transactions message placeholders
-     * <ul>
-     *     <li>{@code <transaction-id>} Transaction ID</li>
-     *     <li>{@code <amount>} Transfer amount without formatting, example: 123456.78</li>
-     *     <li>{@code <amount-formatted>} Transfer amount with formatting, example: 123,456.78</li>
-     *     <li>{@code <amount-short>} Transfer amount with formatting, example: 123k</li>
-     *     <li>{@code <description>} Transfer description</li>
-     * </ul>
-     * @param transaction Transaction
-     * @param message Message to replace placeholders in
-     */
-    public static Component placeholders(@NotNull Transaction transaction, @NotNull String message) {
-        return Account.placeholders(message
-                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                        .replace("<amount>", transaction.amount.toPlainString())
-                        .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
-                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description),
-                new HashMap<>() {{
-                    put("from", transaction.from);
-                    put("to", transaction.to);
-                }});
     }
 }

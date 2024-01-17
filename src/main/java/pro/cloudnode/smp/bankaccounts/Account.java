@@ -1,10 +1,7 @@
 package pro.cloudnode.smp.bankaccounts;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
@@ -24,9 +21,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -194,20 +189,6 @@ public class Account {
      */
     public static boolean isInstrument(final @NotNull ItemStack item) {
         return item.getItemMeta().getPersistentDataContainer().has(BankAccounts.Key.INSTRUMENT_ACCOUNT, PersistentDataType.STRING);
-    }
-
-    /**
-     * Set placeholders for instrument
-     * @param string String to set placeholders in
-     */
-    public final @NotNull Component instrumentPlaceholders (final @NotNull String string) {
-        return MiniMessage.miniMessage().deserialize(string,
-                Placeholder.unparsed("account", this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name),
-                Placeholder.parsed("account-id", this.id),
-                Placeholder.parsed("account-type", this.type.getName()),
-                Placeholder.parsed("account-owner", this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName()),
-                Formatter.date("date", LocalDateTime.now(ZoneOffset.UTC))
-        ).decoration(TextDecoration.ITALIC, false);
     }
 
     /**
@@ -383,58 +364,6 @@ public class Account {
         } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account: " + id, e);
         }
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param accounts Accounts to apply placeholders to
-     */
-    public static String placeholdersString(@NotNull String string, HashMap<String, @NotNull Account> accounts) {
-        for (Map.Entry<String, Account> entry : accounts.entrySet()) {
-            String name = entry.getKey();
-            Account account = entry.getValue();
-            String prefix = name.isEmpty() ? "" : name + "-";
-            string = string.replace("<" + prefix + "account>", account.name == null ? (account.type == Account.Type.PERSONAL && account.owner.getName() != null ? account.owner.getName() : account.id) : account.name)
-                    .replace("<" + prefix + "account-id>", account.id)
-                    .replace("<" + prefix + "account-type>", account.type.getName())
-                    .replace("<" + prefix + "account-owner>", account.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : account.owner.getName() == null ? "<i>unknown player</i>" : account.owner.getName())
-                    .replace("<" + prefix + "balance>", account.balance == null ? "∞" : account.balance.toPlainString())
-                    .replace("<" + prefix + "balance-formatted>", BankAccounts.formatCurrency(account.balance))
-                    .replace("<" + prefix + "balance-short>", BankAccounts.formatCurrencyShort(account.balance));
-        }
-        return string;
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param accounts Accounts to apply placeholders to
-     */
-    public static Component placeholders(@NotNull String string, HashMap<String, Account> accounts) {
-        return MiniMessage.miniMessage().deserialize(placeholdersString(string, accounts));
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param account Account to apply placeholders to
-     */
-    public static Component placeholders(@NotNull String string, Account account) {
-        return placeholders(string, new HashMap<>() {{
-            put("", account);
-        }});
-    }
-
-    /**
-     * Account placeholders
-     * @param string String to deserialize with MiniMessage and apply placeholders to
-     * @param account Account to apply placeholders to
-     */
-    public static String placeholdersString(@NotNull String string, Account account) {
-        return placeholdersString(string, new HashMap<>() {{
-            put("", account);
-        }});
     }
 
     /**
