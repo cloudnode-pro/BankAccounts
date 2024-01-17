@@ -318,8 +318,8 @@ public final class BankConfig {
     }
 
     // pos.delete.lore
-    public @NotNull List<@NotNull String> posDeleteLore() {
-        return Objects.requireNonNull(config.getStringList("pos.delete.lore"));
+    public @NotNull List<@NotNull Component> posDeleteLore() {
+        return Objects.requireNonNull(config.getStringList("pos.delete.lore")).stream().map(string -> MiniMessage.miniMessage().deserialize(string).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // pos.confirm.material

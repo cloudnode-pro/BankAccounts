@@ -312,7 +312,7 @@ public final class POS {
         }
         final @NotNull ItemMeta deleteMeta = delete.getItemMeta();
         deleteMeta.displayName(BankAccounts.getInstance().config().posDeleteName());
-        deleteMeta.lore(BankAccounts.getInstance().config().posDeleteLore().stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+        deleteMeta.lore(BankAccounts.getInstance().config().posDeleteLore());
         final @NotNull PersistentDataContainer deleteContainer = deleteMeta.getPersistentDataContainer();
         deleteContainer.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
         delete.setItemMeta(deleteMeta);
