@@ -313,8 +313,8 @@ public final class BankConfig {
     }
 
     // pos.delete.name
-    public @NotNull String posDeleteName() {
-        return Objects.requireNonNull(config.getString("pos.delete.name"));
+    public @NotNull Component posDeleteName() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("pos.delete.name"))).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.delete.lore
