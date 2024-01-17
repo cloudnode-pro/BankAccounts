@@ -6,6 +6,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
@@ -213,7 +214,7 @@ public final class BankConfig {
 
     // instruments.glint.enchantment
     public @NotNull Enchantment instrumentsGlintEnchantment() {
-        return Objects.requireNonNull(Enchantment.getByKey(NamespacedKey.minecraft(Objects.requireNonNull(config.getString("instruments.glint.enchantment")))));
+        return Objects.requireNonNull(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(Objects.requireNonNull(config.getString("instruments.glint.enchantment")))));
     }
 
     // pos.allow-personal
