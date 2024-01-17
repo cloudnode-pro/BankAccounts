@@ -359,13 +359,7 @@ public final class POS {
         }
         final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
         confirmMeta.displayName(BankAccounts.getInstance().config().posConfirmName(pos, account));
-        confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore(pos, account));
         final @NotNull PersistentDataContainer confirmContainer = confirmMeta.getPersistentDataContainer();
         confirmContainer.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
         confirm.setItemMeta(confirmMeta);

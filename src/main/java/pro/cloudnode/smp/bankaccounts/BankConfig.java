@@ -351,8 +351,21 @@ public final class BankConfig {
     }
 
     // pos.confirm.lore
-    public @NotNull List<@NotNull String> posConfirmLore() {
-        return Objects.requireNonNull(config.getStringList("pos.confirm.lore"));
+    public @NotNull List<@NotNull Component> posConfirmLore(final @NotNull POS pos, final @NotNull Account buyer) {
+        return Objects.requireNonNull(config.getStringList("pos.confirm.lore")).stream().map(string -> MiniMessage.miniMessage().deserialize(
+            string,
+            Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+            Placeholder.unparsed("price", pos.price.toPlainString()),
+            Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+            Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price)),
+            Placeholder.unparsed("account", buyer.name()),
+            Placeholder.unparsed("account-id", buyer.id),
+            Placeholder.unparsed("account-type", buyer.type.getName()),
+            Placeholder.component("account-owner", buyer.ownerName()),
+            Placeholder.unparsed("balance", buyer.balance == null ? "∞" : buyer.balance.toPlainString()),
+            Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(buyer.balance)),
+            Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(buyer.balance))
+        )).toList();
     }
 
     // pos.decline.material
