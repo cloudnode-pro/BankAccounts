@@ -347,7 +347,7 @@ public final class BankConfig {
                 Placeholder.unparsed("balance", buyer.balance == null ? "∞" : buyer.balance.toPlainString()),
                 Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(buyer.balance)),
                 Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(buyer.balance))
-        );
+        ).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.confirm.lore
@@ -365,7 +365,7 @@ public final class BankConfig {
             Placeholder.unparsed("balance", buyer.balance == null ? "∞" : buyer.balance.toPlainString()),
             Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(buyer.balance)),
             Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(buyer.balance))
-        )).toList();
+        ).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // pos.decline.material
