@@ -110,6 +110,14 @@ public class Account {
         );
     }
 
+    public final @NotNull String name() {
+        return this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
+    }
+
+    public final @NotNull Component ownerName() {
+        return this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? MiniMessage.miniMessage().deserialize("<i>the server</i>") : this.owner.getName() == null ? MiniMessage.miniMessage().deserialize("<i>unknown player</i>") : Component.text(this.owner.getName());
+    }
+
     /**
      * Update account balance
      * @param diff Balance difference (positive or negative)
@@ -157,12 +165,11 @@ public class Account {
         final @NotNull Material material = BankAccounts.getInstance().config().instrumentsMaterial();
         final @NotNull ItemStack instrument = new ItemStack(material);
 
-        final @NotNull String name = BankAccounts.getInstance().config().instrumentsName();
         final @NotNull List<@NotNull String> lore = BankAccounts.getInstance().config().instrumentsLore();
         final boolean glint = BankAccounts.getInstance().config().instrumentsGlintEnabled();
 
         final @NotNull ItemMeta meta = instrument.getItemMeta();
-        meta.displayName(this.instrumentPlaceholders(name));
+        meta.displayName(BankAccounts.getInstance().config().instrumentsName(this, LocalDateTime.now(ZoneOffset.UTC)));
         meta.lore(lore.stream().map(this::instrumentPlaceholders).toList());
 
         if (glint) {

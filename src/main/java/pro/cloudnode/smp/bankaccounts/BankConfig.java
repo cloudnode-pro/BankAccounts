@@ -1,5 +1,9 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -7,6 +11,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
+import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -178,8 +183,15 @@ public final class BankConfig {
     }
 
     // instruments.name
-    public @NotNull String instrumentsName() {
-        return Objects.requireNonNull(config.getString("instruments.name"));
+    public @NotNull Component instrumentsName(final @NotNull Account account, final @NotNull TemporalAccessor created) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("instruments.name")),
+                Placeholder.unparsed("account", account.name()),
+                Placeholder.unparsed("account-id", account.id),
+                Placeholder.unparsed("account-type", account.type.getName()),
+                Placeholder.component("account-owner", account.ownerName()),
+                Formatter.date("date", created)
+        );
     }
 
     // instruments.lore
