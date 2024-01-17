@@ -258,8 +258,21 @@ public final class BankConfig {
     }
 
     // pos.info.name-buyer
-    public @NotNull String posInfoNameBuyer() {
-        return Objects.requireNonNull(config.getString("pos.info.name-buyer"));
+    public @NotNull Component posInfoNameBuyer(final @Nullable String description, final @NotNull BigDecimal price, final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("pos.info.name-buyer")),
+                Placeholder.unparsed("description", description == null ? "no description" : description),
+                Placeholder.unparsed("price", price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price)),
+                Placeholder.unparsed("account", account.name()),
+                Placeholder.unparsed("account-id", account.id),
+                Placeholder.unparsed("account-type", account.type.getName()),
+                Placeholder.component("account-owner", account.ownerName()),
+                Placeholder.unparsed("balance", account.balance == null ? "∞" : account.balance.toPlainString()),
+                Placeholder.unparsed("balance-formatted", BankAccounts.formatCurrency(account.balance)),
+                Placeholder.unparsed("balance-short", BankAccounts.formatCurrencyShort(account.balance))
+        ).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.info.lore-owner
