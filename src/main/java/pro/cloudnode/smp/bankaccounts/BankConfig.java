@@ -274,8 +274,14 @@ public final class BankConfig {
     }
 
     // pos.info.lore-owner
-    public @NotNull List<@NotNull String> posInfoLoreOwner() {
-        return Objects.requireNonNull(config.getStringList("pos.info.lore-owner"));
+    public @NotNull List<@NotNull Component> posInfoLoreOwner(final @NotNull POS pos) {
+        return Objects.requireNonNull(config.getStringList("pos.info.lore-owner")).stream().map(string -> MiniMessage.miniMessage().deserialize(
+                string,
+                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
+                Placeholder.unparsed("price", pos.price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
+        ).decoration(TextDecoration.ITALIC, false)).toList();
     }
 
     // pos.info.lore-buyer
