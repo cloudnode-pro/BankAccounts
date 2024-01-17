@@ -300,12 +300,7 @@ public final class POS {
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posInfoNameOwner(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
+        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameOwner(pos.description, pos.price));
         overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreOwner().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(line,
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),

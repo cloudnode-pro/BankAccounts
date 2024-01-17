@@ -1,6 +1,7 @@
 package pro.cloudnode.smp.bankaccounts;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -246,8 +247,14 @@ public final class BankConfig {
     }
 
     // pos.info.name-owner
-    public @NotNull String posInfoNameOwner() {
-        return Objects.requireNonNull(config.getString("pos.info.name-owner"));
+    public @NotNull Component posInfoNameOwner(final @Nullable String description, final @NotNull BigDecimal price) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("pos.info.name-owner")),
+                Placeholder.unparsed("description", description == null ? "no description" : description),
+                Placeholder.unparsed("price", price.toPlainString()),
+                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(price)),
+                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(price))
+        ).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.info.name-buyer
