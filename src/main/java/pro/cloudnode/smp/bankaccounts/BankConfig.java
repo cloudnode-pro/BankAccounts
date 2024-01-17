@@ -379,8 +379,8 @@ public final class BankConfig {
     }
 
     // pos.decline.name
-    public @NotNull String posDeclineName() {
-        return Objects.requireNonNull(config.getString("pos.decline.name"));
+    public @NotNull Component posDeclineName() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("pos.decline.name"))).decoration(TextDecoration.ITALIC, false);
     }
 
     // pos.decline.lore

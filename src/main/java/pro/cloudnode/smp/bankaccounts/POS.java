@@ -371,7 +371,7 @@ public final class POS {
             cancel.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
-        cancelMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posDeclineName()).decoration(TextDecoration.ITALIC, false));
+        cancelMeta.displayName(BankAccounts.getInstance().config().posDeclineName());
         cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore().stream()
                 .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
                         Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
