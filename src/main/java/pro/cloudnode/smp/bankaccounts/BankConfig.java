@@ -183,7 +183,7 @@ public final class BankConfig {
     }
 
     // instruments.material
-    public final @NotNull Material instrumentsMaterial() {
+    public @NotNull Material instrumentsMaterial() {
         return Objects.requireNonNull(Material.getMaterial(Objects.requireNonNull(config.getString("instruments.material"))));
     }
 

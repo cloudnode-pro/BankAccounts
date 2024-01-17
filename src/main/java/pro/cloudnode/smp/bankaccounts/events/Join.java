@@ -27,11 +27,9 @@ public final class Join implements Listener {
                     }
                 }));
         if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {
-            BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
-                BankAccounts.checkForUpdates().ifPresent(latestVersion -> {
-                    player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion));
-                });
-            }, 20L);
+            BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> BankAccounts.checkForUpdates().ifPresent(latestVersion -> {
+                player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion));
+            }), 20L);
         }
     }
 }

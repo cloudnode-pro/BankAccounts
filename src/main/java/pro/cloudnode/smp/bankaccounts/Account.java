@@ -237,7 +237,7 @@ public class Account {
             return accounts.toArray(new Account[0]);
         }
         catch (final @NotNull Exception e) {
-            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts for: " + owner.getUniqueId().toString() + " (" + owner.getName() + "), type = " + (type == null ? "all" : type.name()), e);
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get accounts for: " + owner.getUniqueId() + " (" + owner.getName() + "), type = " + (type == null ? "all" : type.name()), e);
             return new Account[0];
         }
     }

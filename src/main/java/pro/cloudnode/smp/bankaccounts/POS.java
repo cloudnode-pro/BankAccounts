@@ -67,30 +67,6 @@ public final class POS {
      */
     public final @NotNull Date created;
 
-
-    /**
-     * Create new POS instance
-     *
-     * @param x           POS X coordinate
-     * @param y           POS Y coordinate
-     * @param z           POS Z coordinate
-     * @param world       POS world
-     * @param price       Price of POS contents
-     * @param description Description that appears on the bank statement
-     * @param seller      Account that receives the money from the sale
-     * @param created     Date the POS was created
-     */
-    public POS(final int x, final int y, final int z, final @NotNull World world, final @NotNull BigDecimal price, final @Nullable String description, final @NotNull Account seller, final @NotNull Date created) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.world = world;
-        this.price = price;
-        this.description = description;
-        this.seller = seller;
-        this.created = created;
-    }
-
     /**
      * Create new POS instance
      *

@@ -11,9 +11,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
-import org.bukkit.inventory.Inventory;
-import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -148,13 +145,11 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
-            checkForUpdates().ifPresent(latestVersion -> {
-                getInstance().getLogger().warning("An update is available: " + latestVersion);
-                getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
-                getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
-            });
-        });
+        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
+            getInstance().getLogger().warning("An update is available: " + latestVersion);
+            getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
+            getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
+        }));
         getInstance().startInterestTimer();
     }
 
@@ -385,32 +380,6 @@ public final class BankAccounts extends JavaPlugin {
             plugin.getLogger().log(Level.WARNING, "Failed to check for updates", e);
         }
         return Optional.empty();
-    }
-
-    /**
-     * Check if an inventory can fit items
-     *
-     * @param inventory The inventory that you want to hold the items
-     * @param items The items to check if they can fit in the inventory
-     * @return A HashMap containing items that didn't fit.
-     */
-    public static @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> canFit(final @NotNull Inventory inventory, final @NotNull ItemStack... items) {
-        final @NotNull Inventory inv = getInstance().getServer().createInventory(null, inventory.getSize());
-        inv.setContents(inventory.getContents());
-        final @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> didNotFit = inv.addItem(items);
-        inv.close();
-        return didNotFit;
-    }
-
-    /**
-     * Check if entity's inventory can fit items
-     *
-     * @param entity The entity that you want to hold the items
-     * @param items The items to check if they can fit in the inventory
-     * @return A HashMap containing items that didn't fit.
-     */
-    public static @NotNull HashMap<@NotNull Integer, @NotNull ItemStack> canFit(final @NotNull InventoryHolder entity, final @NotNull ItemStack... items) {
-        return canFit(entity.getInventory(), items);
     }
 
     public static final class Key {

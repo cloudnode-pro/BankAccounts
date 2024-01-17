@@ -134,7 +134,6 @@ public class GUI implements Listener {
                     chest.getInventory().clear();
                     event.getWhoClicked().getInventory().addItem(chestItems);
                     pos.get().delete();
-                    final @NotNull String itemsFormatted = chestItems.length == 1 ? "1 item" : chestItems.length + " items";
                     event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesPosPurchase(transaction, chestItems));
                     final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                     if (seller != null)
@@ -160,10 +159,6 @@ public class GUI implements Listener {
 
     public final boolean isGuiItem(final @NotNull ItemStack item) {
         return item.hasItemMeta() && keys.entrySet().stream().anyMatch(entry -> Arrays.stream(entry.getValue()).anyMatch(key -> item.getItemMeta().getPersistentDataContainer().has(key)));
-    }
-
-    public final boolean isGuiItem(final @NotNull ItemStack item, final @NotNull NamespacedKey key) {
-        return item.hasItemMeta() && item.getItemMeta().getPersistentDataContainer().has(key);
     }
 
     public final boolean isGuiItem(final @NotNull ItemStack item, final @NotNull NamespacedKey[] key) {
