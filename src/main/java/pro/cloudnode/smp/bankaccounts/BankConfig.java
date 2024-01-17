@@ -14,6 +14,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pro.cloudnode.smp.bankaccounts.commands.BaltopCommand;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
@@ -1040,18 +1041,45 @@ public final class BankConfig {
     }
 
     // messages.baltop.header
-    public @NotNull String messagesBaltopHeader() {
-        return Objects.requireNonNull(config.getString("messages.baltop.header"));
+    public @NotNull Component messagesBaltopHeader(final @NotNull String category, final int page, final @NotNull String cmdPrev, final @NotNull String cmdNext) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.baltop.header"))
+                        .replace("<category>", category)
+                        .replace("<page>", String.valueOf(page))
+                        .replace("<cmd-prev>", cmdPrev)
+                        .replace("<cmd-next>", cmdNext)
+        );
     }
 
     // messages.baltop.entry
-    public @NotNull String messagesBaltopEntry() {
-        return Objects.requireNonNull(config.getString("messages.baltop.entry"));
+    public @NotNull Component messagesBaltopEntry(final @NotNull Account account, final int position) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.baltop.entry"))
+                .replace("<account>", account.name())
+                .replace("<account-id>", account.id)
+                .replace("<account-type>", account.type.getName())
+                .replace("<account-owner>", account.ownerNameUnparsed())
+                .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+                .replace("<position>", String.valueOf(position))
+        );
     }
 
-    // messages.baltop.entry.player
-    public @NotNull String messagesBaltopEntryPlayer() {
-        return Objects.requireNonNull(config.getString("messages.baltop.entry-player"));
+    // messages.baltop.entry-player
+    public @NotNull Component messagesBaltopEntryPlayer(final @NotNull BaltopCommand.BaltopPlayer entry, final int position) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.baltop.entry-player"))
+                        .replace("<position>", String.valueOf(position))
+                        .replace("<uuid>", entry.uuid.toString())
+                        .replace("<username>", entry.uuid.toString().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId().toString())
+                                ? "the Server"
+                                : Optional.ofNullable(BankAccounts.getInstance().getServer().getOfflinePlayer(entry.uuid).getName())
+                                    .orElse("Unknown Player"))
+                        .replace("<balance>", entry.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(entry.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(entry.balance))
+        );
     }
 
     // messages.update-available
