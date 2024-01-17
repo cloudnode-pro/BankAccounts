@@ -37,6 +37,7 @@ public final class BaltopCommand extends Command {
     }
 
     public static boolean run(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args, final @NotNull String @NotNull [] labelArgs) {
+        if (!sender.hasPermission(Permissions.BALTOP)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<@NotNull String> type = args.length > 0 && (args[0].equalsIgnoreCase("personal") || args[0].equalsIgnoreCase("business") || args[0].equalsIgnoreCase("player")) ? Optional.of(args[0]) : Optional.empty();
         int page = (int) Math.min(1e9, (args.length == 1 && type.isEmpty() && isInteger(args[0])) ? Integer.parseInt(args[0]) : ((args.length > 1 && isInteger(args[1])) ? Integer.parseInt(args[1]) : 1));
         if (page < 1) page = 1;
