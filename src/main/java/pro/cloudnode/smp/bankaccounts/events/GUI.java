@@ -135,16 +135,10 @@ public class GUI implements Listener {
                     event.getWhoClicked().getInventory().addItem(chestItems);
                     pos.get().delete();
                     final @NotNull String itemsFormatted = chestItems.length == 1 ? "1 item" : chestItems.length + " items";
-                    event.getWhoClicked().sendMessage(Transaction.placeholders(transaction, BankAccounts.getInstance().config().messagesPosPurchase()
-                            .replace("<items>", String.valueOf(chestItems.length))
-                            .replace("<items-formatted>", itemsFormatted)
-                    ));
+                    event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesPosPurchase(transaction, chestItems));
                     final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                     if (seller != null)
-                        seller.sendMessage(Transaction.placeholders(transaction, BankAccounts.getInstance().config().messagesPosPurchaseSeller()
-                                .replace("<items>", String.valueOf(chestItems.length))
-                                .replace("<items-formatted>", itemsFormatted)
-                        ));
+                        seller.sendMessage(BankAccounts.getInstance().config().messagesPosPurchaseSeller(transaction, items));
                 }
                 else if (item.equals(cancel)) {
                     inventory.close();
