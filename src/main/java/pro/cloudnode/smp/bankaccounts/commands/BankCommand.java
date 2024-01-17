@@ -280,8 +280,8 @@ public class BankCommand extends Command {
         else {
             sendMessage(sender, BankAccounts.getInstance().config().messagesListAccountsHeader());
             for (final @NotNull Account account : accounts)
-                sendMessage(sender, Account.placeholders(Objects.requireNonNull(BankAccounts.getInstance().config()
-                        .messagesListAccountsEntry()), account));
+                sendMessage(sender, Objects.requireNonNull(BankAccounts.getInstance().config()
+                        .messagesListAccountsEntry(account)));
         }
         return true;
     }

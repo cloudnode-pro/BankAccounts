@@ -665,13 +665,22 @@ public final class BankConfig {
     }
 
     // messages.list-accounts.header
-    public @NotNull String messagesListAccountsHeader() {
-        return Objects.requireNonNull(config.getString("messages.list-accounts.header"));
+    public @NotNull Component messagesListAccountsHeader() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.list-accounts.header")));
     }
 
     // messages.list-accounts.entry
-    public @NotNull String messagesListAccountsEntry() {
-        return Objects.requireNonNull(config.getString("messages.list-accounts.entry"));
+    public @NotNull Component messagesListAccountsEntry(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.list-accounts.entry"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.reload
