@@ -10,6 +10,8 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 import java.text.DecimalFormat;
@@ -411,9 +413,9 @@ public final class BankConfig {
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(
-                Objects.requireNonNull(config.getString("messages.command-usage")),
-                Placeholder.unparsed("command", command),
-                Placeholder.unparsed("arguments", arguments)
+                Objects.requireNonNull(config.getString("messages.command-usage"))
+                        .replace("<command>", command)
+                        .replace("<arguments>", arguments)
         );
     }
 
@@ -423,168 +425,230 @@ public final class BankConfig {
     }
 
     // messages.errors.no-accounts
-    public @NotNull String messagesErrorsNoAccounts() {
-        return Objects.requireNonNull(config.getString("messages.errors.no-accounts"));
+    public @NotNull Component messagesErrorsNoAccounts() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.no-accounts")));
     }
 
     // messages.errors.no-permission
-    public @NotNull String messagesErrorsNoPermission() {
-        return Objects.requireNonNull(config.getString("messages.errors.no-permission"));
+    public @NotNull Component messagesErrorsNoPermission() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.no-permission")));
     }
 
     // messages.errors.account-not-found
-    public @NotNull String messagesErrorsAccountNotFound() {
-        return Objects.requireNonNull(config.getString("messages.errors.account-not-found"));
+    public @NotNull Component messagesErrorsAccountNotFound() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.account-not-found")));
     }
 
     // messages.errors.unknown-command
-    public @NotNull String messagesErrorsUnknownCommand() {
-        return Objects.requireNonNull(config.getString("messages.errors.unknown-command"));
+    public @NotNull Component messagesErrorsUnknownCommand() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.unknown-command")));
     }
 
     // messages.errors.max-accounts
-    public @NotNull String messagesErrorsMaxAccounts() {
-        return Objects.requireNonNull(config.getString("messages.errors.max-accounts"));
+    public @NotNull Component messagesErrorsMaxAccounts(final @NotNull Account.Type type, final int limit) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.max-accounts"))
+                        .replace("<type>", type.getName())
+                        .replace("<limit>", String.valueOf(limit))
+        );
     }
 
     // messages.errors.rename-personal
-    public @NotNull String messagesErrorsRenamePersonal() {
-        return Objects.requireNonNull(config.getString("messages.errors.rename-personal"));
+    public @NotNull Component messagesErrorsRenamePersonal() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-personal")));
     }
 
     // messages.errors.not-account-owner
-    public @NotNull String messagesErrorsNotAccountOwner() {
-        return Objects.requireNonNull(config.getString("messages.errors.not-account-owner"));
+    public @NotNull Component messagesErrorsNotAccountOwner() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.not-account-owner")));
     }
 
     // messages.errors.frozen
-    public @NotNull String messagesErrorsFrozen() {
-        return Objects.requireNonNull(config.getString("messages.errors.frozen"));
+    public @NotNull Component messagesErrorsFrozen(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.frozen"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.errors.same-from-to
-    public @NotNull String messagesErrorsSameFromTo() {
-        return Objects.requireNonNull(config.getString("messages.errors.same-from-to"));
+    public @NotNull Component messagesErrorsSameFromTo() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.same-from-to")));
     }
 
     // messages.errors.transfer-self-only
-    public @NotNull String messagesErrorsTransferSelfOnly() {
-        return Objects.requireNonNull(config.getString("messages.errors.transfer-self-only"));
+    public @NotNull Component messagesErrorsTransferSelfOnly() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.transfer-self-only")));
     }
 
     // messages.errors.transfer-other-only
-    public @NotNull String messagesErrorsTransferOtherOnly() {
-        return Objects.requireNonNull(config.getString("messages.errors.transfer-other-only"));
+    public @NotNull Component messagesErrorsTransferOtherOnly() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.transfer-other-only")));
     }
 
     // messages.errors.invalid-number
-    public @NotNull String messagesErrorsInvalidNumber() {
-        return Objects.requireNonNull(config.getString("messages.errors.invalid-number"));
+    public @NotNull Component messagesErrorsInvalidNumber(final @NotNull String number) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.invalid-number"))
+                        .replace("<number>", number)
+        );
     }
 
     // messages.errors.negative-transfer
-    public @NotNull String messagesErrorsNegativeTransfer() {
-        return Objects.requireNonNull(config.getString("messages.errors.negative-transfer"));
+    public @NotNull Component messagesErrorsNegativeTransfer() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.negative-transfer")));
     }
 
     // messages.errors.insufficient-funds
-    public @NotNull String messagesErrorsInsufficientFunds() {
-        return Objects.requireNonNull(config.getString("messages.errors.insufficient-funds"));
+    public @NotNull Component messagesErrorsInsufficientFunds(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.insufficient-funds"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.errors.closing-balance
-    public @NotNull String messagesErrorsClosingBalance() {
-        return Objects.requireNonNull(config.getString("messages.errors.closing-balance"));
+    public @NotNull Component messagesErrorsClosingBalance(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.closing-balance"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.errors.closing-personal
-    public @NotNull String messagesErrorsClosingPersonal() {
-        return Objects.requireNonNull(config.getString("messages.errors.closing-personal"));
+    public @NotNull Component messagesErrorsClosingPersonal() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.closing-personal")));
     }
 
     // messages.errors.player-only
-    public @NotNull String messagesErrorsPlayerOnly() {
-        return Objects.requireNonNull(config.getString("messages.errors.player-only"));
+    public @NotNull Component messagesErrorsPlayerOnly() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.player-only")));
     }
 
     // messages.errors.player-not-found
-    public @NotNull String messagesErrorsPlayerNotFound() {
-        return Objects.requireNonNull(config.getString("messages.errors.player-not-found"));
+    public @NotNull Component messagesErrorsPlayerNotFound() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.player-not-found")));
     }
 
     // messages.errors.instrument-requires-item
-    public @NotNull String messagesErrorsInstrumentRequiresItem() {
-        return Objects.requireNonNull(config.getString("messages.errors.instrument-requires-item"));
+    public @NotNull Component messagesErrorsInstrumentRequiresItem(final @NotNull Material material) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.instrument-requires-item"))
+                        .replace("<material-key>", material.translationKey())
+                        .replace("<material>", material.name())
+        );
     }
 
     // messages.errors.target-inventory-full
-    public @NotNull String messagesErrorsTargetInventoryFull() {
-        return Objects.requireNonNull(config.getString("messages.errors.target-inventory-full"));
+    public @NotNull Component messagesErrorsTargetInventoryFull(final @NotNull HumanEntity player) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.target-inventory-full"))
+                        .replace("<player>", player.getName())
+        );
     }
 
     // messages.errors.block-too-far
-    public @NotNull String messagesErrorsBlockTooFar() {
-        return Objects.requireNonNull(config.getString("messages.errors.block-too-far"));
+    public @NotNull Component messagesErrorsBlockTooFar() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.block-too-far")));
     }
 
     // messages.errors.pos-already-exists
-    public @NotNull String messagesErrorsPosAlreadyExists() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-already-exists"));
+    public @NotNull Component messagesErrorsPosAlreadyExists() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-already-exists")));
     }
 
     // messages.errors.pos-not-chest
-    public @NotNull String messagesErrorsPosNotChest() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-not-chest"));
+    public @NotNull Component messagesErrorsPosNotChest() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-not-chest")));
     }
 
     // messages.errors.pos-double-chest
-    public @NotNull String messagesErrorsPosDoubleChest() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-double-chest"));
+    public @NotNull Component messagesErrorsPosDoubleChest() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-double-chest")));
     }
 
     // messages.errors.pos-empty
-    public @NotNull String messagesErrorsPosEmpty() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-empty"));
+    public @NotNull Component messagesErrorsPosEmpty() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-empty")));
     }
 
     // messages.errors.pos-invalid-card
-    public @NotNull String messagesErrorsPosInvalidCard() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-invalid-card"));
+    public @NotNull Component messagesErrorsPosInvalidCard() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-invalid-card")));
     }
 
     // messages.errors.pos-no-permission
-    public @NotNull String messagesErrorsPosNoPermission() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-no-permission"));
+    public @NotNull Component messagesErrorsPosNoPermission() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-no-permission")));
     }
 
     // messages.errors.no-card
-    public @NotNull String messagesErrorsNoCard() {
-        return Objects.requireNonNull(config.getString("messages.errors.no-card"));
+    public @NotNull Component messagesErrorsNoCard() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.no-card")));
     }
 
     // messages.errors.pos-items-changed
-    public @NotNull String messagesErrorsPosItemsChanged() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-items-changed"));
+    public @NotNull Component messagesErrorsPosItemsChanged() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-items-changed")));
     }
 
     // messages.errors.pos-create-business-only
-    public @NotNull String messagesErrorsPosCreateBusinessOnly() {
-        return Objects.requireNonNull(config.getString("messages.errors.pos-create-business-only"));
+    public @NotNull Component messagesErrorsPosCreateBusinessOnly() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-create-business-only")));
     }
 
     // messages.errors.disallowed-characters
-    public @NotNull String messagesErrorsDisallowedCharacters() {
-        return Objects.requireNonNull(config.getString("messages.errors.disallowed-characters"));
+    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull String characters) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.disallowed-characters"))
+                        .replace("<characters>", characters)
+        );
     }
 
     // messages.errors.already-frozen
-    public @NotNull String messagesErrorsAlreadyFrozen() {
-        return Objects.requireNonNull(config.getString("messages.errors.already-frozen"));
+    public @NotNull Component messagesErrorsAlreadyFrozen(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.already-frozen"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.errors.not-frozen
-    public @NotNull String messagesErrorsNotFrozen() {
-        return Objects.requireNonNull(config.getString("messages.errors.not-frozen"));
+    public @NotNull Component messagesErrorsNotFrozen(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.not-frozen"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.balance

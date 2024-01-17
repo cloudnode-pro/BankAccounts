@@ -118,6 +118,10 @@ public class Account {
         return this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? MiniMessage.miniMessage().deserialize("<i>the server</i>") : this.owner.getName() == null ? MiniMessage.miniMessage().deserialize("<i>unknown player</i>") : Component.text(this.owner.getName());
     }
 
+    public final @NotNull String ownerNameUnparsed() {
+        return this.owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the server</i>" : this.owner.getName() == null ? "<i>unknown player</i>" : this.owner.getName();
+    }
+
     /**
      * Update account balance
      * @param diff Balance difference (positive or negative)

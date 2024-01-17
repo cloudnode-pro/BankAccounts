@@ -1,7 +1,6 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -84,9 +83,9 @@ public class GUI implements Listener {
                 Block block = pos.get().getBlock();
                 if (!(block.getState() instanceof final @NotNull Chest chest)) {
                     inventory.close();
-                    event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosEmpty()));
+                    event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsPosEmpty());
                     final @Nullable Player seller = pos.get().seller.owner.getPlayer();
-                    if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosEmpty()));
+                    if (seller != null) seller.sendMessage(BankAccounts.getInstance().config().messagesErrorsPosEmpty());
                     pos.get().delete();
                     return;
                 }
@@ -99,18 +98,18 @@ public class GUI implements Listener {
                 if (item.equals(confirm)) {
                     if (!POS.verifyChecksum(chestItems, checksums)) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosItemsChanged()));
+                        event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsPosItemsChanged());
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
-                        if (seller != null) seller.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosItemsChanged()));
+                        if (seller != null) seller.sendMessage(BankAccounts.getInstance().config().messagesErrorsPosItemsChanged());
                         pos.get().delete();
                         return;
                     }
                     if (pos.get().seller.frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), pos.get().seller));
+                        event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsFrozen(pos.get().seller));
                         final @Nullable Player seller = pos.get().seller.owner.getPlayer();
                         if (seller != null) {
-                            seller.sendMessage(Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), pos.get().seller));
+                            seller.sendMessage(BankAccounts.getInstance().config().messagesErrorsFrozen(pos.get().seller));
                             seller.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesPosRemoved()));
                         }
                         pos.get().delete();
@@ -118,19 +117,17 @@ public class GUI implements Listener {
                     }
                     if (buyer.get().frozen) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), buyer.get()));
+                        event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsFrozen(buyer.get()));
                         return;
                     }
                     if (!buyer.get().hasFunds(pos.get().price)) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(Account.placeholders(BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(), buyer.get()));
+                        event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(buyer.get()));
                         return;
                     }
                     if (event.getWhoClicked().getInventory().getSize() - event.getWhoClicked().getInventory().getStorageContents().length < items.length) {
                         inventory.close();
-                        event.getWhoClicked().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsTargetInventoryFull(),
-                                Placeholder.unparsed("player", event.getWhoClicked().getName())
-                        ));
+                        event.getWhoClicked().sendMessage(BankAccounts.getInstance().config().messagesErrorsTargetInventoryFull(event.getWhoClicked()));
                         return;
                     }
                     inventory.close();

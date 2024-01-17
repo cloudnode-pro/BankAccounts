@@ -328,8 +328,7 @@ public class BankCommand extends Command {
             final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
             int limit = BankAccounts.getInstance().config().accountLimits(optionalType.get());
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(), Placeholder.unparsed("type", optionalType
-                        .get().getName()), Placeholder.unparsed("limit", String.valueOf(limit)));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(optionalType.get(), limit));
         }
 
         final @NotNull Account account = new Account(target, optionalType.get(), null, BigDecimal.ZERO, false);
@@ -355,7 +354,7 @@ public class BankCommand extends Command {
                 balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
             }
             catch (NumberFormatException e) {
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
             }
             account.get().balance = balance;
             account.get().update();
@@ -384,7 +383,7 @@ public class BankCommand extends Command {
             name = name.isEmpty() ? null : name;
 
             if (name != null && (name.contains("<") || name.contains(">")))
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(), Placeholder.unparsed("characters", "<>"));
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
 
             account.get().name = name;
             account.get().update();
@@ -402,7 +401,7 @@ public class BankCommand extends Command {
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         if (account.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsAlreadyFrozen(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyFrozen(account.get()));
         account.get().frozen = true;
         account.get().update();
         return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountFrozen(), account.get()));
@@ -417,7 +416,7 @@ public class BankCommand extends Command {
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         if (!account.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsNotFrozen(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotFrozen(account.get()));
         account.get().frozen = false;
         account.get().update();
         return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesAccountUnfrozen(), account.get()));
@@ -436,9 +435,9 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsClosingBalance(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance(account.get()));
         if (account.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
         if (BankAccounts.getInstance().config()
                 .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
@@ -467,7 +466,7 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         // account is frozen
         if (from.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), from.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(from.get()));
         // recipient does not exist
         final @NotNull Optional<@NotNull Account> to = Account.get(argsCopy[1]);
         if (to.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
@@ -475,7 +474,7 @@ public class BankCommand extends Command {
         if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsSameFromTo());
         // to is frozen
         if (to.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), to.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(to.get()));
         // to is foreign
         if (!sender.hasPermission(Permissions.TRANSFER_OTHER) && !to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) {
@@ -491,21 +490,21 @@ public class BankCommand extends Command {
             amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[2])).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", argsCopy[2]));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[2]));
         }
         // amount is 0 or less
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNegativeTransfer());
         // account has insufficient funds
         if (!from.get().hasFunds(amount))
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(), from.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(from.get()));
 
         @Nullable String description = args.length > 3 ? String
                 .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
         if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(), Placeholder.unparsed("characters", "<>"));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
 
         if (!confirm && BankAccounts.getInstance().config().transferConfirmationEnabled()) {
             final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().config().transferConfirmationMinAmount());
@@ -552,7 +551,7 @@ public class BankCommand extends Command {
                     if (page <= 0) throw new NumberFormatException();
                 }
                 catch (final @NotNull NumberFormatException e) {
-                    return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
+                    return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
                 }
             }
         }
@@ -597,7 +596,7 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
 
         if (target.getInventory().firstEmpty() == -1)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTargetInventoryFull(), Placeholder.unparsed("player", target.getName()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTargetInventoryFull(target));
 
         if (BankAccounts.getInstance().config().instrumentsRequireItem() && sender instanceof final @NotNull Player player) {
             final @NotNull Material material = BankAccounts.getInstance().config().instrumentsMaterial();
@@ -606,8 +605,7 @@ public class BankCommand extends Command {
                     .findFirst().orElse(null);
 
             if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE_BYPASS)) {
-                if (item == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInstrumentRequiresItem()
-                        .replace("<material-key>", material.translationKey()), Placeholder.unparsed("material", material.name()));
+                if (item == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInstrumentRequiresItem(material));
                 else {
                     final @NotNull ItemStack clone = item.clone();
                     clone.setAmount(1);
