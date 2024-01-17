@@ -1,8 +1,6 @@
 package pro.cloudnode.smp.bankaccounts;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -14,14 +12,11 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.sql.Timestamp;
 import java.sql.Types;
-import java.text.SimpleDateFormat;
-import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.TimeZone;
 import java.util.logging.Level;
 
 /**
@@ -232,33 +227,5 @@ public class Transaction {
                     put("from", transaction.from);
                     put("to", transaction.to);
                 }});
-    }
-
-
-    /**
-     * Transaction placeholders
-     * @param transaction Transaction
-     * @param account Account
-     * @param message Message to replace placeholders in
-     */
-    public static Component historyPlaceholders(@NotNull Transaction transaction, @NotNull Account account, @NotNull String message) {
-        final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        boolean isSender = transaction.from.id.equals(account.id);
-        final BigDecimal amount = isSender ? transaction.amount.negate() : transaction.amount;
-        final Account other = isSender ? transaction.to : transaction.from;
-        message = message
-                .replace("<amount>", amount.toPlainString())
-                .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
-                .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
-                .replace("<full_date>", sdf.format(transaction.time) + " UTC");
-        message = Account.placeholdersString(message, new HashMap<>() {{
-            put("", account);
-            put("other", other);
-        }});
-        return MiniMessage.miniMessage().deserialize(message, Formatter.date("date", transaction.time.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()));
     }
 }

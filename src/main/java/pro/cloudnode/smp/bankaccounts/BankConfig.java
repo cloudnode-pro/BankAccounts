@@ -16,10 +16,13 @@ import org.jetbrains.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
+import java.time.ZoneOffset;
 import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.TimeZone;
 
 public final class BankConfig {
     public @NotNull FileConfiguration config;
@@ -871,8 +874,38 @@ public final class BankConfig {
     }
 
     // messages.history.entry
-    public @NotNull String messagesHistoryEntry() {
-        return Objects.requireNonNull(config.getString("messages.history.entry"));
+    public @NotNull Component messagesHistoryEntry(final @NotNull Transaction transaction, final @NotNull Account account) {
+        final boolean isSender = transaction.from.id.equals(account.id);
+        final @NotNull Account other = isSender ? transaction.to : transaction.from;
+        final @NotNull BigDecimal amount = isSender ? transaction.amount.negate() : transaction.amount;
+        final SimpleDateFormat sdf = new SimpleDateFormat("dd MMM yyyy HH:mm:ss");
+        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.history.entry"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+                        .replace("<other-account>", other.name())
+                        .replace("<other-account-id>", other.id)
+                        .replace("<other-account-type>", other.type.getName())
+                        .replace("<other-account-owner>", other.ownerNameUnparsed())
+                        .replace("<other-balance>", other.balance == null ? "∞" : other.balance.toPlainString())
+                        .replace("<other-balance-formatted>", BankAccounts.formatCurrency(other.balance))
+                        .replace("<other-balance-short>", BankAccounts.formatCurrencyShort(other.balance))
+                        .replace("<amount>", amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
+                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
+                        .replace("<transaction-id>", String.valueOf(transaction.getId()))
+                        .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
+                        .replace("<full_date>", sdf.format(transaction.time) + " UTC")
+                        .replace("<full-date>", sdf.format(transaction.time) + " UTC"),
+                Formatter.date("date", transaction.time.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
     }
 
     // messages.history.footer

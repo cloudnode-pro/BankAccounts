@@ -562,7 +562,7 @@ public class BankCommand extends Command {
             final int maxPage = (int) Math.ceil((double) count / limit.orElse(count));
             sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryHeader(account.get(), page, maxPage));
             for (final @NotNull Transaction transaction : transactions)
-                sendMessage(sender, Transaction.historyPlaceholders(transaction, account.get(), BankAccounts.getInstance().config().messagesHistoryEntry()));
+                sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryEntry(transaction, account.get()));
             sendMessage(sender, BankAccounts.getInstance().config().messagesHistoryFooter(account.get(), page, maxPage));
         }
         return true;
