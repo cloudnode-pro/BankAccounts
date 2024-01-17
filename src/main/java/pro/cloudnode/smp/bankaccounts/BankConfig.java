@@ -932,8 +932,8 @@ public final class BankConfig {
     }
 
     // messages.instrument-created
-    public @NotNull String messagesInstrumentCreated() {
-        return Objects.requireNonNull(config.getString("messages.instrument-created"));
+    public @NotNull Component messagesInstrumentCreated() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.instrument-created")));
     }
 
     // messages.pos-removed
