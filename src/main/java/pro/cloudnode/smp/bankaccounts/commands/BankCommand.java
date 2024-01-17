@@ -623,7 +623,7 @@ public class BankCommand extends Command {
         if (args.length < 1) return sendUsage(sender, label, "whois <account>");
         final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
         return account
-                .map(value -> sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesWhois(), value)))
+                .map(value -> sendMessage(sender, BankAccounts.getInstance().config().messagesWhois(value)))
                 .orElseGet(() -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound()));
     }
 

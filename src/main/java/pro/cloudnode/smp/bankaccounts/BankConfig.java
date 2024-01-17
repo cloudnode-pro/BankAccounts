@@ -1026,8 +1026,17 @@ public final class BankConfig {
     }
 
     // messages.whois
-    public @NotNull String messagesWhois() {
-        return Objects.requireNonNull(config.getString("messages.whois"));
+    public @NotNull Component messagesWhois(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.whois"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
     }
 
     // messages.baltop.header
