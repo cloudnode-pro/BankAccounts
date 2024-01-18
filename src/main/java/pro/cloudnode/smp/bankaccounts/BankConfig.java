@@ -624,8 +624,8 @@ public final class BankConfig {
     // messages.errors.disallowed-characters
     public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull String characters) {
         return MiniMessage.miniMessage().deserialize(
-                Objects.requireNonNull(config.getString("messages.errors.disallowed-characters"))
-                        .replace("<characters>", characters)
+                Objects.requireNonNull(config.getString("messages.errors.disallowed-characters")),
+                Placeholder.unparsed("characters", characters)
         );
     }
 
@@ -799,10 +799,12 @@ public final class BankConfig {
                         .replace("<to-balance-short>", BankAccounts.formatCurrencyShort(from.balance))
                         .replace("<amount>", amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                        .replace("<description>", description == null ? "<gray><i>no description</i>" : description)
-                        .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description))
-        );
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount)),
+                Placeholder.component("description", description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(description))
+        ).replaceText(configurer -> {
+            configurer.matchLiteral("<confirm-command>");
+            configurer.replacement(Component.text("/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description)));
+        });
     }
 
     // messages.transfer-sent
@@ -826,9 +828,9 @@ public final class BankConfig {
                         .replace("<amount>", transaction.amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
                         .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
                         .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                        .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
+                        .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument),
+                Placeholder.component("description", transaction.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(transaction.description))
         );
     }
 
@@ -853,9 +855,9 @@ public final class BankConfig {
                         .replace("<amount>", transaction.amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
                         .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
                         .replace("<transaction-id>", String.valueOf(transaction.getId()))
-                        .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
+                        .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument),
+                Placeholder.component("description", transaction.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(transaction.description))
         );
     }
 
@@ -903,12 +905,12 @@ public final class BankConfig {
                         .replace("<amount>", amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
                         .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i></gray>" : transaction.description)
                         .replace("<transaction-id>", String.valueOf(transaction.getId()))
                         .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
                         .replace("<full_date>", sdf.format(transaction.time) + " UTC")
                         .replace("<full-date>", sdf.format(transaction.time) + " UTC"),
-                Formatter.date("date", transaction.time.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+                Formatter.date("date", transaction.time.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("description", transaction.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(transaction.description))
         );
     }
 
@@ -954,12 +956,12 @@ public final class BankConfig {
                         .replace("<price>", pos.price.toPlainString())
                         .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
                         .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
-                        .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description)
                         .replace("<x>", String.valueOf(pos.x))
                         .replace("<y>", String.valueOf(pos.y))
                         .replace("<z>", String.valueOf(pos.z))
                         .replace("<pos>", "X: " + pos.x + " Y: " + pos.y + " Z: " + pos.z + " in " + pos.world.getName())
-                        .replace("<world>", pos.world.getName())
+                        .replace("<world>", pos.world.getName()),
+                Placeholder.component("description", pos.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(pos.description))
         );
     }
 
@@ -989,11 +991,11 @@ public final class BankConfig {
                         .replace("<amount>", transaction.amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
                         .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
                         .replace("<transaction-id>", String.valueOf(transaction.getId()))
                         .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
                         .replace("<items>", String.valueOf(items.length))
-                        .replace("<items-formatted>", items.length == 1 ? "1 item" : items.length + " items")
+                        .replace("<items-formatted>", items.length == 1 ? "1 item" : items.length + " items"),
+                Placeholder.component("description", transaction.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(transaction.description))
         );
     }
 
@@ -1018,11 +1020,11 @@ public final class BankConfig {
                         .replace("<amount>", transaction.amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(transaction.amount))
                         .replace("<amount-short>", BankAccounts.formatCurrencyShort(transaction.amount))
-                        .replace("<description>", transaction.description == null ? "<gray><i>no description</i>" : transaction.description)
                         .replace("<transaction-id>", String.valueOf(transaction.getId()))
                         .replace("<instrument>", transaction.instrument == null ? "direct transfer" : transaction.instrument)
                         .replace("<items>", String.valueOf(items.length))
-                        .replace("<items-formatted>", items.length == 1 ? "1 item" : items.length + " items")
+                        .replace("<items-formatted>", items.length == 1 ? "1 item" : items.length + " items"),
+                Placeholder.component("description", transaction.description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(transaction.description))
         );
     }
 
@@ -1046,9 +1048,13 @@ public final class BankConfig {
                 Objects.requireNonNull(config.getString("messages.baltop.header"))
                         .replace("<category>", category)
                         .replace("<page>", String.valueOf(page))
-                        .replace("<cmd-prev>", cmdPrev)
-                        .replace("<cmd-next>", cmdNext)
-        );
+        ).replaceText(configurer -> {
+            configurer.matchLiteral("<cmd-prev>");
+            configurer.replacement(cmdPrev);
+        }).replaceText(configurer -> {
+            configurer.matchLiteral("<cmd-next>");
+            configurer.replacement(cmdNext);
+        });
     }
 
     // messages.baltop.entry
