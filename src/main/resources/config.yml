@@ -334,6 +334,8 @@ messages:
         not-frozen: "<gold>(!) This account is not frozen.</gold>"
         # Invoice negative amount
         negative-invoice: "<red>(!) The amount to invoice must be greater than zero.</red>"
+        # Invoice not found
+        invoice-not-found: "<red>(!) Invoice not found.</red>"
 
     # Account balance
     # Available placeholders:
@@ -490,6 +492,45 @@ messages:
         # <balance-short> - Total balance with formatting, example: $123k
         entry-player: "<click:suggest_command:/msg <username> ><hover:show_text:'<white><username></white><newline><gray><balance-formatted></gray><newline>'><gray>#<position></gray> <white><balance-short></white> <green><username></green></hover></click>"
 
+    # Invoices
+    invoice:
+        # Viewing an invoice
+        # Placeholders:
+        # <invoice-id> - Invoice ID
+        # <amount> - Invoice amount without formatting, example: 123456.78
+        # <amount-formatted> - Invoice amount with formatting, example: $123,456.78
+        # <amount-short> - Invoice amount with formatting, example: $123k
+        # <description> - Invoice description
+        # <date> - Date invoice was created. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
+        # <buyer> - The username of the player who is requested to pay the invoice. Can be "anyone" if anyone can pay this invoice
+        # <transaction-id> - Invoice transaction ID (if the invoice is paid). If not paid, will be "unpaid"
+        # <status> - Payment status (as defined below)
+        # <pay-button> - Button to pay the invoice (as defined below)
+        # <account> - Seller account name. Defaults to owner username or ID if not set.
+        # <account-id> - Seller account ID
+        # <account-type> - Seller account type (Personal or Business)
+        # <account-owner> - Seller account owner username
+        # <balance> - Seller account balance without formatting, example: 123456.78
+        # <balance-formatted> - Seller account balance with formatting, example: $123,456.78
+        # <balance-short> - Seller account balance with formatting, example: $123k
+        details: |-
+            <bold><green>INVOICE</green></bold> <gray><hover:show_text:'<white>Click to copy</white>'><click:copy_to_clipboard:<invoice-id>>#<invoice-id></click></hover></gray>
+            <white>Amount: <green><amount-formatted></green></white>
+            <white>From: <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>
+            <white>To: <gray><buyer></gray></white>
+            <white>Date: <gray><date:'yyyy-MM-dd HH:mm'> UTC</gray></white>
+            <white>Status:</white> <status>
+            <white>Description: <gray><description></gray></white><pay-button>
+
+        # Used in the <status> placeholder
+        # Same placeholders as details (except <status>)
+        status:
+            paid: <green>Paid</green>
+            unpaid: <gray>Unpaid</gray>
+
+        # Used in the <pay-button> placeholder. This placeholder is an empty string if the invoice is unpaid.
+        # Same placeholders as details (except <pay-button>)
+        pay-button: <newline><newline><hover:show_text:'<white>Click to pay</white>'><click:suggest_command:/invoice pay <invoice-id>><bold><green>[PAY]</green></bold></click></hover>
 
     # New version available
     # Placeholders:

@@ -12,6 +12,7 @@ import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -25,14 +26,40 @@ public final class InvoiceCommand extends Command {
         if (args.length < 1)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         return switch (args[0]) {
-            case "create" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "view", "details", "check", "show" -> details(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
 
     @Override
     public @Nullable List<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
-        return null;
+        final @NotNull List<@NotNull String> list = new ArrayList<>();
+        if (args.length <= 1) {
+            if (sender.hasPermission(Permissions.INVOICE_CREATE)) list.addAll(Arrays.asList("create", "new"));
+            if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.addAll(Arrays.asList("view", "details", "check", "show"));
+        }
+        else switch (args[0]) {
+            case "create", "new" -> {
+                if ("--player".equals(args[args.length - 1])) return null;
+                else if (!args[args.length - 1].isEmpty() && "--player".startsWith(args[args.length - 1])) list.add("--player");
+                else if (args.length == 2) {
+                    if (sender.hasPermission(Permissions.INVOICE_CREATE) && sender.hasPermission(Permissions.INVOICE_CREATE_OTHER))
+                        list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
+                    else if (sender.hasPermission(Permissions.INVOICE_CREATE))
+                        list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                }
+            }
+            case "view", "details", "check", "show" -> {
+                if (args.length == 2) {
+                    if (sender.hasPermission(Permissions.INVOICE_VIEW) && sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
+                        list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
+                    else if (sender.hasPermission(Permissions.INVOICE_VIEW))
+                        list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                }
+            }
+        }
+        return list;
     }
 
     /**
@@ -85,5 +112,24 @@ public final class InvoiceCommand extends Command {
         // TODO: send messages
 
         return true;
+    }
+
+    /**
+     * View invoice details
+     * <p>{@code /invoice details <invoice>}</p>
+     */
+    public static boolean details(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.INVOICE_VIEW))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+
+        if (args.length < 1)
+            return sendUsage(sender, label, "details <invoice>");
+
+        final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
+        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_VIEW_OTHER) && invoice.get().buyer().map(b -> b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(true))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceDetails(invoice.get()));
     }
 }

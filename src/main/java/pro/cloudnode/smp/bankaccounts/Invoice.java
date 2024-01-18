@@ -10,7 +10,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
@@ -122,6 +124,39 @@ public class Invoice {
         catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoice: " + id, e);
             return Optional.empty();
+        }
+    }
+
+    public static @NotNull Invoice @NotNull [] get(final @NotNull OfflinePlayer player) {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `buyer` = ?")) {
+            stmt.setString(1, player.getUniqueId().toString());
+            stmt.executeQuery();
+            final @NotNull ResultSet rs = stmt.getResultSet();
+
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new @NotNull Invoice[0]);
+        }
+        catch (final @NotNull Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for player: " + player.getUniqueId(), e);
+            return new @NotNull Invoice[0];
+        }
+    }
+
+    public static @NotNull Invoice @NotNull [] get() {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices`")) {
+            stmt.executeQuery();
+            final @NotNull ResultSet rs = stmt.getResultSet();
+
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new @NotNull Invoice[0]);
+        }
+        catch (final @NotNull Exception e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices", e);
+            return new @NotNull Invoice[0];
         }
     }
 }
