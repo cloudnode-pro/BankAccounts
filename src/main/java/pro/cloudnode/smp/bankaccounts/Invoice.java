@@ -115,8 +115,7 @@ public class Invoice {
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` WHERE `id` = ? LIMIT 1")) {
             stmt.setString(1, id);
 
-            stmt.executeQuery();
-            final @NotNull ResultSet rs = stmt.getResultSet();
+            final @NotNull ResultSet rs = stmt.executeQuery();
 
             if (rs.next()) return Optional.of(new Invoice(rs));
             return Optional.empty();
@@ -131,8 +130,7 @@ public class Invoice {
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `buyer` = ?")) {
             stmt.setString(1, player.getUniqueId().toString());
-            stmt.executeQuery();
-            final @NotNull ResultSet rs = stmt.getResultSet();
+            final @NotNull ResultSet rs = stmt.executeQuery();
 
             final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
             while (rs.next()) invoices.add(new Invoice(rs));
@@ -147,8 +145,7 @@ public class Invoice {
     public static @NotNull Invoice @NotNull [] get() {
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices`")) {
-            stmt.executeQuery();
-            final @NotNull ResultSet rs = stmt.getResultSet();
+            final @NotNull ResultSet rs = stmt.executeQuery();
 
             final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
             while (rs.next()) invoices.add(new Invoice(rs));
