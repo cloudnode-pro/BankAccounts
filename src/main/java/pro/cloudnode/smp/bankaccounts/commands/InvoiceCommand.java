@@ -20,8 +20,10 @@ import java.util.stream.Stream;
 public final class InvoiceCommand extends Command {
     @Override
     public boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
-        if (!sender.hasPermission(Permissions.COMMAND)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
-        if (args.length < 1) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
+        if (!sender.hasPermission(Permissions.COMMAND))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (args.length < 1)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         return switch (args[0]) {
             case "create" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
@@ -38,7 +40,8 @@ public final class InvoiceCommand extends Command {
      * <p>{@code /invoice create <account> <amount> [description] [--player <player>]}</p>
      */
     public static boolean create(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission(Permissions.INVOICE_CREATE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+        if (!sender.hasPermission(Permissions.INVOICE_CREATE))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         final @NotNull Optional<@NotNull String> playerArg;
         final int playerIndex = Arrays.asList(args).indexOf("--player");
@@ -68,9 +71,12 @@ public final class InvoiceCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNegativeInvoice());
 
         final @NotNull Optional<@NotNull Account> account = Account.get(argsCopy[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
-        if (!sender.hasPermission(Permissions.INVOICE_CREATE_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-        if (account.get().frozen) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
+        if (account.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_CREATE_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (account.get().frozen)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
 
         final @Nullable String description = argsCopy.length < 3 ? null : String.join(" ", Arrays.copyOfRange(argsCopy, 2, argsCopy.length));
 
