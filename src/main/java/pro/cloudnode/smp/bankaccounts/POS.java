@@ -1,8 +1,5 @@
 package pro.cloudnode.smp.bankaccounts;
 
-import net.kyori.adventure.text.format.TextDecoration;
-import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -33,7 +30,6 @@ import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.logging.Level;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
@@ -70,30 +66,6 @@ public final class POS {
      * Date the POS was created
      */
     public final @NotNull Date created;
-
-
-    /**
-     * Create new POS instance
-     *
-     * @param x           POS X coordinate
-     * @param y           POS Y coordinate
-     * @param z           POS Z coordinate
-     * @param world       POS world
-     * @param price       Price of POS contents
-     * @param description Description that appears on the bank statement
-     * @param seller      Account that receives the money from the sale
-     * @param created     Date the POS was created
-     */
-    public POS(final int x, final int y, final int z, final @NotNull World world, final @NotNull BigDecimal price, final @Nullable String description, final @NotNull Account seller, final @NotNull Date created) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.world = world;
-        this.price = price;
-        this.description = description;
-        this.seller = seller;
-        this.created = created;
-    }
 
     /**
      * Create new POS instance
@@ -291,12 +263,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -305,19 +272,8 @@ public final class POS {
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posInfoNameOwner(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
-        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreOwner().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(line,
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameOwner(pos));
+        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreOwner(pos));
         overview.setItemMeta(overviewMeta);
         gui.setItem(size - 5, overview);
 
@@ -327,8 +283,8 @@ public final class POS {
             delete.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta deleteMeta = delete.getItemMeta();
-        deleteMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posDeleteName()).decoration(TextDecoration.ITALIC, false));
-        deleteMeta.lore(BankAccounts.getInstance().config().posDeleteLore().stream().map(line -> MiniMessage.miniMessage().deserialize(line)).collect(Collectors.toList()));
+        deleteMeta.displayName(BankAccounts.getInstance().config().posDeleteName());
+        deleteMeta.lore(BankAccounts.getInstance().config().posDeleteLore());
         final @NotNull PersistentDataContainer deleteContainer = deleteMeta.getPersistentDataContainer();
         deleteContainer.set(BankAccounts.Key.POS_OWNER_GUI, PersistentDataType.STRING, pos.id());
         delete.setItemMeta(deleteMeta);
@@ -352,12 +308,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posTitle(),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ));
+        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -366,19 +317,8 @@ public final class POS {
             overview.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta overviewMeta = overview.getItemMeta();
-        overviewMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(BankAccounts.getInstance().config().posInfoNameBuyer(), pos.seller),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
-        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, pos.seller),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        overviewMeta.displayName(BankAccounts.getInstance().config().posInfoNameBuyer(pos));
+        overviewMeta.lore(BankAccounts.getInstance().config().posInfoLoreBuyer(pos));
         final @NotNull PersistentDataContainer overviewContainer = overviewMeta.getPersistentDataContainer();
         overviewContainer.set(BankAccounts.Key.POS_BUYER_GUI, PersistentDataType.STRING, String.join(",", POS.checksum(items)));
         overview.setItemMeta(overviewMeta);
@@ -390,19 +330,8 @@ public final class POS {
             confirm.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta confirmMeta = confirm.getItemMeta();
-        confirmMeta.displayName(MiniMessage.miniMessage().deserialize(Account.placeholdersString(BankAccounts.getInstance().config().posConfirmName(), account),
-                Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                Placeholder.unparsed("price", pos.price.toPlainString()),
-                Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-        ).decoration(TextDecoration.ITALIC, false));
-        confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        confirmMeta.displayName(BankAccounts.getInstance().config().posConfirmName(pos, account));
+        confirmMeta.lore(BankAccounts.getInstance().config().posConfirmLore(pos, account));
         final @NotNull PersistentDataContainer confirmContainer = confirmMeta.getPersistentDataContainer();
         confirmContainer.set(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING, account.id);
         confirm.setItemMeta(confirmMeta);
@@ -414,14 +343,8 @@ public final class POS {
             cancel.addUnsafeEnchantment(Enchantment.ARROW_INFINITE, 1);
         }
         final @NotNull ItemMeta cancelMeta = cancel.getItemMeta();
-        cancelMeta.displayName(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().posDeclineName()).decoration(TextDecoration.ITALIC, false));
-        cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore().stream()
-                .map(line -> MiniMessage.miniMessage().deserialize(Account.placeholdersString(line, account),
-                        Placeholder.unparsed("description", pos.description == null ? "no description" : pos.description),
-                        Placeholder.unparsed("price", pos.price.toPlainString()),
-                        Placeholder.unparsed("price-formatted", BankAccounts.formatCurrency(pos.price)),
-                        Placeholder.unparsed("price-short", BankAccounts.formatCurrencyShort(pos.price))
-                ).decoration(TextDecoration.ITALIC, false)).collect(Collectors.toList()));
+        cancelMeta.displayName(BankAccounts.getInstance().config().posDeclineName());
+        cancelMeta.lore(BankAccounts.getInstance().config().posDeclineLore());
         final @NotNull PersistentDataContainer cancelContainer = cancelMeta.getPersistentDataContainer();
         cancelContainer.set(BankAccounts.Key.POS_BUYER_GUI_CANCEL, PersistentDataType.STRING, pos.id());
         cancel.setItemMeta(cancelMeta);

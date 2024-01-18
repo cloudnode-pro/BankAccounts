@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
@@ -33,20 +32,20 @@ public final class PlayerInteract implements Listener {
                     return;
                 }
                 if (!player.hasPermission(Permissions.POS_USE)) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosNoPermission()));
+                    player.sendMessage(BankAccounts.getInstance().config().messagesErrorsPosNoPermission());
                     return;
                 }
                 final @NotNull ItemStack heldItem = player.getInventory().getItemInMainHand();
                 if (heldItem.getType() != BankAccounts.getInstance().config().instrumentsMaterial()) {
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsNoCard()));
+                    player.sendMessage(BankAccounts.getInstance().config().messagesErrorsNoCard());
                     return;
                 }
                 final @NotNull Optional<@NotNull Account> account = Account.get(heldItem);
                 if (account.isEmpty())
-                    player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsPosInvalidCard()));
+                    player.sendMessage(BankAccounts.getInstance().config().messagesErrorsPosInvalidCard());
                 else {
                     if (!player.hasPermission(Permissions.POS_USE_OTHER) && !account.get().owner.getUniqueId().equals(player.getUniqueId())) {
-                        player.sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesErrorsNotAccountOwner()));
+                        player.sendMessage(BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
                         return;
                     }
                     POS.openBuyGui(player, chest, pos.get(), account.get());

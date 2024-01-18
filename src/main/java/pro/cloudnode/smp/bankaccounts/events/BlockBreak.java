@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
@@ -25,7 +24,7 @@ public final class BlockBreak implements Listener {
                     final @NotNull Optional<POS> pos = POS.get(chest);
                     if (pos.isPresent()) {
                         pos.get().delete();
-                        event.getPlayer().sendMessage(MiniMessage.miniMessage().deserialize(BankAccounts.getInstance().config().messagesPosRemoved()));
+                        event.getPlayer().sendMessage(BankAccounts.getInstance().config().messagesPosRemoved());
                     }
                 });
             }

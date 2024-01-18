@@ -2,7 +2,6 @@ package pro.cloudnode.smp.bankaccounts;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -48,7 +47,7 @@ public abstract class Command implements CommandExecutor, TabCompleter {
      * @return Always true.
      */
     protected static boolean sendUsage(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String arguments) {
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(), Placeholder.unparsed("command", label), Placeholder.unparsed("arguments", arguments));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(label, arguments));
     }
 
     /**

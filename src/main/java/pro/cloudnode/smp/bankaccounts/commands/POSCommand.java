@@ -1,7 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
@@ -47,7 +45,7 @@ public final class POSCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosCreateBusinessOnly());
 
         if (account.get().frozen)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsFrozen(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
 
         if (!player.hasPermission(Permissions.POS_CREATE_OTHER) && !account.get().owner.equals(player))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
@@ -57,11 +55,11 @@ public final class POSCommand extends Command {
             price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
         }
 
         if (price.compareTo(BigDecimal.ZERO) <= 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(), Placeholder.unparsed("number", args[1]));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
 
 
         final @Nullable Block target = player.getTargetBlockExact(5);
@@ -78,11 +76,11 @@ public final class POSCommand extends Command {
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
         if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(), Placeholder.unparsed("characters", "<>"));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
 
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
-        return sendMessage(sender, replacePlaceholders(BankAccounts.getInstance().config().messagesPosCreated(), pos));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesPosCreated(pos));
     }
 
     @Override
@@ -97,18 +95,5 @@ public final class POSCommand extends Command {
             }
         }
         return suggestions;
-    }
-
-    /**
-     * Replace POS placeholders
-     *
-     * @param message Message to replace placeholders in
-     * @param pos     POS to get placeholders from
-     */
-    public static @NotNull Component replacePlaceholders(final @NotNull String message, final @NotNull POS pos) {
-        return Account.placeholders(message.replace("<price>", pos.price.toPlainString())
-                .replace("<price-formatted>", BankAccounts.formatCurrency(pos.price))
-                .replace("<price-short>", BankAccounts.formatCurrencyShort(pos.price))
-                .replace("<description>", pos.description == null ? "<gray><i>no description</i></gray>" : pos.description), pos.seller);
     }
 }
