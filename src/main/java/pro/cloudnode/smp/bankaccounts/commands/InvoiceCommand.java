@@ -28,6 +28,7 @@ public final class InvoiceCommand extends Command {
         return switch (args[0]) {
             case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "view", "details", "check", "show" -> details(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
@@ -38,6 +39,7 @@ public final class InvoiceCommand extends Command {
         if (args.length <= 1) {
             if (sender.hasPermission(Permissions.INVOICE_CREATE)) list.addAll(Arrays.asList("create", "new"));
             if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.addAll(Arrays.asList("view", "details", "check", "show"));
+            if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER)) list.add("pay");
         }
         else switch (args[0]) {
             case "create", "new" -> {
@@ -56,6 +58,17 @@ public final class InvoiceCommand extends Command {
                         list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
                     else if (sender.hasPermission(Permissions.INVOICE_VIEW))
                         list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                }
+            }
+            case "pay" -> {
+                if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER)) break;
+                if (args.length == 2) {
+                    if (sender.hasPermission(Permissions.INVOICE_PAY_OTHER)) list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
+                    else list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                }
+                else if (args.length == 3) {
+                    if (sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER)) list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
+                    else list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
                 }
             }
         }
@@ -131,5 +144,43 @@ public final class InvoiceCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
 
         return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceDetails(invoice.get()));
+    }
+
+    /**
+     * Pay invoice
+     * <p>{@code /invoice pay <invoice> <account>}</p>
+     */
+    public static boolean pay(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+
+        final @NotNull String usage = "pay <invoice> <account>";
+        if (args.length < 1) return sendUsage(sender, label, usage);
+        if (args.length < 2) return sendUsage(sender, label, usage.replace("<invoice>", args[0]));
+
+        final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
+        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_PAY_OTHER) && invoice.get().buyer().map(b -> !b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(false))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (invoice.get().transaction != null)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
+
+        final @NotNull Optional<@NotNull Account> account = Account.get(args[1]);
+        if (account.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (invoice.get().seller.id.equals(account.get().id))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoicePaySelf());
+        if (account.get().frozen)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
+        if (!account.get().hasFunds(invoice.get().amount))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(account.get()));
+
+        invoice.get().pay(account.get());
+
+        // TODO: invoice paid messages
+
+        return true;
     }
 }

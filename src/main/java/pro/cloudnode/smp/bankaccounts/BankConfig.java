@@ -667,6 +667,16 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-not-found")));
     }
 
+    // messages.errors.invoice-pay-self
+    public @NotNull Component messagesErrorsInvoicePaySelf() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-pay-self")));
+    }
+
+    // messages.errors.invoice-already-paid
+    public @NotNull Component messagesErrorsInvoiceAlreadyPaid() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-already-paid")));
+    }
+
     // messages.balance
     public @NotNull Component messagesBalance(final @NotNull Account account) {
         return MiniMessage.miniMessage().deserialize(

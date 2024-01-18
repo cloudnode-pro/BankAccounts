@@ -336,6 +336,9 @@ messages:
         negative-invoice: "<red>(!) The amount to invoice must be greater than zero.</red>"
         # Invoice not found
         invoice-not-found: "<red>(!) Invoice not found.</red>"
+        # Invoice seller account is the same as payer
+        invoice-pay-self: "<red>(!) You cannot pay your own invoice with the same account. You can use a different account.</red>"
+        invoice-already-paid: "<red>(!) This invoice has already been paid.</red>"
 
     # Account balance
     # Available placeholders:

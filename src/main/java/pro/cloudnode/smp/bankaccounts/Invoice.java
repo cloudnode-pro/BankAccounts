@@ -74,7 +74,8 @@ public class Invoice {
     }
 
     public void pay(final @NotNull Account buyer) {
-        this.transaction = buyer.transfer(this.seller, this.amount, "Invoice #" + this.id, null);
+        transaction = buyer.transfer(seller, amount, "Invoice #" + id, null);
+        update();
     }
 
     public void insert() {
