@@ -93,7 +93,7 @@ public class Invoice {
             else stmt.setInt(7, transaction.getId());
 
             stmt.executeUpdate();
-        } catch (final @NotNull Exception e) {
+        } catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save invoice: " + id, e);
         }
     }
@@ -106,7 +106,7 @@ public class Invoice {
             stmt.setString(2, id);
 
             stmt.executeUpdate();
-        } catch (final @NotNull Exception e) {
+        } catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not update invoice: " + id, e);
         }
     }
@@ -121,7 +121,7 @@ public class Invoice {
             if (rs.next()) return Optional.of(new Invoice(rs));
             return Optional.empty();
         }
-        catch (final @NotNull Exception e) {
+        catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoice: " + id, e);
             return Optional.empty();
         }
@@ -137,7 +137,7 @@ public class Invoice {
             while (rs.next()) invoices.add(new Invoice(rs));
             return invoices.toArray(new @NotNull Invoice[0]);
         }
-        catch (final @NotNull Exception e) {
+        catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for player: " + player.getUniqueId(), e);
             return new @NotNull Invoice[0];
         }
@@ -152,7 +152,7 @@ public class Invoice {
             while (rs.next()) invoices.add(new Invoice(rs));
             return invoices.toArray(new @NotNull Invoice[0]);
         }
-        catch (final @NotNull Exception e) {
+        catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices", e);
             return new @NotNull Invoice[0];
         }
