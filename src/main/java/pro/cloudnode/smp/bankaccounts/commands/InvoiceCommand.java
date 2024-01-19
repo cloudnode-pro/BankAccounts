@@ -154,8 +154,10 @@ public final class InvoiceCommand extends Command {
 
         final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
         if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
-        if (!sender.hasPermission(Permissions.INVOICE_VIEW_OTHER) && invoice.get().buyer().map(b -> b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(true))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_VIEW_OTHER)
+                && invoice.get().buyer().map(b -> b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(true)
+                && !invoice.get().seller.owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())
+        ) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
 
         return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceDetails(invoice.get()));
     }
