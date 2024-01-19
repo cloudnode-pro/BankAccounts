@@ -525,6 +525,14 @@ messages:
             <white>Status:</white> <status>
             <white>Description: <gray><description></gray></white><pay-button>
 
+        # You have received an invoice
+        # Same placeholders as details
+        received: <click:suggest_command:/invoice view <invoice-id>><green>(!)You have received invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>From <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> from <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>. Click to view.</green></click>
+
+        # Invoice successfully sent
+        # Same placeholders as details
+        sent: <green>(!) Invoice <gray>#<invoice-id></gray> successfully sent.</green>
+
         # Used in the <status> placeholder
         # Same placeholders as details (except <status>)
         status:
