@@ -566,6 +566,23 @@ messages:
         # Same placeholders as details
         paid-buyer: <click:run_command:/invoice view <invoice-id>><green>(!) You have successfully paid invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>By <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> <gray>(<amount-short>)</gray>. Click to view.</green></click>
 
+        # List invoices
+        list:
+            # Header
+            # Placeholders:
+            # <page> - current page number
+            # <cmd-prev> - command to go to previous page
+            # <cmd-next> - command to go to next page
+            header: "<green>Invoices</green>"
+
+            # Invoice entry
+            # Same placeholders as details
+            entry: <click:run_command:/invoice view <invoice-id>><dark_gray>#<invoice-id></dark_gray> <white><amount-formatted></white> <gray><status>,</gray> <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover></click>
+
+            # Footer
+            # Same placeholders as details
+            footer: "<hover:show_text:'Click to see the previous page'><click:run_command:<cmd-prev>><green>← Previous</green></click></hover> <gray>Page <page></gray> <hover:show_text:'Click to see the next page'><click:run_command:<cmd-next>><green>Next →</green></click></hover>"
+
     # New version available
     # Placeholders:
     # <version> - New version

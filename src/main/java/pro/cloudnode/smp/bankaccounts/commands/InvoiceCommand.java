@@ -31,6 +31,7 @@ public final class InvoiceCommand extends Command {
             case "view", "details", "check", "show" -> details(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "send", "remind" -> send(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "list" -> list(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
@@ -43,6 +44,7 @@ public final class InvoiceCommand extends Command {
             if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.addAll(Arrays.asList("view", "details", "check", "show"));
             if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER)) list.add("pay");
             if (sender.hasPermission(Permissions.INVOICE_SEND)) list.addAll(Arrays.asList("send", "remind"));
+            if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.add("list");
         }
         else switch (args[0]) {
             case "create", "new" -> {
@@ -82,6 +84,12 @@ public final class InvoiceCommand extends Command {
                     if (sender.hasPermission(Permissions.INVOICE_SEND_OTHER)) list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
                     else list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
                 }
+            }
+            case "list" -> {
+                if (!sender.hasPermission(Permissions.INVOICE_VIEW)) break;
+                if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER) && "--player".equals(args[args.length - 1])) return null;
+                else if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER) && !args[args.length - 1].isEmpty() && "--player".startsWith(args[args.length - 1])) list.add("--player");
+                else if (args.length == 2) list.addAll(Arrays.asList("all", "sent", "received"));
             }
         }
         return list;
@@ -225,5 +233,63 @@ public final class InvoiceCommand extends Command {
 
         sendMessage(player.get(), BankAccounts.getInstance().config().messagesInvoiceReceived(invoice.get()));
         return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceSent(invoice.get()));
+    }
+
+    /**
+     * List invoices
+     * <p>{@code /invoice list [all|sent|received] [page] [--player <player>]}</p>
+     */
+    public static boolean list(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.INVOICE_VIEW))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+
+        final @NotNull Optional<@NotNull String> playerArg;
+        final int playerIndex = Arrays.asList(args).indexOf("--player");
+        playerArg = playerIndex == -1 || playerIndex + 1 >= args.length ? Optional.empty() : Optional.of(args[playerIndex + 1]);
+        final @NotNull String @NotNull [] argsCopy;
+        if (playerIndex != -1) {
+            final @NotNull String @NotNull [] partA = Arrays.copyOfRange(args, 0, playerIndex);
+            final @NotNull String @NotNull [] partB = Arrays.copyOfRange(args, playerArg.isPresent() ? playerIndex + 2 : playerIndex + 1, args.length);
+            argsCopy = Stream.of(partA, partB).flatMap(Stream::of).toArray(String[]::new);
+        }
+        else argsCopy = args.clone();
+
+        final @NotNull OfflinePlayer target = playerArg.map(u -> BankAccounts.getInstance().getServer().getOfflinePlayer(u)).orElse(BankAccounts.getOfflinePlayer(sender));
+        if (!target.isOnline() && !target.hasPlayedBefore() && !target.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
+
+        final @NotNull String type = argsCopy.length < 1 ? "all" : argsCopy[0];
+        final int page;
+        if (argsCopy.length < 2) page = 1;
+        else {
+            try {
+                page = Integer.parseInt(argsCopy[1]);
+            }
+            catch (final @NotNull NumberFormatException e) {
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
+            }
+        }
+
+        final int limit = BankAccounts.getInstance().config().invoicePerPage();
+        final int offset = limit * (page - 1);
+
+        final @NotNull Invoice @NotNull [] invoices = switch (type.toLowerCase()) {
+            case "received" -> Invoice.get(target, limit, offset);
+            case "sent" -> {
+                final @NotNull Account @NotNull [] sellerAccounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                yield Invoice.get(sellerAccounts, limit, offset);
+            }
+            default -> {
+                final @NotNull Account @NotNull [] sellerAccounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                yield Invoice.get(target, sellerAccounts, limit, offset);
+            }
+        };
+
+        final @NotNull String cmdPrev = "/" + label + " list " + type + " " + (page - 1) + playerArg.map(u -> " --player " + u).orElse("");
+        final @NotNull String cmdNext = "/" + label + " list " + type + " " + (page + 1) + playerArg.map(u -> " --player " + u).orElse("");
+        
+        sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListHeader(page, cmdPrev, cmdNext));
+        for (final @NotNull Invoice invoice : invoices) sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListEntry(invoice));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListFooter(page, cmdPrev, cmdNext));
     }
 }

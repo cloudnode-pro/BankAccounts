@@ -145,6 +145,24 @@ public class Invoice {
         }
     }
 
+    public static @NotNull Invoice @NotNull [] get(final @NotNull OfflinePlayer player, final int limit, final int offset) {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `buyer` = ? ORDER BY `created` DESC LIMIT ? OFFSET ?")) {
+            stmt.setString(1, player.getUniqueId().toString());
+            stmt.setInt(2, limit);
+            stmt.setInt(3, offset);
+            final @NotNull ResultSet rs = stmt.executeQuery();
+
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new @NotNull Invoice[0]);
+        }
+        catch (final @NotNull SQLException e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for player: " + player.getUniqueId(), e);
+            return new @NotNull Invoice[0];
+        }
+    }
+
     public static @NotNull Invoice @NotNull [] get(final @NotNull OfflinePlayer player, final @NotNull Account @NotNull [] seller) {
         final @NotNull String inParams = Arrays.stream(seller).map(s -> "?").collect(Collectors.joining(", "));
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
@@ -163,11 +181,33 @@ public class Invoice {
         }
     }
 
-    public static @NotNull Invoice @NotNull [] get(final @NotNull Account @NotNull [] seller) {
+    public static @NotNull Invoice @NotNull [] get(final @NotNull OfflinePlayer player, final @NotNull Account @NotNull [] seller, final int limit, final int offset) {
         final @NotNull String inParams = Arrays.stream(seller).map(s -> "?").collect(Collectors.joining(", "));
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
-            final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `seller` IN (" + inParams + ")")) {
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `buyer` = ? OR `seller` IN (" + inParams + ") ORDER BY `created` DESC LIMIT ? OFFSET ?")) {
+            stmt.setString(1, player.getUniqueId().toString());
+            for (int i = 0; i < seller.length; ++i) stmt.setString(i + 2, seller[i].id);
+            stmt.setInt(seller.length + 2, limit);
+            stmt.setInt(seller.length + 3, offset);
+
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new Invoice[0]);
+        }
+        catch (final @NotNull SQLException e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for buyer & seller: " + player.getUniqueId(), e);
+            return new @NotNull Invoice[0];
+        }
+    }
+
+    public static @NotNull Invoice @NotNull [] get(final @NotNull Account @NotNull [] seller, final int limit, final int offset) {
+        final @NotNull String inParams = Arrays.stream(seller).map(s -> "?").collect(Collectors.joining(", "));
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+            final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `seller` IN (" + inParams + ") ORDER BY `created` DESC LIMIT ? OFFSET ?")) {
             for (int i = 0; i < seller.length; ++i) stmt.setString(i + 1, seller[i].id);
+            stmt.setInt(seller.length + 1, limit);
+            stmt.setInt(seller.length + 2, offset);
 
             final @NotNull ResultSet rs = stmt.executeQuery();
             final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
