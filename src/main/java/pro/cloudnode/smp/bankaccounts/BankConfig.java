@@ -682,6 +682,11 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-cannot-send")));
     }
 
+    // messages.errors.player-never-joined
+    public @NotNull Component messagesErrorsPlayerNeverJoined() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.player-never-joined")));
+    }
+
     // messages.balance
     public @NotNull Component messagesBalance(final @NotNull Account account) {
         return MiniMessage.miniMessage().deserialize(

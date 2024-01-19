@@ -343,6 +343,8 @@ messages:
         # a) the invoice has a set buy and that's not this player; OR
         # b) the player does not have permission to view invoices not meant for them
         invoice-cannot-send: "<red>(!) You cannot send this invoice to that player because they don't have permission to view it.</red>"
+        # Player has never played on this server
+        player-never-joined: "<red>(!) This player has never joined this server.</red>"
 
     # Account balance
     # Available placeholders:

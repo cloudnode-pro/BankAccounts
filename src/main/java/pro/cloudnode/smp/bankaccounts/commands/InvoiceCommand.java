@@ -106,6 +106,9 @@ public final class InvoiceCommand extends Command {
 
         final @Nullable OfflinePlayer target = playerArg.map(u -> BankAccounts.getInstance().getServer().getOfflinePlayer(u)).orElse(null);
 
+        if (target != null && !target.isOnline() && !target.hasPlayedBefore())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
+
         final @NotNull String usage = "create <account> <amount> [description] [--player <player>]";
         if (argsCopy.length == 0) return sendUsage(sender, label, usage);
         if (argsCopy.length == 1) return sendUsage(sender, label, usage.replace("<account>", argsCopy[0]));
