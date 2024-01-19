@@ -117,7 +117,7 @@ public final class InvoiceCommand extends Command {
         try {
             amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[1])).setScale(2, RoundingMode.HALF_UP);
         }
-        catch (NumberFormatException e) {
+        catch (final @NotNull NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
         }
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
