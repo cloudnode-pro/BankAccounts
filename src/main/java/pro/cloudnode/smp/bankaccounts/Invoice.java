@@ -163,6 +163,23 @@ public class Invoice {
         }
     }
 
+    public static @NotNull Invoice @NotNull [] get(final @NotNull Account @NotNull [] seller) {
+        final @NotNull String inParams = Arrays.stream(seller).map(s -> "?").collect(Collectors.joining(", "));
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+            final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `seller` IN (" + inParams + ")")) {
+            for (int i = 0; i < seller.length; ++i) stmt.setString(i + 1, seller[i].id);
+
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new Invoice[0]);
+        }
+        catch (final @NotNull SQLException e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for seller: " + Arrays.toString(seller), e);
+            return new @NotNull Invoice[0];
+        }
+    }
+
     public static @NotNull Invoice @NotNull [] get() {
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices`")) {
