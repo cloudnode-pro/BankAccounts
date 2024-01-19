@@ -30,6 +30,7 @@ public final class InvoiceCommand extends Command {
             case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "view", "details", "check", "show" -> details(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
+            case "send", "remind" -> send(sender, Arrays.copyOfRange(args, 1, args.length), label);
             default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
         };
     }
@@ -41,6 +42,7 @@ public final class InvoiceCommand extends Command {
             if (sender.hasPermission(Permissions.INVOICE_CREATE)) list.addAll(Arrays.asList("create", "new"));
             if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.addAll(Arrays.asList("view", "details", "check", "show"));
             if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER)) list.add("pay");
+            if (sender.hasPermission(Permissions.INVOICE_SEND)) list.addAll(Arrays.asList("send", "remind"));
         }
         else switch (args[0]) {
             case "create", "new" -> {
@@ -70,6 +72,13 @@ public final class InvoiceCommand extends Command {
                 else if (args.length == 3) {
                     if (sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER)) list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
                     else list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                }
+            }
+            case "send", "remind" -> {
+                if (!sender.hasPermission(Permissions.INVOICE_SEND)) break;
+                if (args.length == 2) {
+                    if (sender.hasPermission(Permissions.INVOICE_SEND_OTHER)) list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
+                    else list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
                 }
             }
         }
@@ -184,5 +193,31 @@ public final class InvoiceCommand extends Command {
         // TODO: invoice paid messages
 
         return true;
+    }
+
+    /**
+     * Send invoice to a player
+     * <p>{@code /invoice send <invoice> <player>}</p>
+     */
+    public static boolean send(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.INVOICE_SEND))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+
+        final @NotNull String usage = "send <invoice> <player>";
+        if (args.length < 1) return sendUsage(sender, label, usage);
+        if (args.length < 2) return sendUsage(sender, label, usage.replace("<invoice>", args[0]));
+
+        final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(BankAccounts.getInstance().getServer().getPlayer(args[1]));
+        if (player.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
+
+        final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
+        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (!sender.hasPermission(Permissions.INVOICE_SEND_OTHER) && !invoice.get().seller.owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (invoice.get().buyer().isPresent() && !invoice.get().buyer().get().getUniqueId().equals(player.get().getUniqueId()) && !player.get().hasPermission(Permissions.INVOICE_VIEW_OTHER))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceCannotSend());
+
+        sendMessage(player.get(), BankAccounts.getInstance().config().messagesInvoiceReceived(invoice.get()));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceSent(invoice.get()));
     }
 }

@@ -339,6 +339,10 @@ messages:
         # Invoice seller account is the same as payer
         invoice-pay-self: "<red>(!) You cannot pay your own invoice with the same account. You can use a different account.</red>"
         invoice-already-paid: "<red>(!) This invoice has already been paid.</red>"
+        # Cannot send this invoice to this player because either:
+        # a) the invoice has a set buy and that's not this player; OR
+        # b) the player does not have permission to view invoices not meant for them
+        invoice-cannot-send: "<red>(!) You cannot send this invoice to that player because they don't have permission to view it.</red>"
 
     # Account balance
     # Available placeholders:

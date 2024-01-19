@@ -677,6 +677,11 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-already-paid")));
     }
 
+    // messages.errors.invoice-cannot-send
+    public @NotNull Component messagesErrorsInvoiceCannotSend() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-cannot-send")));
+    }
+
     // messages.balance
     public @NotNull Component messagesBalance(final @NotNull Account account) {
         return MiniMessage.miniMessage().deserialize(
