@@ -416,6 +416,11 @@ public final class BankConfig {
                 .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
     }
 
+    // invoice.per-page
+    public int invoicePerPage() {
+        return config.getInt("invoice.per-page");
+    }
+
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(

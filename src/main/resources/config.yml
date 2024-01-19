@@ -254,6 +254,11 @@ interest:
         interval: 1440
         description: "Interest payment (<rate-formatted>)"
 
+# Invoice
+invoice:
+    # Number of invoices to return per page
+    per-page: 10
+
 # Messages
 messages:
     # Command usage message
