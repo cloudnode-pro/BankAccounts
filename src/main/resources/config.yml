@@ -552,7 +552,7 @@ messages:
         # Used in the <status> placeholder
         # Same placeholders as details (except <status>)
         status:
-            paid: <green>Paid</green>
+            paid: '<green>Paid</green> <gray>(transaction #<transaction-id>)</gray>'
             unpaid: <gray>Unpaid</gray>
 
         # Used in the <pay-button> placeholder. This placeholder is an empty string if the invoice is unpaid.
