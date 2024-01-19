@@ -2,6 +2,7 @@ package pro.cloudnode.smp.bankaccounts.commands;
 
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
@@ -122,9 +123,10 @@ public final class InvoiceCommand extends Command {
 
         final @NotNull Invoice invoice = new Invoice(account.get(), amount, description, target);
         invoice.insert();
-        // TODO: send messages
 
-        return true;
+        final @NotNull Optional<@NotNull Player> onlineRecipient = invoice.buyer().isPresent() ? Optional.ofNullable(invoice.buyer().get().getPlayer()) : Optional.empty();
+        onlineRecipient.ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice)));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice));
     }
 
     /**
