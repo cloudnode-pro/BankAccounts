@@ -59,8 +59,10 @@ public final class InvoiceCommand extends Command {
                 if (args.length == 2) {
                     if (sender.hasPermission(Permissions.INVOICE_VIEW) && sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
                         list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
-                    else if (sender.hasPermission(Permissions.INVOICE_VIEW))
-                        list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                    else if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
+                        final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                        list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender), accounts)).map(a -> a.id).toList());
+                    }
                 }
             }
             case "pay" -> {

@@ -11,11 +11,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * A payment request
@@ -139,6 +141,24 @@ public class Invoice {
         }
         catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for player: " + player.getUniqueId(), e);
+            return new @NotNull Invoice[0];
+        }
+    }
+
+    public static @NotNull Invoice @NotNull [] get(final @NotNull OfflinePlayer player, final @NotNull Account @NotNull [] seller) {
+        final @NotNull String inParams = Arrays.stream(seller).map(s -> "?").collect(Collectors.joining(", "));
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+            final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_invoices` where `buyer` = ? OR `seller` IN (" + inParams + ")")) {
+            stmt.setString(1, player.getUniqueId().toString());
+            for (int i = 0; i < seller.length; ++i) stmt.setString(i + 2, seller[i].id);
+
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            final @NotNull List<@NotNull Invoice> invoices = new ArrayList<>();
+            while (rs.next()) invoices.add(new Invoice(rs));
+            return invoices.toArray(new Invoice[0]);
+        }
+        catch (final @NotNull SQLException e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get invoices for buyer & seller: " + player.getUniqueId(), e);
             return new @NotNull Invoice[0];
         }
     }
