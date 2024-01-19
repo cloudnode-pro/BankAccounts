@@ -1209,6 +1209,54 @@ public final class BankConfig {
         );
     }
 
+    // messages.invoice.paid-seller
+    public @NotNull Component messagesInvoicePaidSeller(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.paid-seller"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.paid-buyer
+    public @NotNull Component messagesInvoicePaidBuyer(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.paid-buyer"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
     // messages.invoice.status.*
     public @NotNull Component messagesInvoiceStatus(final @NotNull Invoice invoice) {
         return MiniMessage.miniMessage().deserialize(

@@ -190,9 +190,8 @@ public final class InvoiceCommand extends Command {
 
         invoice.get().pay(account.get());
 
-        // TODO: invoice paid messages
-
-        return true;
+        Optional.ofNullable(invoice.get().seller.owner.getPlayer()).ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoicePaidSeller(invoice.get())));
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoicePaidBuyer(invoice.get()));
     }
 
     /**
