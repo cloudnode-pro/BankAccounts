@@ -536,6 +536,16 @@ messages:
             <white>Status:</white> <status>
             <white>Description: <gray><description></gray></white><pay-button>
 
+        # Used in the <status> placeholder
+        # Same placeholders as details (except <status>)
+        status:
+            paid: '<green>Paid</green> <gray>(transaction #<transaction-id>)</gray>'
+            unpaid: <gray>Unpaid</gray>
+
+        # Used in the <pay-button> placeholder. This placeholder is an empty string if the invoice is unpaid.
+        # Same placeholders as details (except <pay-button>)
+        pay-button: <newline><newline><hover:show_text:'<white>Click to pay</white>'><click:suggest_command:/invoice pay <invoice-id>><bold><green>[PAY]</green></bold></click></hover>
+
         # You have received an invoice
         # Same placeholders as details
         received: <click:run_command:/invoice view <invoice-id>><green>(!)You have received invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>From <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> from <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>. Click to view.</green></click>
@@ -555,16 +565,6 @@ messages:
         # You have successfully paid an invoice (buyer's perspective)
         # Same placeholders as details
         paid-buyer: <click:run_command:/invoice view <invoice-id>><green>(!) You have successfully paid invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>By <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> <gray>(<amount-short>)</gray>. Click to view.</green></click>
-
-        # Used in the <status> placeholder
-        # Same placeholders as details (except <status>)
-        status:
-            paid: '<green>Paid</green> <gray>(transaction #<transaction-id>)</gray>'
-            unpaid: <gray>Unpaid</gray>
-
-        # Used in the <pay-button> placeholder. This placeholder is an empty string if the invoice is unpaid.
-        # Same placeholders as details (except <pay-button>)
-        pay-button: <newline><newline><hover:show_text:'<white>Click to pay</white>'><click:suggest_command:/invoice pay <invoice-id>><bold><green>[PAY]</green></bold></click></hover>
 
     # New version available
     # Placeholders:
