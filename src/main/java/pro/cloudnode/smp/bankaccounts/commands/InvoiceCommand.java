@@ -106,19 +106,19 @@ public final class InvoiceCommand extends Command {
         sendMessage(sender, "<green>Available commands:");
         sendMessage(sender, "");
         if (sender.hasPermission(Permissions.INVOICE_CREATE)) {
-            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</click></white>");
-            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>");
         }
         if (sender.hasPermission(Permissions.INVOICE_VIEW))
-            sendMessage(sender, "<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>");
         if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
-            sendMessage(sender, "<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>");
         if (sender.hasPermission(Permissions.INVOICE_SEND))
-            sendMessage(sender, "<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>");
         if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
-            sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>");
             if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
-                sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</click></white>");
+                sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>");
         }
         return sendMessage(sender, "<dark_gray>---</dark_gray>");
     }
