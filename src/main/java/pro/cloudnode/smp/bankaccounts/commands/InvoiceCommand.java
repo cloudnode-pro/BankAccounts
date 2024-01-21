@@ -33,7 +33,7 @@ public final class InvoiceCommand extends Command {
             case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "send", "remind" -> send(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "list" -> list(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
+            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand(label));
         };
     }
 

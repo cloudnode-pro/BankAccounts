@@ -451,8 +451,10 @@ public final class BankConfig {
     }
 
     // messages.errors.unknown-command
-    public @NotNull Component messagesErrorsUnknownCommand() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.unknown-command")));
+    public @NotNull Component messagesErrorsUnknownCommand(final @NotNull String label) {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.unknown-command"))
+                .replace("<label>", label)
+        );
     }
 
     // messages.errors.max-accounts

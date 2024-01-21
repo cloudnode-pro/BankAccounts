@@ -283,7 +283,7 @@ messages:
         # Account not found
         account-not-found: "<red>(!) Account not found.</red>"
         # Command not recognised
-        unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/bank help><gray>/bank help</gray></click>.</red>"
+        unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/<label> help><gray>/<label> help</gray></click>.</red>"
         # <type> the account type
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"

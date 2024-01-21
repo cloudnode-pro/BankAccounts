@@ -175,7 +175,7 @@ public class BankCommand extends Command {
             case "instrument", "card" -> instrument(sender, argsSubset, label);
             case "whois", "who", "info" -> whois(sender, argsSubset, label);
             case "baltop" -> baltop(sender, argsSubset, label);
-            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
+            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand(label));
         };
     }
 
