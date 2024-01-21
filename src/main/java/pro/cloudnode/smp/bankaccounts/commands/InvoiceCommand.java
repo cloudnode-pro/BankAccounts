@@ -198,6 +198,10 @@ public final class InvoiceCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         if (invoice.get().seller.id.equals(account.get().id))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoicePaySelf());
+        if (!sender.hasPermission(Permissions.TRANSFER_SELF) && account.get().owner.getUniqueId().equals(invoice.get().seller.owner.getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
+        if (!sender.hasPermission(Permissions.TRANSFER_OTHER) && !account.get().owner.getUniqueId().equals(invoice.get().seller.owner.getUniqueId()))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
         if (account.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
         if (!account.get().hasFunds(invoice.get().amount))
