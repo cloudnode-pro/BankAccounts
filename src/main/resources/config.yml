@@ -556,7 +556,7 @@ messages:
 
         # Invoice created
         # Same placeholders as details
-        created: <click:run_command:/invoice view <invoice-id>><green>(!) Successfully created invoice <gray>#<invoice-id></gray> for <gray><amount-formatted></gray> to <gray><buyer></gray> from <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray><account-id></gray>'><account></hover>. Click to view.</green></click>
+        created: <click:run_command:/invoice view <invoice-id>><green>(!) Successfully created invoice <gray>#<invoice-id></gray> for <gray><amount-formatted></gray> to <gray><buyer></gray> from <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>. Click to view.</green></click>
 
         # Your invoice has been paid (seller's perspective)
         # Same placeholders as details
