@@ -25,8 +25,9 @@ public final class InvoiceCommand extends Command {
         if (!sender.hasPermission(Permissions.COMMAND))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
+            return help(sender, label);
         return switch (args[0]) {
+            case "help" -> help(sender, label);
             case "create", "new" -> create(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "view", "details", "check", "show" -> details(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
@@ -40,6 +41,7 @@ public final class InvoiceCommand extends Command {
     public @Nullable List<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull List<@NotNull String> list = new ArrayList<>();
         if (args.length <= 1) {
+            list.add("help");
             if (sender.hasPermission(Permissions.INVOICE_CREATE)) list.addAll(Arrays.asList("create", "new"));
             if (sender.hasPermission(Permissions.INVOICE_VIEW)) list.addAll(Arrays.asList("view", "details", "check", "show"));
             if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER)) list.add("pay");
@@ -93,6 +95,32 @@ public final class InvoiceCommand extends Command {
             }
         }
         return list;
+    }
+
+    /**
+     * Show available commands
+     * <p>{@code /invoice help}</p>
+     */
+    public static boolean help(final @NotNull CommandSender sender, final @NotNull String label) {
+        sendMessage(sender, "<dark_gray>---</dark_gray>");
+        sendMessage(sender, "<green>Available commands:");
+        sendMessage(sender, "");
+        if (sender.hasPermission(Permissions.INVOICE_CREATE)) {
+            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</click></white>");
+            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</click></white>");
+        }
+        if (sender.hasPermission(Permissions.INVOICE_VIEW))
+            sendMessage(sender, "<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</click></white>");
+        if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
+            sendMessage(sender, "<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</click></white>");
+        if (sender.hasPermission(Permissions.INVOICE_SEND))
+            sendMessage(sender, "<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</click></white>");
+        if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
+            sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</click></white>");
+            if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
+                sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</click></white>");
+        }
+        return sendMessage(sender, "<dark_gray>---</dark_gray>");
     }
 
     /**
