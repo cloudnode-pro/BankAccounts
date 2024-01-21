@@ -467,13 +467,9 @@ public class BankCommand extends Command {
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         final double requiredBalance = BankAccounts.getInstance().config().changeOwnerMinBalance();
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.valueOf(requiredBalance)) < 0)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsChangeOwnerBalance()
-                    .replace("<required-balance>", String.valueOf(requiredBalance))
-                    .replace("<required-balance-formatted>", BankAccounts.formatCurrency(BigDecimal.valueOf(requiredBalance)))
-                    .replace("<required-balance-short>", BankAccounts.formatCurrencyShort(BigDecimal.valueOf(requiredBalance)))
-            , account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerBalance(account.get(), BigDecimal.valueOf(requiredBalance)));
         if (BankAccounts.getInstance().config().changeOwnerRequireHistory() && Transaction.count(account.get()) == 0)
-            return sendMessage(sender, Account.placeholders(BankAccounts.getInstance().config().messagesErrorsChangeOwnerNoHistory(), account.get()));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNoHistory());
         final @NotNull OfflinePlayer newOwner = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
         if (newOwner.getUniqueId().equals(account.get().owner.getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyOwnsAccount().replace("<player>", Optional.ofNullable(newOwner.getName()).orElse("<i>that player</i>")));
@@ -502,10 +498,7 @@ public class BankCommand extends Command {
             final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender), account.get().type);
             int limit = BankAccounts.getInstance().config().accountLimits(account.get().type);
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(),
-                        Placeholder.unparsed("type", account.get().type.getName()),
-                        Placeholder.unparsed("limit", String.valueOf(limit))
-                );
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(account.get().type, limit));
         }
 
         final boolean success = request.get().confirm();

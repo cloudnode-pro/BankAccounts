@@ -678,13 +678,25 @@ public final class BankConfig {
     }
 
     // messages.errors.change-owner-balance
-    public @NotNull String messagesErrorsChangeOwnerBalance() {
-        return Objects.requireNonNull(config.getString("messages.errors.change-owner-balance"));
+    public @NotNull Component messagesErrorsChangeOwnerBalance(final @NotNull Account account, final @NotNull BigDecimal requiredBalance) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.change-owner-balance"))
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+                        .replace("<required-balance>", requiredBalance.toPlainString())
+                        .replace("<required-balance-formatted>", BankAccounts.formatCurrency(requiredBalance))
+                        .replace("<required-balance-short>", BankAccounts.formatCurrencyShort(requiredBalance))
+        );
     }
 
     // messages.errors.change-owner-no-history
-    public @NotNull String messagesErrorsChangeOwnerNoHistory() {
-        return Objects.requireNonNull(config.getString("messages.errors.change-owner-no-history"));
+    public @NotNull Component messagesErrorsChangeOwnerNoHistory() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-no-history")));
     }
 
     // messages.errors.already-owns-account
