@@ -17,6 +17,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.commands.BaltopCommand;
 import pro.cloudnode.smp.bankaccounts.commands.BankCommand;
+import pro.cloudnode.smp.bankaccounts.commands.InvoiceCommand;
 import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
@@ -67,6 +68,7 @@ public final class BankAccounts extends JavaPlugin {
             put("bank", new BankCommand());
             put("pos", new POSCommand());
             put("baltop", new BaltopCommand());
+            put("invoice", new InvoiceCommand());
         }};
         for (Map.Entry<@NotNull String, @NotNull CommandExecutor> entry : commands.entrySet()) {
             final PluginCommand command = getCommand(entry.getKey());

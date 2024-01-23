@@ -53,3 +53,14 @@ DROP TABLE `bank_transactions`;
 ALTER TABLE `new_bank_transactions`
     RENAME TO `bank_transactions`;
 -- END OF `bank_transactions` MODIFICATION
+
+CREATE TABLE IF NOT EXISTS `bank_invoices`
+(
+    `id`          CHAR(16) PRIMARY KEY NOT NULL COLLATE BINARY,
+    `seller`      CHAR(16)             NOT NULL COLLATE BINARY,
+    `amount`      DECIMAL(15, 2)       NOT NULL,
+    `description` TEXT                          DEFAULT NULL COLLATE NOCASE,
+    `buyer`       CHAR(36)                      DEFAULT NULL COLLATE NOCASE,
+    `created`     DATETIME             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `transaction` INTEGER                       DEFAULT NULL
+);

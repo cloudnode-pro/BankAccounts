@@ -416,6 +416,11 @@ public final class BankConfig {
                 .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance));
     }
 
+    // invoice.per-page
+    public int invoicePerPage() {
+        return config.getInt("invoice.per-page");
+    }
+
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(
@@ -446,8 +451,10 @@ public final class BankConfig {
     }
 
     // messages.errors.unknown-command
-    public @NotNull Component messagesErrorsUnknownCommand() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.unknown-command")));
+    public @NotNull Component messagesErrorsUnknownCommand(final @NotNull String label) {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.unknown-command"))
+                .replace("<label>", label)
+        );
     }
 
     // messages.errors.max-accounts
@@ -655,6 +662,36 @@ public final class BankConfig {
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
         );
+    }
+
+    // messages.errors.negative-invoice
+    public @NotNull Component messagesErrorsNegativeInvoice() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.negative-invoice")));
+    }
+
+    // messages.errors.invoice-not-found
+    public @NotNull Component messagesErrorsInvoiceNotFound() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-not-found")));
+    }
+
+    // messages.errors.invoice-pay-self
+    public @NotNull Component messagesErrorsInvoicePaySelf() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-pay-self")));
+    }
+
+    // messages.errors.invoice-already-paid
+    public @NotNull Component messagesErrorsInvoiceAlreadyPaid() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-already-paid")));
+    }
+
+    // messages.errors.invoice-cannot-send
+    public @NotNull Component messagesErrorsInvoiceCannotSend() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.invoice-cannot-send")));
+    }
+
+    // messages.errors.player-never-joined
+    public @NotNull Component messagesErrorsPlayerNeverJoined() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.player-never-joined")));
     }
 
     // messages.balance
@@ -1085,6 +1122,239 @@ public final class BankConfig {
                         .replace("<balance>", entry.balance.toPlainString())
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(entry.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(entry.balance))
+        );
+    }
+
+    // messages.invoice.details
+    public @NotNull Component messagesInvoiceDetails(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.details"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.status.*
+    public @NotNull Component messagesInvoiceStatus(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.status." + (invoice.transaction == null ? "unpaid" : "paid")))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
+    // messages.invoice.pay-button
+    public @NotNull Component messagesInvoicePayButton(final @NotNull Invoice invoice) {
+        if (invoice.transaction != null) return Component.text("");
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.pay-button"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
+    // messages.invoice.received
+    public @NotNull Component messagesInvoiceReceived(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.received"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.sent
+    public @NotNull Component messagesInvoiceSent(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.sent"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.created
+    public @NotNull Component messagesInvoiceCreated(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.created"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.paid-seller
+    public @NotNull Component messagesInvoicePaidSeller(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.paid-seller"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.paid-buyer
+    public @NotNull Component messagesInvoicePaidBuyer(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.paid-buyer"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.list.header
+    public @NotNull Component messagesInvoiceListHeader(final int page, final @NotNull String cmdPrev, final @NotNull String cmdNext) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.list.header"))
+                        .replace("<page>", String.valueOf(page))
+                        .replace("<cmd-prev>", cmdPrev)
+                        .replace("<cmd-next>", cmdNext)
+        );
+    }
+
+    // messages.invoice.list.entry
+    public @NotNull Component messagesInvoiceListEntry(final @NotNull Invoice invoice) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.list.entry"))
+                        .replace("<invoice-id>", invoice.id)
+                        .replace("<amount>", invoice.amount.toPlainString())
+                        .replace("<amount-formatted>", BankAccounts.formatCurrency(invoice.amount))
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(invoice.amount))
+                        .replace("<buyer>", invoice.buyer().map(buyer -> buyer.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) ? "<i>the Server</i>" : Optional.ofNullable(buyer.getName()).orElse("<i>unknown player</i>")).orElse("<i>anyone</i>"))
+                        .replace("<transaction-id>", invoice.transaction == null ? "unpaid" : String.valueOf(invoice.transaction.getId()))
+                        .replace("<account>", invoice.seller.name())
+                        .replace("<account-id>", invoice.seller.id)
+                        .replace("<account-type>", invoice.seller.type.getName())
+                        .replace("<account-owner>", invoice.seller.ownerNameUnparsed())
+                        .replace("<balance>", invoice.seller.balance == null ? "∞" : invoice.seller.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(invoice.seller.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(invoice.seller.balance)),
+                Placeholder.component("description", invoice.description().isPresent() ? Component.text(invoice.description().get()) : MiniMessage.miniMessage().deserialize("<i>no description</i>")),
+                Formatter.date("date", invoice.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime()),
+                Placeholder.component("status", messagesInvoiceStatus(invoice)),
+                Placeholder.component("pay-button", messagesInvoicePayButton(invoice))
+        );
+    }
+
+    // messages.invoice.list.footer
+    public @NotNull Component messagesInvoiceListFooter(final int page, final @NotNull String cmdPrev, final @NotNull String cmdNext) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.invoice.list.footer"))
+                        .replace("<page>", String.valueOf(page))
+                        .replace("<cmd-prev>", cmdPrev)
+                        .replace("<cmd-next>", cmdNext)
         );
     }
 
