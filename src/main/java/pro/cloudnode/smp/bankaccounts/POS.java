@@ -29,6 +29,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.stream.IntStream;
 import java.util.zip.CRC32;
@@ -96,7 +97,7 @@ public final class POS {
         this.x = rs.getInt("x");
         this.y = rs.getInt("y");
         this.z = rs.getInt("z");
-        final @NotNull Optional<@NotNull World> world = Optional.ofNullable(BankAccounts.getInstance().getServer().getWorld(rs.getString("world")));
+        final @NotNull Optional<@NotNull World> world = Optional.ofNullable(BankAccounts.getInstance().getServer().getWorld(UUID.fromString(rs.getString("world"))));
         if (world.isEmpty()) throw new IllegalStateException("World not found: " + rs.getString("world"));
         this.world = world.get();
         this.price = rs.getBigDecimal("price");
@@ -123,7 +124,7 @@ public final class POS {
      * Create POS id
      */
     public @NotNull String id() {
-        return world.getName() + ":" + x + ":" + y + ":" + z;
+        return world.getUID() + ":" + x + ":" + y + ":" + z;
     }
 
     /**
@@ -135,7 +136,7 @@ public final class POS {
             stmt.setInt(1, x);
             stmt.setInt(2, y);
             stmt.setInt(3, z);
-            stmt.setString(4, world.getName());
+            stmt.setString(4, world.getUID().toString());
             stmt.setBigDecimal(5, price);
             if (description == null) stmt.setNull(6, Types.VARCHAR);
             else stmt.setString(6, description);
@@ -157,7 +158,7 @@ public final class POS {
             stmt.setInt(1, x);
             stmt.setInt(2, y);
             stmt.setInt(3, z);
-            stmt.setString(4, world.getName());
+            stmt.setString(4, world.getUID().toString());
             stmt.executeUpdate();
         } catch (final @NotNull SQLException e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete POS in " + world.getName() + " at X: " + x + " Y: " + y + " Z: " + z, e);
@@ -178,7 +179,7 @@ public final class POS {
             stmt.setInt(1, x);
             stmt.setInt(2, y);
             stmt.setInt(3, z);
-            stmt.setString(4, world.getName());
+            stmt.setString(4, world.getUID().toString());
             final @NotNull ResultSet rs = stmt.executeQuery();
             return rs.next() ? Optional.of(new POS(rs)) : Optional.empty();
         } catch (final @NotNull SQLException e) {
@@ -236,7 +237,7 @@ public final class POS {
     public static @NotNull Optional<@NotNull POS> get(final @NotNull String id) {
         final @NotNull String @NotNull [] split = id.split(":");
         if (split.length != 4) return Optional.empty();
-        final @NotNull Optional<@NotNull World> world = Optional.ofNullable(Bukkit.getWorld(split[0]));
+        final @NotNull Optional<@NotNull World> world = Optional.ofNullable(BankAccounts.getInstance().getServer().getWorld(UUID.fromString(split[0])));
         if (world.isEmpty()) return Optional.empty();
         try {
             final int x = Integer.parseInt(split[1]);
