@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
@@ -264,7 +263,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
+        final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -309,7 +308,7 @@ public final class POS {
         final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
-        final @NotNull Inventory gui = Bukkit.createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
+        final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
