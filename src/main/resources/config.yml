@@ -259,6 +259,15 @@ invoice:
     # Number of invoices to return per page
     per-page: 10
 
+    # Notifications for unpaid invoices (see messages.invoice.notify)
+    notify:
+        # Send message when a player joins
+        join: true
+        # Periodically send message while player is online
+        # Interval between messages in seconds
+        # Set to 0 or negative to disable
+        interval: 300
+
 # Messages
 messages:
     # Command usage message
@@ -582,6 +591,14 @@ messages:
             # Footer
             # Same placeholders as details
             footer: "<hover:show_text:'Click to see the previous page'><click:run_command:<cmd-prev>><green>← Previous</green></click></hover> <gray>Page <page></gray> <hover:show_text:'Click to see the next page'><click:run_command:<cmd-next>><green>Next →</green></click></hover>"
+
+        # You have unpaid invoices
+        # Sent periodically and on login (as configured in invoice.notify)
+        # Set to empty string to disable
+        # Placeholders:
+        # <unpaid> - number of unpaid invoices></yellow>."
+        # <unpaid-choice> - choice placeholder for unpaid invoices; see https://docs.advntr.dev/minimessage/dynamic-replacements.html#insert-a-choice
+        notify: "<click:run_command:/invoice list><hover:show_text:'Click to view unpaid invoices'><yellow>(!) You have <gray><unpaid></gray> unpaid invoice<unpaid-choice:'0<s'>. <gray>Click to view.</gray></yellow></hover></click>"
 
     # New version available
     # Placeholders:
