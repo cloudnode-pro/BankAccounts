@@ -421,6 +421,16 @@ public final class BankConfig {
         return config.getInt("invoice.per-page");
     }
 
+    // invoice.notify.join
+    public boolean invoiceNotifyJoin() {
+        return config.getBoolean("invoice.notify.join");
+    }
+
+    // invoice.notify.interval
+    public int invoiceNotifyInterval() {
+        return config.getInt("invoice.notify.interval");
+    }
+
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(
@@ -1356,6 +1366,17 @@ public final class BankConfig {
                         .replace("<cmd-prev>", cmdPrev)
                         .replace("<cmd-next>", cmdNext)
         );
+    }
+
+    // messages.invoice.notify
+    public @NotNull Optional<@NotNull Component> messagesInvoiceNotify(final int unpaid) {
+        final @NotNull String message = Objects.requireNonNull(config.getString("messages.invoice.notify"));
+        if (message.isBlank()) return Optional.empty();
+        return Optional.of(MiniMessage.miniMessage().deserialize(
+                message
+                        .replace("<unpaid>", String.valueOf(unpaid)),
+                Formatter.choice("unpaid-choice", unpaid)
+        ));
     }
 
     // messages.update-available
