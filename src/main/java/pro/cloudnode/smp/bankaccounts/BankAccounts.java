@@ -4,7 +4,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
@@ -90,7 +89,7 @@ public final class BankAccounts extends JavaPlugin {
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
 
         // Setup PlaceholderAPI Integration
-        if(Bukkit.getPluginManager().getPlugin("PlaceholderAPI") != null) {
+        if(BankAccounts.getInstance().getServer().getPluginManager().getPlugin("PlaceholderAPI") != null) {
             new PAPIIntegration().register();
         } else {
             getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");

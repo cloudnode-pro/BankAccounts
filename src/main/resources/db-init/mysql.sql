@@ -47,3 +47,10 @@ CREATE TABLE IF NOT EXISTS `bank_invoices`
     `created`     DATETIME                                                            NOT NULL DEFAULT UTC_TIMESTAMP(),
     `transaction` INT                                                                          DEFAULT NULL
 );
+
+DELETE
+from `pos`
+WHERE `world` NOT LIKE '%-%-%-%-%';
+
+ALTER TABLE `pos`
+    CHANGE COLUMN `world` `world` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;

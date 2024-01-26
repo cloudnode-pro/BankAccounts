@@ -64,3 +64,31 @@ CREATE TABLE IF NOT EXISTS `bank_invoices`
     `created`     DATETIME             NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `transaction` INTEGER                       DEFAULT NULL
 );
+
+-- Modify `pos`.`world` to be `CHAR(36)` (UUID)
+DELETE
+from `pos`
+WHERE `world` NOT LIKE '%-%-%-%-%';
+
+CREATE TABLE `new_pos`
+(
+    `x`           INTEGER  NOT NULL,
+    `y`           INTEGER  NOT NULL,
+    `z`           INTEGER  NOT NULL,
+    `world`       CHAR(36) NOT NULL COLLATE NOCASE,
+    `price`       NUMERIC  NOT NULL,
+    `description` TEXT              DEFAULT NULL,
+    `seller`      TEXT     NOT NULL,
+    `created`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`x`, `y`, `z`, `world`)
+);
+
+INSERT INTO `new_pos`
+SELECT *
+FROM `pos`;
+
+DROP TABLE `pos`;
+
+ALTER TABLE `new_pos`
+    RENAME TO `pos`;
+-- END OF `pos` MODIFICATION
