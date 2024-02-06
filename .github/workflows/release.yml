@@ -36,7 +36,7 @@ jobs:
         uses: cloudnode-pro/modrinth-publish@1.0.0
         with:
           token: '${{ secrets.MODRINTH_TOKEN }}'
-          project: Dc8RS2En
+          project: '${{ github.event.repository.custom_properties.modrinth_id }}'
           file: target/BankAccounts-${{ github.event.release.tag_name }}.jar
           changelog: ${{ github.event.release.body }}
           loaders: paper

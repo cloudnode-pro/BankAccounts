@@ -21,6 +21,7 @@ import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class BankCommand extends Command {
     @Override
@@ -184,7 +185,7 @@ public class BankCommand extends Command {
             case "instrument", "card" -> instrument(sender, argsSubset, label);
             case "whois", "who", "info" -> whois(sender, argsSubset, label);
             case "baltop" -> baltop(sender, argsSubset, label);
-            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand());
+            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand(label));
         };
     }
 
@@ -239,6 +240,8 @@ public class BankCommand extends Command {
             sendMessage(sender, "<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>");
         if (sender.hasPermission(Permissions.RELOAD))
             sendMessage(sender, "<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>");
+        if (Stream.of(Permissions.INVOICE_CREATE, Permissions.INVOICE_VIEW, Permissions.INVOICE_SEND, Permissions.TRANSFER_SELF, Permissions.TRANSFER_OTHER).anyMatch(sender::hasPermission))
+            sendMessage(sender, "<click:suggest_command:/invoice help><green>/invoice help</green> <white>- See invoicing commands</click>");
         return sendMessage(sender, "<dark_gray>---</dark_gray>");
     }
 

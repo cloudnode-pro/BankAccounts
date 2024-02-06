@@ -37,6 +37,24 @@ CREATE TABLE IF NOT EXISTS `pos`
 ALTER TABLE `bank_transactions`
     CHANGE COLUMN `instrument` `instrument` VARCHAR(24) CHARACTER SET latin1 COLLATE latin1_general_ci NULL DEFAULT NULL AFTER `description`;
 
+CREATE TABLE IF NOT EXISTS `bank_invoices`
+(
+    `id`          CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs PRIMARY KEY NOT NULL,
+    `seller`      CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs             NOT NULL,
+    `amount`      DECIMAL(15, 2)                                                      NOT NULL,
+    `description` VARCHAR(64) CHARACTER SET latin1 COLLATE latin1_general_ci                   DEFAULT NULL,
+    `buyer`       CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci                      DEFAULT NULL,
+    `created`     DATETIME                                                            NOT NULL DEFAULT UTC_TIMESTAMP(),
+    `transaction` INT                                                                          DEFAULT NULL
+);
+
+DELETE
+from `pos`
+WHERE `world` NOT LIKE '%-%-%-%-%';
+
+ALTER TABLE `pos`
+    CHANGE COLUMN `world` `world` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;
+
 CREATE TABLE IF NOT EXISTS `change_owner_requests`
 (
     `account`   CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,

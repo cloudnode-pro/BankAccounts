@@ -265,6 +265,11 @@ interest:
         interval: 1440
         description: "Interest payment (<rate-formatted>)"
 
+# Invoice
+invoice:
+    # Number of invoices to return per page
+    per-page: 10
+
 # Messages
 messages:
     # Command usage message
@@ -289,7 +294,7 @@ messages:
         # Account not found
         account-not-found: "<red>(!) Account not found.</red>"
         # Command not recognised
-        unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/bank help><gray>/bank help</gray></click>.</red>"
+        unknown-command: "<red>(!) Unknown command. Try <click:suggest_command:/<label> help><gray>/<label> help</gray></click>.</red>"
         # <type> the account type
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
@@ -343,6 +348,19 @@ messages:
         already-frozen: "<yellow>(!) This account is already frozen.</yellow>"
         # Account is not frozen (placeholders same as balance)
         not-frozen: "<gold>(!) This account is not frozen.</gold>"
+        # Invoice negative amount
+        negative-invoice: "<red>(!) The amount to invoice must be greater than zero.</red>"
+        # Invoice not found
+        invoice-not-found: "<red>(!) Invoice not found.</red>"
+        # Invoice seller account is the same as payer
+        invoice-pay-self: "<red>(!) You cannot pay your own invoice with the same account. You can use a different account.</red>"
+        invoice-already-paid: "<red>(!) This invoice has already been paid.</red>"
+        # Cannot send this invoice to this player because either:
+        # a) the invoice has a set buy and that's not this player; OR
+        # b) the player does not have permission to view invoices not meant for them
+        invoice-cannot-send: "<red>(!) You cannot send this invoice to that player because they don't have permission to view it.</red>"
+        # Player has never played on this server
+        player-never-joined: "<red>(!) This player has never joined this server.</red>"
         # Account balance minimum to change owner not satisfied (placeholders same as balance)
         # Additional placeholders:
         # <required-balance> - required min balance, example: 123456.78
@@ -513,6 +531,82 @@ messages:
         # <balance-short> - Total balance with formatting, example: $123k
         entry-player: "<click:suggest_command:/msg <username> ><hover:show_text:'<white><username></white><newline><gray><balance-formatted></gray><newline>'><gray>#<position></gray> <white><balance-short></white> <green><username></green></hover></click>"
 
+    # Invoices
+    invoice:
+        # Viewing an invoice
+        # Placeholders:
+        # <invoice-id> - Invoice ID
+        # <amount> - Invoice amount without formatting, example: 123456.78
+        # <amount-formatted> - Invoice amount with formatting, example: $123,456.78
+        # <amount-short> - Invoice amount with formatting, example: $123k
+        # <description> - Invoice description
+        # <date> - Date invoice was created. You can use <date:'yyyy-MM-dd HH:mm:ss'>. Check here for patterns: https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/time/format/DateTimeFormatter.html#patterns
+        # <buyer> - The username of the player who is requested to pay the invoice. Can be "anyone" if anyone can pay this invoice
+        # <transaction-id> - Invoice transaction ID (if the invoice is paid). If not paid, will be "unpaid"
+        # <status> - Payment status (as defined below)
+        # <pay-button> - Button to pay the invoice (as defined below)
+        # <account> - Seller account name. Defaults to owner username or ID if not set.
+        # <account-id> - Seller account ID
+        # <account-type> - Seller account type (Personal or Business)
+        # <account-owner> - Seller account owner username
+        # <balance> - Seller account balance without formatting, example: 123456.78
+        # <balance-formatted> - Seller account balance with formatting, example: $123,456.78
+        # <balance-short> - Seller account balance with formatting, example: $123k
+        details: |-
+            <bold><green>INVOICE</green></bold> <gray><hover:show_text:'<white>Click to copy</white>'><click:copy_to_clipboard:<invoice-id>>#<invoice-id></click></hover></gray>
+            <white>Amount: <green><amount-formatted></green></white>
+            <white>From: <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>
+            <white>To: <gray><buyer></gray></white>
+            <white>Date: <gray><date:'yyyy-MM-dd HH:mm'> UTC</gray></white>
+            <white>Status:</white> <status>
+            <white>Description: <gray><description></gray></white><pay-button>
+
+        # Used in the <status> placeholder
+        # Same placeholders as details (except <status>)
+        status:
+            paid: "<green>Paid</green> <gray>(transaction #<transaction-id>)</gray>"
+            unpaid: <gray>Unpaid</gray>
+
+        # Used in the <pay-button> placeholder. This placeholder is an empty string if the invoice is unpaid.
+        # Same placeholders as details (except <pay-button>)
+        pay-button: <newline><newline><hover:show_text:'<white>Click to pay</white>'><click:suggest_command:/invoice pay <invoice-id>><bold><green>[PAY]</green></bold></click></hover>
+
+        # You have received an invoice
+        # Same placeholders as details
+        received: <click:run_command:/invoice view <invoice-id>><green>(!)You have received invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>From <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> from <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>. Click to view.</green></click>
+
+        # Invoice successfully sent
+        # Same placeholders as details
+        sent: <green>(!) Invoice <gray>#<invoice-id></gray> successfully sent.</green>
+
+        # Invoice created
+        # Same placeholders as details
+        created: <click:run_command:/invoice view <invoice-id>><green>(!) Successfully created invoice <gray>#<invoice-id></gray> for <gray><amount-formatted></gray> to <gray><buyer></gray> from <hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray><account-id></gray>'><gray><account></gray></hover>. Click to view.</green></click>
+
+        # Your invoice has been paid (seller's perspective)
+        # Same placeholders as details
+        paid-seller: <click:run_command:/invoice view <invoice-id>><green>(!) Your invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> <gray>(<amount-short>)</gray> has been paid. Click to view.</green></click>
+
+        # You have successfully paid an invoice (buyer's perspective)
+        # Same placeholders as details
+        paid-buyer: <click:run_command:/invoice view <invoice-id>><green>(!) You have successfully paid invoice <hover:show_text:'<green>Invoice</green> <gray>#<invoice-id></gray><newline><gray>By <white><account></white></gray><newline><gray>For <white><amount-formatted></white></gray>'><gray>#<invoice-id></gray></hover> <gray>(<amount-short>)</gray>. Click to view.</green></click>
+
+        # List invoices
+        list:
+            # Header
+            # Placeholders:
+            # <page> - current page number
+            # <cmd-prev> - command to go to previous page
+            # <cmd-next> - command to go to next page
+            header: "<green>Invoices</green>"
+
+            # Invoice entry
+            # Same placeholders as details
+            entry: <click:run_command:/invoice view <invoice-id>><dark_gray>#<invoice-id></dark_gray> <white><amount-formatted></white> <gray><status>,</gray> <hover:show_text:'<white><account></white><newline><gray><account-type></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><gray><account></gray></hover></click>
+
+            # Footer
+            # Same placeholders as details
+            footer: "<hover:show_text:'Click to see the previous page'><click:run_command:<cmd-prev>><green>← Previous</green></click></hover> <gray>Page <page></gray> <hover:show_text:'Click to see the next page'><click:run_command:<cmd-next>><green>Next →</green></click></hover>"
 
     # New version available
     # Placeholders:

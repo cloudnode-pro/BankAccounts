@@ -54,6 +54,45 @@ ALTER TABLE `new_bank_transactions`
     RENAME TO `bank_transactions`;
 -- END OF `bank_transactions` MODIFICATION
 
+CREATE TABLE IF NOT EXISTS `bank_invoices`
+(
+    `id`          CHAR(16) PRIMARY KEY NOT NULL COLLATE BINARY,
+    `seller`      CHAR(16)             NOT NULL COLLATE BINARY,
+    `amount`      DECIMAL(15, 2)       NOT NULL,
+    `description` TEXT                          DEFAULT NULL COLLATE NOCASE,
+    `buyer`       CHAR(36)                      DEFAULT NULL COLLATE NOCASE,
+    `created`     DATETIME             NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `transaction` INTEGER                       DEFAULT NULL
+);
+
+-- Modify `pos`.`world` to be `CHAR(36)` (UUID)
+DELETE
+from `pos`
+WHERE `world` NOT LIKE '%-%-%-%-%';
+
+CREATE TABLE `new_pos`
+(
+    `x`           INTEGER  NOT NULL,
+    `y`           INTEGER  NOT NULL,
+    `z`           INTEGER  NOT NULL,
+    `world`       CHAR(36) NOT NULL COLLATE NOCASE,
+    `price`       NUMERIC  NOT NULL,
+    `description` TEXT              DEFAULT NULL,
+    `seller`      TEXT     NOT NULL,
+    `created`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`x`, `y`, `z`, `world`)
+);
+
+INSERT INTO `new_pos`
+SELECT *
+FROM `pos`;
+
+DROP TABLE `pos`;
+
+ALTER TABLE `new_pos`
+    RENAME TO `pos`;
+-- END OF `pos` MODIFICATION
+
 CREATE TABLE IF NOT EXISTS `change_owner_requests`
 (
     `account` CHAR(16) NOT NULL COLLATE BINARY,

@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
-import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.event.EventHandler;
@@ -20,7 +19,7 @@ public final class BlockBreak implements Listener {
         if (block.getState() instanceof final @NotNull Chest chest) {
             final @NotNull Inventory inventory = chest.getInventory();
             if (!inventory.isEmpty()) {
-                Bukkit.getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
+                BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
                     final @NotNull Optional<POS> pos = POS.get(chest);
                     if (pos.isPresent()) {
                         pos.get().delete();

@@ -1,6 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.events;
 
-import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -19,7 +18,7 @@ public final class Join implements Listener {
         final Player player = event.getPlayer();
         final @NotNull Optional<@NotNull Double> startingBalance = BankAccounts.getInstance().config()
                 .startingBalance();
-        startingBalance.ifPresent(aDouble -> Bukkit.getScheduler()
+        startingBalance.ifPresent(aDouble -> BankAccounts.getInstance().getServer().getScheduler()
                 .runTaskAsynchronously(BankAccounts.getInstance(), () -> {
                     final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
                     if (accounts.length == 0) {
