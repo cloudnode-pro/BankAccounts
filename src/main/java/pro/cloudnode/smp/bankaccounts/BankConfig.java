@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -1412,6 +1413,26 @@ public final class BankConfig {
                         .replace("<page>", String.valueOf(page))
                         .replace("<cmd-prev>", cmdPrev)
                         .replace("<cmd-next>", cmdNext)
+        );
+    }
+
+    // messages.change-owner.request
+    public @NotNull Component messagesChangeOwnerRequest(final @NotNull Account.ChangeOwnerRequest request, final @NotNull String acceptCommand) {
+        final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
+        final @NotNull OfflinePlayer newOwner = request.newOwner();
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.frozen"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<accept-command>", acceptCommand)
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
+                Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
         );
     }
 

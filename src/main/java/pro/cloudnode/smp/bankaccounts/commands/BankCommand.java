@@ -479,7 +479,8 @@ public class BankCommand extends Command {
         if (BankAccounts.getInstance().config().changeOwnerConfirm() && !sender.hasPermission(Permissions.CHANGE_OWNER_SKIP_CONFIRMATION)) {
             final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId());
             request.insert();
-            // TODO: send confirmation message to new owner
+            final @NotNull String acceptCommand = "/" + label + " acceptchangeowner " + account.get().id;
+            sendMessage(newOwner.getPlayer(), BankAccounts.getInstance().config().messagesChangeOwnerRequest(request, acceptCommand));
         }
         new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId()).confirm();
 
@@ -582,10 +583,7 @@ public class BankCommand extends Command {
 
         final @NotNull Transaction transfer = from.get().transfer(to.get(), amount, description, null);
         sendMessage(sender, BankAccounts.getInstance().config().messagesTransferSent(transfer));
-        final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(to.get().owner.getPlayer());
-        if (player.isPresent() && player.get().isOnline() && !player.get().getUniqueId()
-                .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            sendMessage(player.get(), BankAccounts.getInstance().config().messagesTransferReceived(transfer));
+        sendMessage(to.get().owner.getPlayer(), BankAccounts.getInstance().config().messagesTransferReceived(transfer));
 
         return true;
     }
