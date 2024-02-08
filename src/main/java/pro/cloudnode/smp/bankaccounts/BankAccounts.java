@@ -155,6 +155,7 @@ public final class BankAccounts extends JavaPlugin {
                 getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
             });
         });
+        getInstance().minuteLoopTasks.clear();
         getInstance().startMinuteLoop();
         getInstance().minuteLoopTasks.add(Account.ChangeOwnerRequest.deleteExpiredLater);
         getInstance().minuteLoopTasks.add(BankAccounts.getInstance().interestTask);
