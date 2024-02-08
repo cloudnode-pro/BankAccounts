@@ -624,6 +624,10 @@ messages:
         # <balance-short> - Account balance with formatting, example: $123k
         request: <green>(!) You have received a request to become the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray><newline><click:run_command:<accept-command>> <dark_gray>></dark_gray> <green><bold>ACCEPT</bold></green></click>
 
+        # You have sent an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        sent: <green>(!) You have sent a request to <gray><new-owner></gray> to become the new owner of account <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>.</green>
+
     # New version available
     # Placeholders:
     # <version> - New version

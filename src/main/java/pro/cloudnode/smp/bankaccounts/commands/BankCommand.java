@@ -481,10 +481,11 @@ public class BankCommand extends Command {
             request.insert();
             final @NotNull String acceptCommand = "/" + label + " acceptchangeowner " + account.get().id;
             sendMessage(newOwner.getPlayer(), BankAccounts.getInstance().config().messagesChangeOwnerRequest(request, acceptCommand));
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
         }
-        new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId()).confirm();
-
-        return true;
+        final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId());
+        request.confirm();
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
     }
 
     /**
