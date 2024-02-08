@@ -1421,7 +1421,7 @@ public final class BankConfig {
         final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
         final @NotNull OfflinePlayer newOwner = request.newOwner();
         return MiniMessage.miniMessage().deserialize(
-                Objects.requireNonNull(config.getString("messages.errors.frozen"))
+                Objects.requireNonNull(config.getString("messages.change-owner.request"))
                         .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
                         .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
                         .replace("<accept-command>", acceptCommand)
