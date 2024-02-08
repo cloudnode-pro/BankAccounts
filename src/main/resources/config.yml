@@ -628,6 +628,10 @@ messages:
         # Same placeholders as details (except <accept-command>)
         sent: <green>(!) You have sent a request to <gray><new-owner></gray> to become the new owner of account <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>.</green>
 
+        # You have accepted an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        accepted: <click:run_command:/bank bal <account-id>><green>(!) You are now the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>. Click to view account.</green></click>
+
     # New version available
     # Placeholders:
     # <version> - New version

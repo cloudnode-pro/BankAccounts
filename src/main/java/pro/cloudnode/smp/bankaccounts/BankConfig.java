@@ -1455,6 +1455,25 @@ public final class BankConfig {
         );
     }
 
+    // messages.change-owner.accepted
+    public @NotNull Component messagesChangeOwnerAccepted(final @NotNull Account.ChangeOwnerRequest request) {
+        final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
+        final @NotNull OfflinePlayer newOwner = request.newOwner();
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.accepted"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
+                Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
     // messages.update-available
     public @NotNull Component messagesUpdateAvailable(final @NotNull String version) {
         return MiniMessage.miniMessage().deserialize(

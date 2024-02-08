@@ -508,8 +508,7 @@ public class BankCommand extends Command {
 
         final boolean success = request.get().confirm();
         if (!success) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerAcceptFailed());
-        // TODO: send success message to new owner
-        return true;
+        return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerAccepted(request.get()));
     }
 
     /**
