@@ -1,5 +1,6 @@
 package pro.cloudnode.smp.bankaccounts;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -16,38 +17,38 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     /**
      * Send message to sender.
      *
-     * @param sender  Command sender.
-     * @param message Message to send.
+     * @param audience Message recipient
+     * @param message  Message to send.
      * @return Always true.
      */
-    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull Component message) {
-        sender.sendMessage(message);
+    public static boolean sendMessage(final @NotNull Audience audience, final @NotNull Component message) {
+        audience.sendMessage(message);
         return true;
     }
 
     /**
      * Send message to sender.
      *
-     * @param sender       Command sender.
+     * @param audience     Message recipient
      * @param message      Message to send.
      * @param placeholders Placeholders to replace.
      * @return Always true.
      */
-    public static boolean sendMessage(final @NotNull CommandSender sender, final @NotNull String message, final @NotNull TagResolver @NotNull ... placeholders) {
-        sendMessage(sender, MiniMessage.miniMessage().deserialize(message, placeholders));
+    public static boolean sendMessage(final @NotNull Audience audience, final @NotNull String message, final @NotNull TagResolver @NotNull ... placeholders) {
+        sendMessage(audience, MiniMessage.miniMessage().deserialize(message, placeholders));
         return true;
     }
 
     /**
      * Send command usage to sender.
      *
-     * @param sender    Command sender.
+     * @param audience  Message recipient
      * @param label     Command label.
      * @param arguments Command arguments.
      * @return Always true.
      */
-    protected static boolean sendUsage(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String arguments) {
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(label, arguments));
+    protected static boolean sendUsage(final @NotNull Audience audience, final @NotNull String label, final @NotNull String arguments) {
+        return sendMessage(audience, BankAccounts.getInstance().config().messagesCommandUsage(label, arguments));
     }
 
     /**
