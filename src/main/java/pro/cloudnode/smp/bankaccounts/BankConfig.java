@@ -1083,13 +1083,9 @@ public final class BankConfig {
                 Objects.requireNonNull(config.getString("messages.baltop.header"))
                         .replace("<category>", category)
                         .replace("<page>", String.valueOf(page))
-        ).replaceText(configurer -> {
-            configurer.matchLiteral("<cmd-prev>");
-            configurer.replacement(cmdPrev);
-        }).replaceText(configurer -> {
-            configurer.matchLiteral("<cmd-next>");
-            configurer.replacement(cmdNext);
-        });
+                        .replace("<cmd-prev>", cmdPrev)
+                        .replace("<cmd-next>", cmdNext)
+        );
     }
 
     // messages.baltop.entry
