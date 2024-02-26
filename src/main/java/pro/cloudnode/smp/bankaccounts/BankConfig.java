@@ -836,12 +836,10 @@ public final class BankConfig {
                         .replace("<to-balance-short>", BankAccounts.formatCurrencyShort(to.balance))
                         .replace("<amount>", amount.toPlainString())
                         .replace("<amount-formatted>", BankAccounts.formatCurrency(amount))
-                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount)),
+                        .replace("<amount-short>", BankAccounts.formatCurrencyShort(amount))
+                        .replace("<confirm-command>", "/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description)),
                 Placeholder.component("description", description == null ? MiniMessage.miniMessage().deserialize("<gray><i>no description</i>") : Component.text(description))
-        ).replaceText(configurer -> {
-            configurer.matchLiteral("<confirm-command>");
-            configurer.replacement(Component.text("/bank transfer --confirm " + from.id + " " + to.id + " " + amount.toPlainString() + (description == null ? "" : " " + description)));
-        });
+        );
     }
 
     // messages.transfer-sent
