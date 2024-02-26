@@ -41,6 +41,9 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.Callable;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 
 public final class BankAccounts extends JavaPlugin {
@@ -381,6 +384,32 @@ public final class BankAccounts extends JavaPlugin {
             plugin.getLogger().log(Level.WARNING, "Failed to check for updates", e);
         }
         return Optional.empty();
+    }
+
+    /**
+     * Run a task on the main thread
+     * @param task The task to run
+     * @param timeout Task timeout in SECONDS. Set to 0 to disable timeout
+     */
+    public static <T> @NotNull Optional<T> runOnMain(@NotNull Callable<T> task, final long timeout) {
+        final @NotNull BankAccounts plugin = BankAccounts.getInstance();
+        final @NotNull Future<T> future = plugin.getServer().getScheduler().callSyncMethod(plugin, task);
+        try {
+            if (timeout == 0) return Optional.of(future.get());
+            return Optional.of(future.get(timeout, TimeUnit.SECONDS));
+        }
+        catch (final @NotNull Exception e) {
+            plugin.getLogger().log(Level.WARNING, "Failed to run task on main thread", e);
+        }
+        return Optional.empty();
+    }
+
+    /**
+     * Run a task on the main thread (without timeout)
+     * @param task The task to run
+     */
+    public static <T> @NotNull Optional<T> runOnMain(@NotNull Callable<T> task) {
+        return runOnMain(task, 0);
     }
 
     public static final class Key {

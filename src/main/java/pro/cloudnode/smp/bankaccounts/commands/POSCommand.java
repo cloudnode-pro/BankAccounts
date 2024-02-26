@@ -1,6 +1,7 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -65,7 +66,9 @@ public final class POSCommand extends Command {
         final @Nullable Block target = player.getTargetBlockExact(5);
         if (target == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsBlockTooFar());
 
-        if (!(target.getState() instanceof final @NotNull Chest chest))
+        final @NotNull Optional<@NotNull BlockState> block = BankAccounts.runOnMain(target::getState, 5);
+        if (block.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAsyncFailed());
+        if (!(block.get() instanceof final @NotNull Chest chest))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosNotChest());
         if (chest.getInventory() instanceof DoubleChestInventory)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosDoubleChest());
