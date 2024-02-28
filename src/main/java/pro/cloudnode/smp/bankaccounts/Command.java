@@ -51,13 +51,13 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     /**
      * Send command usage to sender.
      *
-     * @param sender    Command sender.
+     * @param audience  Message recipient
      * @param label     Command label.
      * @param arguments Command arguments.
      * @return Always true.
      */
-    protected static boolean sendUsage(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String arguments) {
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesCommandUsage(label, arguments));
+    protected static boolean sendUsage(final @NotNull Audience audience, final @NotNull String label, final @NotNull String arguments) {
+        return sendMessage(audience, BankAccounts.getInstance().config().messagesCommandUsage(label, arguments));
     }
 
     /**

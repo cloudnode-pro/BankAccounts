@@ -361,6 +361,8 @@ messages:
         invoice-cannot-send: "<red>(!) You cannot send this invoice to that player because they don't have permission to view it.</red>"
         # Player has never played on this server
         player-never-joined: "<red>(!) This player has never joined this server.</red>"
+        # Asynchronous code failed. Detailed info is outputted in the console
+        async-failed: "<red>(!) The request failed. See the console for details.</red>"
         # Account balance minimum to change owner not satisfied (placeholders same as balance)
         # Additional placeholders:
         # <required-balance> - required min balance, example: 123456.78
