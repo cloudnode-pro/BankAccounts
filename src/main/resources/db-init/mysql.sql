@@ -54,3 +54,11 @@ WHERE `world` NOT LIKE '%-%-%-%-%';
 
 ALTER TABLE `pos`
     CHANGE COLUMN `world` `world` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;
+
+CREATE TABLE IF NOT EXISTS `change_owner_requests`
+(
+    `account`   CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+    `new_owner` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+    `created`   DATETIME NOT NULL DEFAULT UTC_TIMESTAMP(),
+    KEY `id` (`account`, `new_owner`)
+);
