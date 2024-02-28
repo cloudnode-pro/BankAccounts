@@ -1,33 +1,68 @@
-[![Banner](https://i.ibb.co/2yFTQ8X/banner-optimised.png)](https://modrinth.com/plugin/Dc8RS2En/)
-
 # Bank Accounts
-[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En)
-[![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper)
-[![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
+[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En) [![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper) [![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
 
-[![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml)
-[![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
-[![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
-[![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Java CI with Maven](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yml) [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml) [![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/version/latest) [![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/) [![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
 
-A multi-account economy plugin.
+A Minecraft economy plugin that enables players to hold multiple bank accounts.
 
-[**`Features (Wiki)`**](https://github.com/cloudnode-pro/BankAccounts/wiki)
-&middot; [**`Commands`**](https://github.com/cloudnode-pro/BankAccounts/wiki/Commands)
-&middot; [**`Permissions`**](https://github.com/cloudnode-pro/BankAccounts/wiki/Permissions)
-&middot; [**`Download`**](https://modrinth.com/plugin/Dc8RS2En/version/latest)
+[**`Download`**](https://modrinth.com/plugin/Dc8RS2En/version/latest)
+
+## Features
+
+See also: [Commands](https://github.com/cloudnode-pro/BankAccounts/wiki/Commands) · [Permissions](https://github.com/cloudnode-pro/BankAccounts/wiki/Permissions)
+
+### Multiple Accounts/Balances
+Players can have multiple independent bank accounts. You can have both personal and business accounts.
+
+### Transaction History
+See the history of your account’s transactions using the `/bank history` command.
+
+### Payment Requests (Invoices)
+Request money from players and track the payment status.
+
+### POS and Bank Cards
+
+You can create a [Point of Sale](https://github.com/cloudnode-pro/BankAccounts/wiki/POS), which is a type of single-use chest shop. Players can pay using a bank card (`/bank card`).
+
+### Extensive Configuration
+
+All functionality is fully configurable. See [default config](https://github.com/cloudnode-pro/BankAccounts/blob/master/src/main/resources/config.yml).
+
+## Support
+
+| Matrix | [bankaccounts:cloudnode.pro](https://matrix.to/#/#bankaccounts:cloudnode.pro) |
+|--------|-------------------------------------------------------------------------------|
+
+Join our dedicated BankAccounts community space on Matrix to engage in discussions, receive support, and stay updated on crucial plugin announcements.
+
+If you want to report a problem or request a feature, please [submit a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new?labels=bug).
+
+## Release Cycle
+
+BankAccounts follows a weekly **time-based release schedule**, with new features or changes typically released every **Tuesday**.
+
+When we merge critical bug fixes, we may publish out-of-band releases on any day of the week.
 
 ## Report Issues
-If you discover any issues with the plugin, please first check the [known issues](https://github.com/cloudnode-pro/BankAccounts/issues?q=is%3Aopen+is%3Aissue+label%3Abug). If it is not listed there, please [create a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new?labels=bug). Fixing bugs is the highest priority for this project.
+Please ensure that you are using the [latest version](https://modrinth.com/plugin/Dc8RS2En/version/latest) of BankAccounts. The newest bug fixes are only available in the most recent version, and support is provided exclusively for this version.
 
-When reporting an issue, please include as much relevant information as possible, including error logs, screenshots, and steps to reproduce the issue.
+If you encounter any problems with the plugin, please first check the [list of known issues](https://github.com/cloudnode-pro/BankAccounts/issues?q=is%3Aopen+is%3Aissue+label%3Abug) on our GitHub repository. If you don’t find a similar fault listed there, we encourage you to [submit a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new?labels=bug). Resolving bugs is the highest priority for this project.
 
-Please make sure you are using the latest version of BankAccounts.
+To help us resolve your issue as quickly as possible, please provide as much relevant information as possible, including error logs, screenshots, and detailed steps to reproduce the problem.
 
-## Request Features
-If you would like to request a new feature, please [open a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new) and describe what you have in mind.
+## Feature Requests
 
-Due to each player having multiple accounts, it is difficult to integrate this project with other plugins. BankAccounts provides replacements for some such functionalities.
+To suggest a new feature, please [create a new issue](https://github.com/cloudnode-pro/BankAccounts/issues/new), providing a detailed description of your idea.
 
 ## Contributing
-If you would like to contribute to the project, you can [fork the repository](https://github.com/cloudnode-pro/BankAccounts/fork) and create a pull request.
+
+New contributors are most welcome to the project.
+
+If you're interested in contributing, follow these steps:
+
+1.  [Fork the repository](https://github.com/cloudnode-pro/BankAccounts/fork)
+2.  Create a new branch for your contributions.
+3.  Make your changes and ensure they align with the project’s goals.
+4.  Commit your changes with clear and descriptive messages.
+5.  Push your changes to your fork.
+6.  Submit a pull request.
