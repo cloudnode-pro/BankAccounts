@@ -55,9 +55,6 @@ prevent-close-last-personal: true
 
 # Server account
 server-account:
-    # If enabled, when the plugin is loaded an account will be created as player with UUID 00000000-0000-0000-0000-000000000000
-    # This is required for features like interest to work.
-    enabled: true
     # Display name for the server account
     name: Central Bank
     # Account type

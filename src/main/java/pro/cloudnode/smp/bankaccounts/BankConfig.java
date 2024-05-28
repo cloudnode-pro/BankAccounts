@@ -130,11 +130,6 @@ public final class BankConfig {
         return config.getBoolean("prevent-close-last-personal");
     }
 
-    // server-account.enabled
-    public boolean serverAccountEnabled() {
-        return config.getBoolean("server-account.enabled");
-    }
-
     // server-account.name
     public @NotNull String serverAccountName() {
         return Objects.requireNonNull(config.getString("server-account.name"));
