@@ -106,7 +106,6 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.DELETE)) return suggestions;
                     if (args.length == 2) suggestions.addAll(Arrays
                             .stream(sender.hasPermission(Permissions.DELETE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
-                            .filter(account -> sender.hasPermission(Permissions.DELETE_PERSONAL) || account.type != Account.Type.PERSONAL)
                             .map(account -> account.id).collect(Collectors.toSet()));
                 }
                 case "transfer", "send", "pay" -> {
@@ -438,9 +437,6 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance(account.get()));
         if (account.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
-        if (BankAccounts.getInstance().config()
-                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
         return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountDeleted(account.get()));
     }

@@ -37,7 +37,6 @@ public final class Permissions {
     public static @NotNull String SET_NAME_PERSONAL = "bank.set.name.personal";
     public static @NotNull String FREEZE_OTHER = "bank.freeze.other";
     public static @NotNull String DELETE_OTHER = "bank.delete.other";
-    public static @NotNull String DELETE_PERSONAL = "bank.delete.personal";
     public static @NotNull String POS_CREATE_OTHER = "bank.pos.create.other";
     public static @NotNull String POS_CREATE_PERSONAL = "bank.pos.create.personal";
     public static @NotNull String POS_USE_OTHER = "bank.pos.use.other";

@@ -44,14 +44,7 @@ currency:
     format: "#,##0.00"
 
 # Starting balance
-# Set to `null` to disable automatically creating a personal account on first join
 starting-balance: 0
-
-# If set to true, players will not be able to close their LAST personal account.
-# This is recommended if you are using `starting-balance` as an account will be re-created when the player joins again.
-# If you want to prevent a player from using their personal account, you can freeze it.
-# You can BYPASS this setting using `bank.delete.personal`
-prevent-close-last-personal: true
 
 # Server account
 server-account:
@@ -303,8 +296,6 @@ messages:
         insufficient-funds: "<red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>"
         # Trying to close an account that has non-zero balance
         closing-balance: "<red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>"
-        # Trying to close a personal account and `prevent-close-last-personal` is enabled
-        closing-personal: "<red>(!) You cannot close your last personal account.</red>"
         # Command only for players
         player-only: "<red>(!) You must be a player to use this command.</red>"
         # Player not found

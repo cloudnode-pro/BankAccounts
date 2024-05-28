@@ -125,11 +125,6 @@ public final class BankConfig {
         else return Optional.of(config.getDouble("starting-balance"));
     }
 
-    // prevent-close-last-personal
-    public boolean preventCloseLastPersonal() {
-        return config.getBoolean("prevent-close-last-personal");
-    }
-
     // server-account.name
     public @NotNull String serverAccountName() {
         return Objects.requireNonNull(config.getString("server-account.name"));
@@ -539,11 +534,6 @@ public final class BankConfig {
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
         );
-    }
-
-    // messages.errors.closing-personal
-    public @NotNull Component messagesErrorsClosingPersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.closing-personal")));
     }
 
     // messages.errors.player-only
