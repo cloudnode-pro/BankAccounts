@@ -376,7 +376,11 @@ public class Account {
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS;
+        BUSINESS,
+        /**
+         * Vault integration account
+         */
+        VAULT;
 
         /**
          * Get type name (as set in config)
