@@ -277,7 +277,7 @@ messages:
         # <type> the account type
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
-        rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
+        rename-vault-account: "<red>(!) You cannot rename this account.</red>"
         # You do not own this account
         not-account-owner: "<red>(!) You are not the owner of this account.</red>"
         # Account frozen (placeholders same as balance)

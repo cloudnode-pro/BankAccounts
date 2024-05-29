@@ -456,9 +456,9 @@ public final class BankConfig {
         );
     }
 
-    // messages.errors.rename-personal
-    public @NotNull Component messagesErrorsRenamePersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-personal")));
+    // messages.errors.rename-vault-account
+    public @NotNull Component messagesErrorsRenameVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-vault-account")));
     }
 
     // messages.errors.not-account-owner

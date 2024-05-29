@@ -376,8 +376,8 @@ public class BankCommand extends Command {
             if (!sender.hasPermission(Permissions.SET_NAME_OTHER) && !account.get().owner.getUniqueId()
                     .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-            if (!sender.hasPermission(Permissions.SET_NAME_PERSONAL) && account.get().type == Account.Type.PERSONAL)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenamePersonal());
+            if (!sender.hasPermission(Permissions.SET_NAME_VAULT) && account.get().type == Account.Type.VAULT)
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenameVaultAccount());
             @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.isEmpty() ? null : name;

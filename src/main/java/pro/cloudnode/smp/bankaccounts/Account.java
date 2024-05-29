@@ -106,7 +106,7 @@ public class Account {
     }
 
     public final @NotNull String name() {
-        return this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
+        return this.name == null ? (this.type == Type.VAULT && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
     }
 
     public final @NotNull Component ownerName() {
