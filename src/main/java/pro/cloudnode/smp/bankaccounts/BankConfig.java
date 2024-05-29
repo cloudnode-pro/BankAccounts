@@ -146,10 +146,10 @@ public final class BankConfig {
     }
 
     // server-account.starting-balance
-    public @NotNull Optional<@NotNull Double> serverAccountStartingBalance() {
+    public @Nullable BigDecimal serverAccountStartingBalance() {
         if (Objects.requireNonNull(config.getString("server-account.starting-balance")).equalsIgnoreCase("infinity"))
-            return Optional.empty();
-        else return Optional.of(config.getDouble("server-account.starting-balance"));
+            return null;
+        else return new BigDecimal(Objects.requireNonNull(config.getString("server-account.starting-balance")));
     }
 
     // account-limits.
@@ -168,8 +168,8 @@ public final class BankConfig {
     }
 
     // transfer-confirmation.min-amount
-    public double transferConfirmationMinAmount() {
-        return config.getDouble("transfer-confirmation.min-amount");
+    public BigDecimal transferConfirmationMinAmount() {
+        return new BigDecimal(Objects.requireNonNull(config.getString("transfer-confirmation.min-amount")));
     }
 
     // transfer-confirmation.bypass-own-accounts
