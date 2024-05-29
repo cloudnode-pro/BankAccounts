@@ -20,9 +20,9 @@ public final class Join implements Listener {
                 .startingBalance();
         startingBalance.ifPresent(aDouble -> BankAccounts.getInstance().getServer().getScheduler()
                 .runTaskAsynchronously(BankAccounts.getInstance(), () -> {
-                    final @NotNull Account[] accounts = Account.get(player, Account.Type.PERSONAL);
+                    final @NotNull Account[] accounts = Account.get(player, Account.Type.VAULT);
                     if (accounts.length == 0) {
-                        new Account(player, Account.Type.PERSONAL, null, BigDecimal.valueOf(aDouble), false).insert();
+                        new Account(player, Account.Type.VAULT, null, BigDecimal.valueOf(aDouble), false).insert();
                     }
                 }));
         if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {
