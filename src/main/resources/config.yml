@@ -263,6 +263,8 @@ messages:
         0: Personal
         # Business account
         1: Business
+        # Vault integration account used to integrate payments with other plugins
+        2: Checking
 
     # Errors
     errors:
