@@ -340,6 +340,8 @@ messages:
         player-never-joined: "<red>(!) This player has never joined this server.</red>"
         # Asynchronous code failed. Detailed info is outputted in the console
         async-failed: "<red>(!) The request failed. See the console for details.</red>"
+        # Trying to delete vault integration account
+        delete-vault-account: "<red>(!) You cannot delete this account.</red>"
 
     # Account balance
     # Available placeholders:

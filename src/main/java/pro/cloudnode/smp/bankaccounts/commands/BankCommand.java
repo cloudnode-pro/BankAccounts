@@ -432,6 +432,8 @@ public class BankCommand extends Command {
         if (!sender.hasPermission(Permissions.DELETE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (account.get().type == Account.Type.VAULT)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDeleteVaultAccount());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance(account.get()));

@@ -684,6 +684,11 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.async-failed")));
     }
 
+    // messages.errors.delete-vault-account
+    public @NotNull Component messagesErrorsDeleteVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.delete-vault-account")));
+    }
+
     // messages.balance
     public @NotNull Component messagesBalance(final @NotNull Account account) {
         return MiniMessage.miniMessage().deserialize(
