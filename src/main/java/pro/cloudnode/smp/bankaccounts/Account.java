@@ -267,6 +267,12 @@ public class Account {
         }
     }
 
+    public static @NotNull Optional<@NotNull Account> getVaultAccount(final @NotNull OfflinePlayer player) {
+        final @NotNull Account @NotNull [] accounts = get(player, Type.VAULT);
+        if (accounts.length == 0) return Optional.empty();
+        return Optional.of(accounts[0]);
+    }
+
     /**
      * Get accounts sorted by balance
      *

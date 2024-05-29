@@ -108,6 +108,16 @@ public final class BankConfig {
         return config.getBoolean("db.maintainTimeStats");
     }
 
+    // integrations.vault.enabled
+    public boolean integrationsVaultEnabled() {
+        return config.getBoolean("integrations.vault.enabled");
+    }
+
+    // integrations.vault.description
+    public @NotNull String integrationsVaultDescription() {
+        return Objects.requireNonNull(config.getString("integrations.vault.description"));
+    }
+
     // currency.symbol
     public @NotNull String currencySymbol() {
         return Objects.requireNonNull(config.getString("currency.symbol"));

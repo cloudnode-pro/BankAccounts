@@ -60,6 +60,13 @@ public final class BankAccounts extends JavaPlugin {
         return dbSource;
     }
 
+    /**
+     * Check if vault plugin is present
+     */
+    public boolean vaultEnabled() {
+        return config().integrationsVaultEnabled() && getServer().getPluginManager().getPlugin("Vault") != null;
+    }
+
     @Override
     public void onEnable() {
         saveDefaultConfig();

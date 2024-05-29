@@ -35,6 +35,14 @@ db:
     elideSetAutoCommits: true
     maintainTimeStats: false
 
+integrations:
+    vault:
+        # Enable Vault integration
+        enabled: false
+
+        # Transaction description for all vault operations
+        description: Vault Transaction
+
 currency:
     # Currency symbol
     symbol: $
