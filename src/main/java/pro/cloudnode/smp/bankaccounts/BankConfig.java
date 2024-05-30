@@ -168,7 +168,7 @@ public final class BankConfig {
     }
 
     // transfer-confirmation.min-amount
-    public BigDecimal transferConfirmationMinAmount() {
+    public @NotNull BigDecimal transferConfirmationMinAmount() {
         return new BigDecimal(Objects.requireNonNull(config.getString("transfer-confirmation.min-amount")));
     }
 
