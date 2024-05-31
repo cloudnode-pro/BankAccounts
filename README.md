@@ -20,6 +20,13 @@ See the history of your account’s transactions using the `/bank history` comma
 ### Payment Requests (Invoices)
 Request money from players and track the payment status.
 
+### Vault Support
+
+If [Vault](https://github.com/MilkBowl/Vault/releases/latest) is installed on your server,
+you can [enable its integration in the configuration](https://github.com/cloudnode-pro/BankAccounts/blob/dad253525b6bc3ee9647cd01c75e2c425a921f58/src/main/resources/config.yml#L38-L44).
+This allows BankAccounts to function as a Vault economy provider,
+enabling compatibility with third-party plugins that support Vault.
+
 ### POS and Bank Cards
 
 You can create a [Point of Sale](https://github.com/cloudnode-pro/BankAccounts/wiki/POS), which is a type of single-use chest shop. Players can pay using a bank card (`/bank card`).
