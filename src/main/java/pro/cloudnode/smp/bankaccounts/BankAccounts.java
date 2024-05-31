@@ -85,7 +85,7 @@ public final class BankAccounts extends JavaPlugin {
 
     public void setupVault() {
         if (!vaultEnabled()) {
-            getLogger().log(Level.WARNING, "Vault not found or not enabled, vault integration will not work.");
+            getLogger().log(Level.WARNING, "Vault not found or not enabled, Vault integration will not work.");
             return;
         }
 
