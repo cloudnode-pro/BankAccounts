@@ -351,7 +351,7 @@ public class BankCommand extends Command {
         else {
             final @Nullable BigDecimal balance;
             try {
-                balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
+                balance = args[1].equalsIgnoreCase("Infinity") ? null : new BigDecimal(args[1]);
             }
             catch (NumberFormatException e) {
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
@@ -485,7 +485,7 @@ public class BankCommand extends Command {
 
         final @NotNull BigDecimal amount;
         try {
-            amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[2])).setScale(2, RoundingMode.HALF_UP);
+            amount = new BigDecimal(argsCopy[2]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[2]));
@@ -505,7 +505,7 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
 
         if (!confirm && BankAccounts.getInstance().config().transferConfirmationEnabled()) {
-            final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().config().transferConfirmationMinAmount());
+            final @NotNull BigDecimal minAmount = BankAccounts.getInstance().config().transferConfirmationMinAmount();
             boolean bypassOwnAccounts = BankAccounts.getInstance().config().transferConfirmationBypassOwnAccounts();
             if (amount.compareTo(minAmount) >= 0 && (!bypassOwnAccounts || !from.get().owner.getUniqueId()
                     .equals(to.get().owner.getUniqueId()))) {

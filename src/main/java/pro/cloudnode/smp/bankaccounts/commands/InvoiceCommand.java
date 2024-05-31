@@ -153,7 +153,7 @@ public final class InvoiceCommand extends Command {
 
         final @NotNull BigDecimal amount;
         try {
-            amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[1])).setScale(2, RoundingMode.HALF_UP);
+            amount = new BigDecimal(argsCopy[1]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
