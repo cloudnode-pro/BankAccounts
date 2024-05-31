@@ -53,7 +53,7 @@ public final class POSCommand extends Command {
 
         final @NotNull BigDecimal price;
         try {
-            price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
+            price = new BigDecimal(args[1]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
