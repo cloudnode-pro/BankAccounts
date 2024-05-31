@@ -198,8 +198,11 @@ public final class BankAccounts extends JavaPlugin {
      * Reload plugin
      */
     public static void reload() {
+        final boolean vaultConfigEnabled = getInstance().config().integrationsVaultEnabled();
         getInstance().reloadConfig();
         getInstance().config.config = getInstance().getConfig();
+        if (vaultConfigEnabled != getInstance().config().integrationsVaultEnabled())
+            getInstance().getLogger().warning("Vault integration has been " + (getInstance().config().integrationsVaultEnabled() ? "enabled" : "disabled") + " in the configuration. To activate this change, please restart the server.");
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
