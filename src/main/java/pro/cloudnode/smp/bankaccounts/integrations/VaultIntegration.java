@@ -119,7 +119,7 @@ public final class VaultIntegration implements Economy {
     public double getBalance(final @NotNull OfflinePlayer player) {
         final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
         return account.map(value -> Optional.ofNullable(value.balance).map(BigDecimal::doubleValue)
-                .orElse(Double.POSITIVE_INFINITY)).orElse(0d);
+                .orElse(Double.MAX_VALUE)).orElse(0d);
     }
     
     /**
@@ -209,13 +209,13 @@ public final class VaultIntegration implements Economy {
         final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
         if (account.isEmpty()) return new EconomyResponse(amount, 0, EconomyResponse.ResponseType.FAILURE, "Account not found");
         if (!account.get().hasFunds(BigDecimal.valueOf(amount)))
-            return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.POSITIVE_INFINITY), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
+            return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.MAX_VALUE), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
         final @NotNull Account serverAccount = Account.getServerAccount().orElse(new Account.ClosedAccount());
         // transfer funds to the server account since Vault just wants them "gone"
         account.get().transfer(serverAccount, BigDecimal.valueOf(amount), BankAccounts.getInstance().config().integrationsVaultDescription(), null);
         // remove funds from the server account without a transaction
         serverAccount.updateBalance(BigDecimal.valueOf(amount).negate());
-        return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.POSITIVE_INFINITY), EconomyResponse.ResponseType.SUCCESS, null);
+        return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.MAX_VALUE), EconomyResponse.ResponseType.SUCCESS, null);
     }
     /**
      * Remove amount of money from player.
