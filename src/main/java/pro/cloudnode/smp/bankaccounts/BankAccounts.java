@@ -4,15 +4,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
-import net.milkbowl.vault.economy.Economy;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.event.Listener;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.plugin.ServicePriority;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
@@ -64,50 +61,6 @@ public final class BankAccounts extends JavaPlugin {
         return dbSource;
     }
 
-    /**
-     * Check if vault plugin is present
-     */
-    public boolean vaultEnabled() {
-        return config().integrationsVaultEnabled() && getServer().getPluginManager().getPlugin("Vault") != null;
-    }
-
-    private @Nullable Economy economy;
-
-    public boolean hasEconomy() {
-        return economy != null;
-    }
-
-    public @NotNull Economy getEconomy() {
-        if (!hasEconomy()) throw new IllegalStateException("Vault is not initialized");
-        if (!vaultEnabled()) throw new IllegalStateException("Vault integration is not enabled");
-        return economy;
-    }
-
-    public void setupVault() {
-        if (!vaultEnabled()) {
-            getLogger().log(Level.WARNING, "Vault not found or not enabled, Vault integration will not work.");
-            return;
-        }
-
-        final @NotNull Optional<@NotNull RegisteredServiceProvider<@NotNull Economy>> rsp = Optional.ofNullable(getServer().getServicesManager().getRegistration(Economy.class));
-        if (rsp.isPresent()) {
-            final @NotNull Economy foreignEconomy = rsp.get().getProvider();
-            getLogger().log(Level.WARNING, "Economy already registered by " + rsp.get().getPlugin().getName());
-            getServer().getServicesManager().unregister(foreignEconomy);
-            getLogger().log(Level.WARNING, "Unregistered economy provider " + rsp.get().getPlugin().getName());
-        }
-
-        try {
-            getLogger().log(Level.INFO, "Vault found. Enabling integration.");
-            this.economy = new VaultIntegration();
-            getServer().getServicesManager().register(Economy.class, getEconomy(), this, ServicePriority.Normal);
-        }
-        catch (final @NotNull Exception e) {
-            getLogger().log(Level.WARNING, "Failed to register vault economy.", e);
-        }
-
-    }
-
     @Override
     public void onEnable() {
         saveDefaultConfig();
@@ -146,11 +99,7 @@ public final class BankAccounts extends JavaPlugin {
             getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
         }
 
-
-        if (getInstance().vaultEnabled())
-            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
-                getInstance().setupVault();
-            });
+        VaultIntegration.setup();
     }
 
     @Override
