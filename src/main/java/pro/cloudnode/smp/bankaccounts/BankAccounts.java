@@ -145,6 +145,12 @@ public final class BankAccounts extends JavaPlugin {
         } else {
             getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
         }
+
+
+        if (getInstance().vaultEnabled())
+            getServer().getScheduler().scheduleSyncDelayedTask(this, () -> {
+                getInstance().setupVault();
+            });
     }
 
     @Override
@@ -197,8 +203,6 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        if (getInstance().vaultEnabled())
-            getInstance().setupVault();
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
             getInstance().getLogger().warning("An update is available: " + latestVersion);
             getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
