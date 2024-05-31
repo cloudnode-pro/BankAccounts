@@ -34,7 +34,7 @@ public final class Permissions {
     public static @NotNull String INSTRUMENT_CREATE_BYPASS = "bank.instrument.create.bypass";
     public static @NotNull String SET_BALANCE = "bank.set.balance";
     public static @NotNull String SET_NAME_OTHER = "bank.set.name.other";
-    public static @NotNull String SET_NAME_VAULT = "bank.set.name.VAULT";
+    public static @NotNull String SET_NAME_VAULT = "bank.set.name.vault";
     public static @NotNull String FREEZE_OTHER = "bank.freeze.other";
     public static @NotNull String DELETE_OTHER = "bank.delete.other";
     public static @NotNull String POS_CREATE_OTHER = "bank.pos.create.other";
