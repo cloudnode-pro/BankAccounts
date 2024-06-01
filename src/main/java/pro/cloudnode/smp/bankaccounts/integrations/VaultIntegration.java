@@ -3,7 +3,6 @@ package pro.cloudnode.smp.bankaccounts.integrations;
 import net.milkbowl.vault.economy.Economy;
 import net.milkbowl.vault.economy.EconomyResponse;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.plugin.RegisteredServiceProvider;
 import org.bukkit.plugin.ServicePriority;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
@@ -27,8 +26,6 @@ public final class VaultIntegration {
             BankAccounts.getInstance().getLogger().log(Level.WARNING, "Vault not found or not enabled, Vault integration will not work.");
             return;
         }
-
-        final @NotNull Optional<@NotNull RegisteredServiceProvider<@NotNull Economy>> rsp = Optional.ofNullable(BankAccounts.getInstance().getServer().getServicesManager().getRegistration(Economy.class));
 
         try {
             BankAccounts.getInstance().getLogger().log(Level.INFO, "Vault found. Enabling integration.");
