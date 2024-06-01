@@ -100,8 +100,7 @@ public final class VaultIntegration {
          */
         @Override
         public boolean hasAccount(final @NotNull OfflinePlayer player) {
-            final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
-            return account.isPresent() && !account.get().frozen;
+            return Account.getVaultAccount(player).isPresent();
         }
 
         /**
@@ -144,7 +143,7 @@ public final class VaultIntegration {
         @Override
         public double getBalance(final @NotNull OfflinePlayer player) {
             final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
-            return account.map(a -> a.frozen ? 0 : Optional.ofNullable(a.balance).map(BigDecimal::doubleValue)
+            return account.map(value -> Optional.ofNullable(value.balance).map(BigDecimal::doubleValue)
                     .orElse(Double.MAX_VALUE)).orElse(0d);
         }
 
@@ -188,7 +187,7 @@ public final class VaultIntegration {
         @Override
         public boolean has(final @NotNull OfflinePlayer player, final double amount) {
             final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
-            return account.map(a -> !a.frozen && a.hasFunds(BigDecimal.valueOf(amount))).orElse(false);
+            return account.map(value -> value.hasFunds(BigDecimal.valueOf(amount))).orElse(false);
         }
 
         /**
