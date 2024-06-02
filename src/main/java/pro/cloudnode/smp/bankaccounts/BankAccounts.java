@@ -23,6 +23,7 @@ import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
+import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -97,6 +98,8 @@ public final class BankAccounts extends JavaPlugin {
         } else {
             getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
         }
+
+        VaultIntegration.setup();
     }
 
     @Override
@@ -144,8 +147,11 @@ public final class BankAccounts extends JavaPlugin {
      * Reload plugin
      */
     public static void reload() {
+        final boolean vaultConfigEnabled = getInstance().config().integrationsVaultEnabled();
         getInstance().reloadConfig();
         getInstance().config.config = getInstance().getConfig();
+        if (vaultConfigEnabled != getInstance().config().integrationsVaultEnabled())
+            getInstance().getLogger().warning("Vault integration has been " + (getInstance().config().integrationsVaultEnabled() ? "enabled" : "disabled") + " in the configuration. To activate this change, please restart the server.");
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
@@ -323,14 +329,12 @@ public final class BankAccounts extends JavaPlugin {
      * Create server account, if enabled in config
      */
     private static void createServerAccount() {
-        if (getInstance().config().serverAccountEnabled()) {
-            final @NotNull Account[] accounts = Account.get(getConsoleOfflinePlayer());
-            if (accounts.length > 0) return;
-            final @Nullable String name = getInstance().config().serverAccountName();
-            final @NotNull Account.Type type = getInstance().config().serverAccountType();
-            final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
-            new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
-        }
+        final @NotNull Account @NotNull [] accounts = Account.get(getConsoleOfflinePlayer());
+        if (accounts.length > 0) return;
+        final @Nullable String name = getInstance().config().serverAccountName();
+        final @NotNull Account.Type type = getInstance().config().serverAccountType();
+        final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
+        new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
     }
 
     /**

@@ -108,6 +108,16 @@ public final class BankConfig {
         return config.getBoolean("db.maintainTimeStats");
     }
 
+    // integrations.vault.enabled
+    public boolean integrationsVaultEnabled() {
+        return config.getBoolean("integrations.vault.enabled");
+    }
+
+    // integrations.vault.description
+    public @NotNull String integrationsVaultDescription() {
+        return Objects.requireNonNull(config.getString("integrations.vault.description"));
+    }
+
     // currency.symbol
     public @NotNull String currencySymbol() {
         return Objects.requireNonNull(config.getString("currency.symbol"));
@@ -119,20 +129,10 @@ public final class BankConfig {
     }
 
     // starting-balance
-    public @NotNull Optional<@NotNull Double> startingBalance() {
+    public @NotNull BigDecimal startingBalance() {
         if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("null"))
-            return Optional.empty();
-        else return Optional.of(config.getDouble("starting-balance"));
-    }
-
-    // prevent-close-last-personal
-    public boolean preventCloseLastPersonal() {
-        return config.getBoolean("prevent-close-last-personal");
-    }
-
-    // server-account.enabled
-    public boolean serverAccountEnabled() {
-        return config.getBoolean("server-account.enabled");
+            return BigDecimal.ZERO;
+        else return new BigDecimal(Objects.requireNonNull(config.getString("starting-balance")));
     }
 
     // server-account.name
@@ -466,9 +466,9 @@ public final class BankConfig {
         );
     }
 
-    // messages.errors.rename-personal
-    public @NotNull Component messagesErrorsRenamePersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-personal")));
+    // messages.errors.rename-vault-account
+    public @NotNull Component messagesErrorsRenameVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-vault-account")));
     }
 
     // messages.errors.not-account-owner
@@ -544,11 +544,6 @@ public final class BankConfig {
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
         );
-    }
-
-    // messages.errors.closing-personal
-    public @NotNull Component messagesErrorsClosingPersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.closing-personal")));
     }
 
     // messages.errors.player-only
@@ -697,6 +692,11 @@ public final class BankConfig {
     // messages.errors.async-failed
     public @NotNull Component messagesErrorsAsyncFailed() {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.async-failed")));
+    }
+
+    // messages.errors.delete-vault-account
+    public @NotNull Component messagesErrorsDeleteVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.delete-vault-account")));
     }
 
     // messages.balance

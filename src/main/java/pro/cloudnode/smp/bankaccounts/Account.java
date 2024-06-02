@@ -106,7 +106,7 @@ public class Account {
     }
 
     public final @NotNull String name() {
-        return this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
+        return this.name == null ? (this.type == Type.VAULT && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
     }
 
     public final @NotNull Component ownerName() {
@@ -267,6 +267,12 @@ public class Account {
         }
     }
 
+    public static @NotNull Optional<@NotNull Account> getVaultAccount(final @NotNull OfflinePlayer player) {
+        final @NotNull Account @NotNull [] accounts = get(player, Type.VAULT);
+        if (accounts.length == 0) return Optional.empty();
+        return Optional.of(accounts[0]);
+    }
+
     /**
      * Get accounts sorted by balance
      *
@@ -307,7 +313,6 @@ public class Account {
      * Get the server account
      */
     public static @NotNull Optional<@NotNull Account> getServerAccount() {
-        if (!BankAccounts.getInstance().config().serverAccountEnabled()) return Optional.empty();
         final @NotNull Account @NotNull [] accounts = get(BankAccounts.getConsoleOfflinePlayer());
         if (accounts.length == 0) return Optional.empty();
         return Optional.of(accounts[0]);
@@ -377,7 +382,11 @@ public class Account {
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS;
+        BUSINESS,
+        /**
+         * Vault integration account
+         */
+        VAULT;
 
         /**
          * Get type name (as set in config)

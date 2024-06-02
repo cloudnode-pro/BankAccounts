@@ -106,7 +106,6 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.DELETE)) return suggestions;
                     if (args.length == 2) suggestions.addAll(Arrays
                             .stream(sender.hasPermission(Permissions.DELETE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
-                            .filter(account -> sender.hasPermission(Permissions.DELETE_PERSONAL) || account.type != Account.Type.PERSONAL)
                             .map(account -> account.id).collect(Collectors.toSet()));
                 }
                 case "transfer", "send", "pay" -> {
@@ -377,8 +376,8 @@ public class BankCommand extends Command {
             if (!sender.hasPermission(Permissions.SET_NAME_OTHER) && !account.get().owner.getUniqueId()
                     .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-            if (!sender.hasPermission(Permissions.SET_NAME_PERSONAL) && account.get().type == Account.Type.PERSONAL)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenamePersonal());
+            if (!sender.hasPermission(Permissions.SET_NAME_VAULT) && account.get().type == Account.Type.VAULT)
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenameVaultAccount());
             @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.isEmpty() ? null : name;
@@ -433,14 +432,13 @@ public class BankCommand extends Command {
         if (!sender.hasPermission(Permissions.DELETE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (account.get().type == Account.Type.VAULT)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDeleteVaultAccount());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance(account.get()));
         if (account.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
-        if (BankAccounts.getInstance().config()
-                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
         return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountDeleted(account.get()));
     }
