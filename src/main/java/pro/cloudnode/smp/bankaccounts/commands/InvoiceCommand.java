@@ -50,7 +50,7 @@ public final class InvoiceCommand extends Command {
         }
         else switch (args[0]) {
             case "create", "new" -> {
-                if ("--player".equals(args[args.length - 1])) return null;
+                if ("--player".equals(args[args.length - 2])) return null;
                 else if (!args[args.length - 1].isEmpty() && "--player".startsWith(args[args.length - 1])) list.add("--player");
                 else if (args.length == 2) {
                     if (sender.hasPermission(Permissions.INVOICE_CREATE) && sender.hasPermission(Permissions.INVOICE_CREATE_OTHER))
