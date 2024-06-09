@@ -269,6 +269,8 @@ public final class InvoiceCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (invoice.get().buyer().isPresent() && !invoice.get().buyer().get().getUniqueId().equals(player.get().getUniqueId()) && !player.get().hasPermission(Permissions.INVOICE_VIEW_OTHER))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceCannotSend());
+        if (invoice.get().transaction != null)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
 
         sendMessage(player.get(), BankAccounts.getInstance().config().messagesInvoiceReceived(invoice.get()));
         return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceSent(invoice.get()));
