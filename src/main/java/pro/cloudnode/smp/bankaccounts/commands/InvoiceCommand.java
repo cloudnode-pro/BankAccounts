@@ -86,6 +86,13 @@ public final class InvoiceCommand extends Command {
                     if (sender.hasPermission(Permissions.INVOICE_SEND_OTHER)) list.addAll(Arrays.stream(Invoice.get()).map(a -> a.id).toList());
                     else list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender), Account.get(BankAccounts.getOfflinePlayer(sender)))).filter(i -> i.transaction == null).map(a -> a.id).toList());
                 }
+                if (args.length == 3) {
+                    final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[1]);
+                    if (invoice.isPresent() && (sender.hasPermission(Permissions.INVOICE_SEND_OTHER) || invoice.get().seller.owner.equals(BankAccounts.getOfflinePlayer(sender)))) {
+                        invoice.get().buyer().flatMap(buyer -> Optional.ofNullable(buyer.getPlayer()))
+                                .ifPresent(player -> list.add(player.getName()));
+                    }
+                }
             }
             case "list" -> {
                 if (!sender.hasPermission(Permissions.INVOICE_VIEW)) break;
