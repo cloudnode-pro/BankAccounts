@@ -24,7 +24,9 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public final class BankConfig {
     public @NotNull FileConfiguration config;
@@ -421,6 +423,11 @@ public final class BankConfig {
         return config.getInt("invoice.per-page");
     }
 
+    // disallowed-regex
+    public @NotNull Pattern disallowedRegex() {
+        return Pattern.compile(Objects.requireNonNull(config.getString("disallowed-regex")));
+    }
+
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(
@@ -624,10 +631,10 @@ public final class BankConfig {
     }
 
     // messages.errors.disallowed-characters
-    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull String characters) {
+    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull Set<@NotNull String> characters) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("messages.errors.disallowed-characters")),
-                Placeholder.unparsed("characters", characters)
+                Placeholder.unparsed("characters", String.join("", characters))
         );
     }
 

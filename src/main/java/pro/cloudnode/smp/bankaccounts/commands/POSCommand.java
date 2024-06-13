@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Create a POS at the location the player is looking at.
@@ -76,10 +77,11 @@ public final class POSCommand extends Command {
         if (POS.get(chest).isPresent()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosAlreadyExists());
 
         @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
-        if (description != null && description.length() > 64) description = description.substring(0, 64);
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
-        if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+        final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
+        if (!disallowedChars.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();

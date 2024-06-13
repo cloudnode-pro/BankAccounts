@@ -12,6 +12,10 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public abstract class Command implements CommandExecutor, TabCompleter {
     /**
@@ -80,5 +84,19 @@ public abstract class Command implements CommandExecutor, TabCompleter {
     public final @Nullable List<@NotNull String> onTabComplete(final @NotNull CommandSender sender, final @NotNull org.bukkit.command.Command command, final @NotNull String label, final @NotNull String @NotNull [] args) {
         final @Nullable List<@NotNull String> suggestions = tab(sender, args);
         return Optional.ofNullable(suggestions).map(s -> s.stream().filter(suggestion -> suggestion.toLowerCase().startsWith(args[args.length - 1].toLowerCase())).toList()).orElse(null);
+    }
+
+    protected static @NotNull Set<@NotNull String> getDisallowedCharacters(final @Nullable String input) {
+        if (input == null) return Set.of();
+        final @NotNull Set<@NotNull String> chars = input
+                .codePoints()
+                .filter(codePoint -> codePoint > 0xFFFF)
+                .mapToObj(codePoint -> new String(Character.toChars(codePoint)))
+                .collect(Collectors.toSet());
+        final @NotNull Matcher matcher = BankAccounts.getInstance().config().disallowedRegex().matcher(input);
+        while (matcher.find()) chars.add(matcher.group());
+        if (input.contains("<")) chars.add("<");
+        if (input.contains(">")) chars.add(">");
+        return chars;
     }
 }
