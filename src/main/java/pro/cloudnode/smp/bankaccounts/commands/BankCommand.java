@@ -501,7 +501,7 @@ public class BankCommand extends Command {
 
         @Nullable String description = args.length > 3 ? String
                 .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
-        if (description != null && description.length() > 64) description = description.substring(0, 64);
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
         final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
         if (!disallowedChars.isEmpty())

@@ -77,7 +77,7 @@ public final class POSCommand extends Command {
         if (POS.get(chest).isPresent()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosAlreadyExists());
 
         @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
-        if (description != null && description.length() > 64) description = description.substring(0, 64);
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
         final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
         if (!disallowedChars.isEmpty())

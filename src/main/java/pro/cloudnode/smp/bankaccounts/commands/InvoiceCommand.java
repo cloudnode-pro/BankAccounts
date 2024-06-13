@@ -177,7 +177,9 @@ public final class InvoiceCommand extends Command {
         if (account.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
 
-        final @Nullable String description = argsCopy.length < 3 ? null : String.join(" ", Arrays.copyOfRange(argsCopy, 2, argsCopy.length));
+        @Nullable String description = argsCopy.length < 3 ? null : String.join(" ", Arrays.copyOfRange(argsCopy, 2, argsCopy.length));
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
+
         final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
         if (!disallowedChars.isEmpty())
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
