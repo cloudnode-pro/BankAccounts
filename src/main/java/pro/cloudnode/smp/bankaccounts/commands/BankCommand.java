@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -382,8 +383,9 @@ public class BankCommand extends Command {
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.isEmpty() ? null : name;
 
-            if (name != null && (name.contains("<") || name.contains(">")))
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+            final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(name);
+            if (!disallowedChars.isEmpty())
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
             account.get().name = name;
             account.get().update();
@@ -501,8 +503,9 @@ public class BankCommand extends Command {
                 .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
         if (description != null && description.length() > 64) description = description.substring(0, 64);
 
-        if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+        final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
+        if (!disallowedChars.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         if (!confirm && BankAccounts.getInstance().config().transferConfirmationEnabled()) {
             final @NotNull BigDecimal minAmount = BankAccounts.getInstance().config().transferConfirmationMinAmount();

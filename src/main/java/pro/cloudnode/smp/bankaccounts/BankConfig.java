@@ -24,6 +24,7 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
 
 public final class BankConfig {
@@ -624,10 +625,10 @@ public final class BankConfig {
     }
 
     // messages.errors.disallowed-characters
-    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull String characters) {
+    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull Set<@NotNull String> characters) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("messages.errors.disallowed-characters")),
-                Placeholder.unparsed("characters", characters)
+                Placeholder.unparsed("characters", String.join("", characters))
         );
     }
 
