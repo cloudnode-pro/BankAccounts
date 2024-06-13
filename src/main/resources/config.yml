@@ -257,6 +257,12 @@ invoice:
     # Number of invoices to return per page
     per-page: 10
 
+# Advanced: do not edit unless you have good understanding of RegEx
+# Regular expression for disallowed characters user-provided text inputs
+# e.g. account name, transaction description, POS description, invoice description
+# Note: additionally <> and characters with code point above 0xFFFF are always disallowed.
+disallowed-regex: [\x00-\x08\x0B-\x1F\x7F-\x9F\u2400-\u2421\u200B-\u200D\uFEFF\uD800-\uDB7F\uDFFF]
+
 # Messages
 messages:
     # Command usage message

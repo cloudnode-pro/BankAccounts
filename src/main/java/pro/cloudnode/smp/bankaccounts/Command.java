@@ -93,8 +93,10 @@ public abstract class Command implements CommandExecutor, TabCompleter {
                 .filter(codePoint -> codePoint > 0xFFFF)
                 .mapToObj(codePoint -> new String(Character.toChars(codePoint)))
                 .collect(Collectors.toSet());
-        final @NotNull Matcher matcher = Pattern.compile("[<>\\x00-\\x08\\x0B-\\x1F\\x7F-\\x9F\\u2400-\\u2421\\u200B-\\u200D\\uFEFF\\uD800-\\uDB7F\\uDFFF]").matcher(input);
+        final @NotNull Matcher matcher = BankAccounts.getInstance().config().disallowedRegex().matcher(input);
         while (matcher.find()) chars.add(matcher.group());
+        if (input.contains("<")) chars.add("<");
+        if (input.contains(">")) chars.add(">");
         return chars;
     }
 }

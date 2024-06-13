@@ -26,6 +26,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public final class BankConfig {
     public @NotNull FileConfiguration config;
@@ -420,6 +421,11 @@ public final class BankConfig {
     // invoice.per-page
     public int invoicePerPage() {
         return config.getInt("invoice.per-page");
+    }
+
+    // disallowed-regex
+    public @NotNull Pattern disallowedRegex() {
+        return Pattern.compile(Objects.requireNonNull(config.getString("disallowed-regex")));
     }
 
     // messages.command-usage
