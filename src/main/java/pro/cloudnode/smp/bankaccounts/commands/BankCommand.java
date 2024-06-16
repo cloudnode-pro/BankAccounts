@@ -75,6 +75,8 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.ACCOUNT_CREATE)) return suggestions;
                     if (args.length == 2) {
                         suggestions.addAll(Arrays.asList("PERSONAL", "BUSINESS"));
+                        if (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT))
+                            suggestions.add("VAULT");
                     }
                     else if (args.length == 3 && sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
                         suggestions.add("--player");
@@ -206,9 +208,9 @@ public class BankCommand extends Command {
         if (sender.hasPermission(Permissions.HISTORY))
             sendMessage(sender, "<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>");
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE))
-            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
+            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "></gray></green> <white>- Create a new account</click>");
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
-            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS> --player <player></gray></green> <white>- Create an account for another player</click>");
+            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player></gray></green> <white>- Create an account for another player</click>");
         if (sender.hasPermission(Permissions.FREEZE)) {
             sendMessage(sender, "<click:suggest_command:/bank freeze ><green>/bank freeze <gray><account></gray></green> <white>- Freeze an account</click>");
             sendMessage(sender, "<click:suggest_command:/bank unfreeze ><green>/bank unfreeze <gray><account></gray></green> <white>- Unfreeze an account</click>");
@@ -312,19 +314,19 @@ public class BankCommand extends Command {
                 int index = Arrays.asList(args).indexOf("--player");
                 // index out of bounds
                 if (index == -1 || index >= args.length - 1)
-                    return sendUsage(sender, label, "create <PERSONAL|BUSINESS> --player <player>");
+                    return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player>");
                 target = BankAccounts.getInstance().getServer().getOfflinePlayer(args[index + 1]);
             }
         }
         if (args.length == 0)
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
         // check if target is the same as sender
         if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender)
                 .getUniqueId()) && !sender.hasPermission(Permissions.ACCOUNT_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
-        if (optionalType.isEmpty())
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
+        if (optionalType.isEmpty() || optionalType.get() == Account.Type.VAULT && !sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT))
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
         if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_BYPASS)) {
             final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
             int limit = BankAccounts.getInstance().config().accountLimits(optionalType.get());
@@ -434,7 +436,7 @@ public class BankCommand extends Command {
         if (!sender.hasPermission(Permissions.DELETE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-        if (account.get().type == Account.Type.VAULT)
+        if (account.get().type == Account.Type.VAULT && !sender.hasPermission(Permissions.DELETE_VAULT))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDeleteVaultAccount());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)

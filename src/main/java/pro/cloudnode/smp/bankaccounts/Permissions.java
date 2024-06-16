@@ -30,6 +30,7 @@ public final class Permissions {
     public static @NotNull String HISTORY_OTHER = "bank.history.other";
     public static @NotNull String ACCOUNT_CREATE_OTHER = "bank.account.create.other";
     public static @NotNull String ACCOUNT_CREATE_BYPASS = "bank.account.create.bypass";
+    public static @NotNull String ACCOUNT_CREATE_VAULT = "bank.account.create.vault";
     public static @NotNull String INSTRUMENT_CREATE_OTHER = "bank.instrument.create.other";
     public static @NotNull String INSTRUMENT_CREATE_BYPASS = "bank.instrument.create.bypass";
     public static @NotNull String SET_BALANCE = "bank.set.balance";
@@ -37,6 +38,7 @@ public final class Permissions {
     public static @NotNull String SET_NAME_VAULT = "bank.set.name.vault";
     public static @NotNull String FREEZE_OTHER = "bank.freeze.other";
     public static @NotNull String DELETE_OTHER = "bank.delete.other";
+    public static @NotNull String DELETE_VAULT = "bank.delete.vault";
     public static @NotNull String POS_CREATE_OTHER = "bank.pos.create.other";
     public static @NotNull String POS_CREATE_PERSONAL = "bank.pos.create.personal";
     public static @NotNull String POS_USE_OTHER = "bank.pos.use.other";
