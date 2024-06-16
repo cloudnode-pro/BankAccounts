@@ -10,17 +10,24 @@ import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 public final class Join implements Listener {
     @EventHandler
     public void onPlayerJoin(final @NotNull PlayerJoinEvent event) {
         final @NotNull Player player = event.getPlayer();
-        final @NotNull BigDecimal startingBalance = BankAccounts.getInstance().config().startingBalance();
+        final @NotNull Optional<@NotNull BigDecimal> startingBalance = BankAccounts.getInstance().config().startingBalance();
         BankAccounts.getInstance().getServer().getScheduler().runTaskAsynchronously(BankAccounts.getInstance(), () -> {
             if (Account.getVaultAccount(player).isEmpty()) {
-                // if the player already has a personal account, they will not be given starting balance
-                final @NotNull BigDecimal balance = startingBalance.compareTo(BigDecimal.ZERO) <= 0 || Account.get(player, Account.Type.PERSONAL).length > 0 ? BigDecimal.ZERO : startingBalance;
-                new Account(player, Account.Type.VAULT, null, balance, false).insert();
+                if (startingBalance.isPresent()) {
+                    // if the player already has a personal account, they will not be given starting balance
+                    final @NotNull BigDecimal balance = startingBalance.get().compareTo(BigDecimal.ZERO) <= 0 || Account.get(player, Account.Type.PERSONAL).length > 0 ? BigDecimal.ZERO : startingBalance.get();
+                    new Account(player, Account.Type.VAULT, null, balance, false).insert();
+                }
+                else if (BankAccounts.getInstance().config().integrationsVaultEnabled()) {
+                    // Vault account is required if the Vault integration is enabled, regardless of starting balance
+                    new Account(player, Account.Type.VAULT, null, BigDecimal.ZERO, false).insert();
+                }
             }
         });
         if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {

@@ -131,10 +131,10 @@ public final class BankConfig {
     }
 
     // starting-balance
-    public @NotNull BigDecimal startingBalance() {
-        if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("null"))
-            return BigDecimal.ZERO;
-        else return new BigDecimal(Objects.requireNonNull(config.getString("starting-balance")));
+    public @NotNull Optional<@NotNull BigDecimal> startingBalance() {
+        if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("false"))
+            return Optional.empty();
+        else return Optional.of(new BigDecimal(Objects.requireNonNull(config.getString("starting-balance"))));
     }
 
     // server-account.name
