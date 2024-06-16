@@ -52,9 +52,9 @@ currency:
     format: "#,##0.00"
 
 # Starting balance
-# Min value is 0. Set to `null` to disable creating an account on join.
+# Min value is 0. Set to false to disable creating an account on join.
 # If the Vault integration is enabled and this is set to `null`, an account with 0 balance will be created regardless.
-starting-balance: 0
+starting-balance: false
 
 # Server account
 server-account:
