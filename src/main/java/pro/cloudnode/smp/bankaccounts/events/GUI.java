@@ -72,7 +72,7 @@ public class GUI implements Listener {
                     inventory.close();
                     return;
                 }
-                final @NotNull Optional<Account> buyer = Account.get(Objects.requireNonNull(confirm.getItemMeta().getPersistentDataContainer().get(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING)));
+                final @NotNull Optional<@NotNull Account> buyer = Account.get(Account.Tag.id(Objects.requireNonNull(confirm.getItemMeta().getPersistentDataContainer().get(BankAccounts.Key.POS_BUYER_GUI_CONFIRM, PersistentDataType.STRING))));
                 if (buyer.isEmpty()) {
                     inventory.close();
                     return;

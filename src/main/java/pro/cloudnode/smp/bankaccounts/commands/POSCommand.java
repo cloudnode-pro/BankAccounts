@@ -40,9 +40,7 @@ public final class POSCommand extends Command {
         if (args.length < 2)
             return sendUsage(sender, label, (args.length > 0 ? args[0] : "<account>") + " <price> [description]");
 
-        final @NotNull Optional<@NotNull Account> account;
-        if (!args[0].startsWith("@")) account = Account.get(args[0]);
-        else account = Account.getVaultAccount(sender.getServer().getOfflinePlayer(args[0].substring(1)));
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
 
         if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission(Permissions.POS_CREATE_PERSONAL))
