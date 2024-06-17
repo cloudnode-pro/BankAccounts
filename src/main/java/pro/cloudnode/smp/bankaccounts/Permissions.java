@@ -27,6 +27,7 @@ public final class Permissions {
     public static @NotNull String INVOICE_SEND_OTHER = "bank.invoice.send.other";
     public static @NotNull String RELOAD = "bank.reload";
     public static @NotNull String BALANCE_OTHER = "bank.balance.other";
+    public static @NotNull String TRANSFER_FROM_OTHER = "bank.transfer.from-other";
     public static @NotNull String HISTORY_OTHER = "bank.history.other";
     public static @NotNull String ACCOUNT_CREATE_OTHER = "bank.account.create.other";
     public static @NotNull String ACCOUNT_CREATE_BYPASS = "bank.account.create.bypass";

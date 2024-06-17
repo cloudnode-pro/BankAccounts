@@ -40,7 +40,9 @@ public final class POSCommand extends Command {
         if (args.length < 2)
             return sendUsage(sender, label, (args.length > 0 ? args[0] : "<account>") + " <price> [description]");
 
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account;
+        if (!args[0].startsWith("@")) account = Account.get(args[0]);
+        else account = Account.getVaultAccount(sender.getServer().getOfflinePlayer(args[0].substring(1)));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
 
         if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission(Permissions.POS_CREATE_PERSONAL))
@@ -91,12 +93,18 @@ public final class POSCommand extends Command {
     @Override
     public @NotNull ArrayList<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
-        if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof Player && args.length == 1) {
-            final @NotNull Account[] accounts = sender.hasPermission(Permissions.POS_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-            for (final @NotNull Account account : accounts) {
-                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !sender.hasPermission(Permissions.POS_CREATE_PERSONAL)))
-                    continue;
-                suggestions.add(account.id);
+        if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof final @NotNull Player player && args.length == 1) {
+            if (args[0].startsWith("@")) {
+                if (sender.hasPermission(Permissions.POS_CREATE_OTHER))
+                    suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).toList());
+                else suggestions.add("@" + player.getName());
+            }
+            else {
+                final @NotNull Account @NotNull [] accounts;
+                if (sender.hasPermission(Permissions.POS_CREATE_OTHER))
+                    accounts = Account.get();
+                else accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                suggestions.addAll(Arrays.stream(accounts).filter(account -> !account.frozen && (account.type != Account.Type.PERSONAL || BankAccounts.getInstance().config().posAllowPersonal() || sender.hasPermission(Permissions.POS_CREATE_PERSONAL))).map(a -> a.id).toList());
             }
         }
         return suggestions;
