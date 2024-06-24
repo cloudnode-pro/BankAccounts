@@ -96,7 +96,7 @@ public class Transaction {
      * @param rs Result set
      */
     public Transaction(ResultSet rs) throws SQLException {
-        this(rs.getInt("id"), Account.get(rs.getString("from")).orElse(new Account.ClosedAccount()), Account.get(rs.getString("to")).orElse(new Account.ClosedAccount()), rs.getBigDecimal("amount"), rs.getTimestamp("time"), rs.getString("description"), rs.getString("instrument"));
+        this(rs.getInt("id"), Account.get(Account.Tag.from(rs.getString("from"))).orElse(new Account.ClosedAccount()), Account.get(Account.Tag.from(rs.getString("to"))).orElse(new Account.ClosedAccount()), rs.getBigDecimal("amount"), rs.getTimestamp("time"), rs.getString("description"), rs.getString("instrument"));
     }
 
     /**

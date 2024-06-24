@@ -58,7 +58,7 @@ public class Invoice {
     public Invoice(final @NotNull ResultSet rs) throws @NotNull SQLException {
         this(
                 rs.getString("id"),
-                Account.get(rs.getString("seller")).orElse(new Account.ClosedAccount()),
+                Account.get(Account.Tag.id(rs.getString("seller"))).orElse(new Account.ClosedAccount()),
                 rs.getBigDecimal("amount"),
                 rs.getString("description"),
                 rs.getString("buyer") == null ? null : BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString(rs.getString("buyer"))),

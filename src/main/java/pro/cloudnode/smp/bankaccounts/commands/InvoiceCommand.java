@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class InvoiceCommand extends Command {
@@ -53,11 +54,15 @@ public final class InvoiceCommand extends Command {
             case "create", "new" -> {
                 if ("--player".equals(args[args.length - 2])) return null;
                 else if (!args[args.length - 1].isEmpty() && "--player".startsWith(args[args.length - 1])) list.add("--player");
-                else if (args.length == 2) {
-                    if (sender.hasPermission(Permissions.INVOICE_CREATE) && sender.hasPermission(Permissions.INVOICE_CREATE_OTHER))
-                        list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
-                    else if (sender.hasPermission(Permissions.INVOICE_CREATE))
-                        list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                else if (args.length == 2 && sender.hasPermission(Permissions.INVOICE_CREATE)) {
+                    if (sender.hasPermission(Permissions.INVOICE_CREATE_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                        if (args[1].startsWith("@")) list.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                        else list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
+                    }
+                    else {
+                        if (args[1].startsWith("@")) list.add("@" + player.getName());
+                        else list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                    }
                 }
             }
             case "view", "details", "check", "show" -> {
@@ -77,8 +82,14 @@ public final class InvoiceCommand extends Command {
                     else list.addAll(Arrays.stream(Invoice.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
                 }
                 else if (args.length == 3) {
-                    if (sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER)) list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
-                    else list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                    if (sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                        if (args[2].startsWith("@")) list.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                        else list.addAll(Arrays.stream(Account.get()).map(a -> a.id).toList());
+                    }
+                    else {
+                        if (args[2].startsWith("@")) list.add("@" + player.getName());
+                        else list.addAll(Arrays.stream(Account.get(BankAccounts.getOfflinePlayer(sender))).map(a -> a.id).toList());
+                    }
                 }
             }
             case "send", "remind" -> {
@@ -169,7 +180,7 @@ public final class InvoiceCommand extends Command {
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNegativeInvoice());
 
-        final @NotNull Optional<@NotNull Account> account = Account.get(argsCopy[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(argsCopy[0]));
         if (account.isEmpty())
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_CREATE_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
@@ -232,7 +243,7 @@ public final class InvoiceCommand extends Command {
         if (invoice.get().transaction != null)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
 
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[1]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[1]));
         if (account.isEmpty())
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
