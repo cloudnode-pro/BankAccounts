@@ -6,6 +6,9 @@ author: Cloudnode
 softdepend:
     - PlaceholderAPI
     - Vault
+libraries:
+    - org.mariadb.jdbc:mariadb-java-client:3.4.0
+    - com.zaxxer:HikariCP:5.1.0
 commands:
     bank:
         description: Bank Accounts
