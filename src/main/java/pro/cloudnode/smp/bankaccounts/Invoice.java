@@ -234,4 +234,19 @@ public class Invoice {
             return new @NotNull Invoice[0];
         }
     }
+
+    public static int countUnpaid(final @NotNull OfflinePlayer player) {
+        try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT COUNT(`id`) as `count` FROM `bank_invoices` WHERE `buyer` = ? AND `transaction` IS NULL")) {
+            stmt.setString(1, player.getUniqueId().toString());
+
+            final @NotNull ResultSet rs = stmt.executeQuery();
+            if (rs.next()) return rs.getInt("count");
+            return 0;
+        }
+        catch (final @NotNull SQLException e) {
+            BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not count unpaid invoices for player: " + player.getUniqueId(), e);
+            return 0;
+        }
+    }
 }

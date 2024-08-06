@@ -21,6 +21,7 @@ public final class Permissions {
     public static final @NotNull String INVOICE_CREATE_OTHER = "bank.invoice.create.other";
     public static final @NotNull String INVOICE_VIEW = "bank.invoice.view";
     public static final @NotNull String INVOICE_VIEW_OTHER = "bank.invoice.view.other";
+    public static final @NotNull String INVOICE_NOTIFY = "bank.invoice.notify";
     public static final @NotNull String INVOICE_PAY_OTHER = "bank.invoice.pay.other";
     public static final @NotNull String INVOICE_PAY_ACCOUNT_OTHER = "bank.invoice.pay.account-other";
     public static final @NotNull String INVOICE_SEND = "bank.invoice.send";
