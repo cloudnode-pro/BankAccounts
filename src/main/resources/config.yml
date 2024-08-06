@@ -35,6 +35,14 @@ db:
     elideSetAutoCommits: true
     maintainTimeStats: false
 
+integrations:
+    vault:
+        # Enable Vault integration
+        enabled: false
+
+        # Transaction description for all vault operations
+        description: Vault Transaction
+
 currency:
     # Currency symbol
     symbol: $
@@ -44,20 +52,12 @@ currency:
     format: "#,##0.00"
 
 # Starting balance
-# Set to `null` to disable automatically creating a personal account on first join
+# Min value is 0. Set to "false" to disable creating an account on join.
+# If the Vault integration is enabled and this is set to "false", an account with 0 balance will be created regardless.
 starting-balance: 0
-
-# If set to true, players will not be able to close their LAST personal account.
-# This is recommended if you are using `starting-balance` as an account will be re-created when the player joins again.
-# If you want to prevent a player from using their personal account, you can freeze it.
-# You can BYPASS this setting using `bank.delete.personal`
-prevent-close-last-personal: true
 
 # Server account
 server-account:
-    # If enabled, when the plugin is loaded an account will be created as player with UUID 00000000-0000-0000-0000-000000000000
-    # This is required for features like interest to work.
-    enabled: true
     # Display name for the server account
     name: Central Bank
     # Account type
@@ -268,6 +268,12 @@ invoice:
         # Set to 0 or negative to disable
         interval: 300
 
+# Advanced: do not edit unless you have good understanding of RegEx
+# Regular expression for disallowed characters user-provided text inputs
+# e.g. account name, transaction description, POS description, invoice description
+# Note: additionally <> and characters with code point above 0xFFFF are always disallowed.
+disallowed-regex: [\x00-\x08\x0B-\x1F\x7F-\x9F\u2400-\u2421\u200B-\u200D\uFEFF\uD800-\uDB7F\uDFFF]
+
 # Messages
 messages:
     # Command usage message
@@ -282,6 +288,8 @@ messages:
         0: Personal
         # Business account
         1: Business
+        # Vault integration account used to integrate payments with other plugins
+        2: Checking
 
     # Errors
     errors:
@@ -296,7 +304,7 @@ messages:
         # <type> the account type
         # <limit> the account limit for that type
         max-accounts: "<red>(!) You cannot open more than <limit> <type> accounts.</red>"
-        rename-personal: "<red>(!) You cannot rename personal accounts.</red>"
+        rename-vault-account: "<red>(!) You cannot rename this account.</red>"
         # You do not own this account
         not-account-owner: "<red>(!) You are not the owner of this account.</red>"
         # Account frozen (placeholders same as balance)
@@ -315,8 +323,6 @@ messages:
         insufficient-funds: "<red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>"
         # Trying to close an account that has non-zero balance
         closing-balance: "<red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>"
-        # Trying to close a personal account and `prevent-close-last-personal` is enabled
-        closing-personal: "<red>(!) You cannot close your last personal account.</red>"
         # Command only for players
         player-only: "<red>(!) You must be a player to use this command.</red>"
         # Player not found
@@ -359,6 +365,10 @@ messages:
         invoice-cannot-send: "<red>(!) You cannot send this invoice to that player because they don't have permission to view it.</red>"
         # Player has never played on this server
         player-never-joined: "<red>(!) This player has never joined this server.</red>"
+        # Asynchronous code failed. Detailed info is outputted in the console
+        async-failed: "<red>(!) The request failed. See the console for details.</red>"
+        # Trying to delete vault integration account
+        delete-vault-account: "<red>(!) You cannot delete this account.</red>"
 
     # Account balance
     # Available placeholders:

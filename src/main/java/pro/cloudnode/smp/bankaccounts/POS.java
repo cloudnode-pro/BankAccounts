@@ -30,7 +30,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
-import java.util.stream.IntStream;
 import java.util.zip.CRC32;
 
 public final class POS {
@@ -101,7 +100,7 @@ public final class POS {
         this.world = world.get();
         this.price = rs.getBigDecimal("price");
         this.description = rs.getString("description");
-        this.seller = Account.get(rs.getString("seller")).orElse(new Account.ClosedAccount());
+        this.seller = Account.get(Account.Tag.from(rs.getString("seller"))).orElse(new Account.ClosedAccount());
         this.created = rs.getDate("created");
     }
 
@@ -375,25 +374,17 @@ public final class POS {
     }
 
     /**
-     * Verify checksum
-     *
-     * @param item     The item to verify
-     * @param checksum The checksum to verify against
-     */
-    public static boolean verifyChecksum(final @NotNull ItemStack item, final @NotNull String checksum) {
-        return checksum(item).equals(checksum);
-    }
-
-    /**
      * Verify checksums
      *
      * @param items     The items to verify
      * @param checksums The checksums to verify against
      */
     public static boolean verifyChecksum(final @NotNull ItemStack @NotNull [] items, final @NotNull String @NotNull [] checksums) {
-        if (items.length != checksums.length)
-            throw new IllegalArgumentException("The number of items and checksums must be the same.");
-
-        return IntStream.range(0, items.length).allMatch(i -> verifyChecksum(items[i], checksums[i]));
+        if (items.length != checksums.length) return false;
+        final @NotNull String @NotNull [] itemChecksums = checksum(items);
+        return Arrays.equals(
+                Arrays.stream(itemChecksums).sorted().toArray(String[]::new),
+                Arrays.stream(checksums).sorted().toArray(String[]::new)
+        );
     }
 }
