@@ -78,6 +78,6 @@ If you're interested in contributing, follow these steps:
 
 ## Thanks To
 
-[<img src="https://github.com/JetBrains/logos/raw/master/web/jetbrains/jetbrains-simple.svg" alt="JetBrains logo." height="96">](https://www.jetbrains.com)
+[<img src="https://github.com/JetBrains/logos/raw/master/web/jetbrains/jetbrains-simple.svg" alt="JetBrains logo" height="96" align="left">](https://www.jetbrains.com)
 
 [JetBrains](https://www.jetbrains.com/), creators of the IntelliJ IDEA, supports BankAccounts with one of their [Open Source Licenses](https://www.jetbrains.com/opensource/). IntelliJ IDEA is the recommended IDE for working with BankAccounts.
