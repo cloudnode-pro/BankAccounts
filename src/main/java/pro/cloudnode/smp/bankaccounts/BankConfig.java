@@ -120,6 +120,11 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("integrations.vault.description"));
     }
 
+    // integrations.vault.server-account
+    public @NotNull String integrationsVaultServerAccount() {
+        return Objects.requireNonNull(config.getString("integrations.vault.server-account"));
+    }
+
     // currency.symbol
     public @NotNull String currencySymbol() {
         return Objects.requireNonNull(config.getString("currency.symbol"));

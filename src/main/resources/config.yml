@@ -43,6 +43,10 @@ integrations:
         # Transaction description for all vault operations
         description: Vault Transaction
 
+        # Name of the server Vault account
+        # All Vault transactions will appear as to/from this account.
+        server-account: Server Vault
+
 currency:
     # Currency symbol
     symbol: $
