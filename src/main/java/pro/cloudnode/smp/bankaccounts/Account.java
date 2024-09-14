@@ -351,7 +351,7 @@ public class Account {
      * Get the server Vault account
      */
     public static @NotNull Optional<@NotNull Account> getServerVaultAccount() {
-        if (!BankAccounts.getInstance().config().serverAccountEnabled()) return Optional.empty();
+        if (!BankAccounts.getInstance().config().integrationsVaultEnabled()) return Optional.empty();
         return getVaultAccount(BankAccounts.getConsoleOfflinePlayer());
     }
 
