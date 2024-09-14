@@ -330,8 +330,9 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().config().serverAccountEnabled()) {
-            final @NotNull Account @NotNull [] accounts = Account.get(getConsoleOfflinePlayer());
-            if (accounts.length > 0) return;
+            final @NotNull Optional<@NotNull Account> account = Account.getServerAccount();
+            if (account.isPresent()) return;
+
             final @Nullable String name = getInstance().config().serverAccountName();
             final @NotNull Account.Type type = getInstance().config().serverAccountType();
             final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
