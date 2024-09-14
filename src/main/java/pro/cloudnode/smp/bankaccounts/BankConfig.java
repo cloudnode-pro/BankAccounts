@@ -137,6 +137,11 @@ public final class BankConfig {
         else return Optional.of(new BigDecimal(Objects.requireNonNull(config.getString("starting-balance"))));
     }
 
+    // server-account.enabled
+    public boolean serverAccountEnabled() {
+        return config.getBoolean("server-account.enabled");
+    }
+
     // server-account.name
     public @NotNull String serverAccountName() {
         return Objects.requireNonNull(config.getString("server-account.name"));

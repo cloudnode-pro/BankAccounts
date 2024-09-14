@@ -329,12 +329,14 @@ public final class BankAccounts extends JavaPlugin {
      * Create server account, if enabled in config
      */
     private static void createServerAccount() {
-        final @NotNull Account @NotNull [] accounts = Account.get(getConsoleOfflinePlayer());
-        if (accounts.length > 0) return;
-        final @Nullable String name = getInstance().config().serverAccountName();
-        final @NotNull Account.Type type = getInstance().config().serverAccountType();
-        final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
-        new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
+        if (getInstance().config().serverAccountEnabled()) {
+            final @NotNull Account @NotNull [] accounts = Account.get(getConsoleOfflinePlayer());
+            if (accounts.length > 0) return;
+            final @Nullable String name = getInstance().config().serverAccountName();
+            final @NotNull Account.Type type = getInstance().config().serverAccountType();
+            final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance().map(BigDecimal::valueOf).orElse(null);
+            new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
+        }
     }
 
     /**
