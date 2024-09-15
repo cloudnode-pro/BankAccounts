@@ -107,11 +107,6 @@ public final class BankAccounts extends JavaPlugin {
     @Override
     public void onDisable() {
         dbSource.close();
-        if (this.invoiceNotificationTask != null) {
-            final int taskId = this.invoiceNotificationTask.getTaskId();
-            getServer().getScheduler().cancelTask(taskId);
-            this.invoiceNotificationTask = null;
-        }
     }
 
     /**
@@ -169,6 +164,11 @@ public final class BankAccounts extends JavaPlugin {
             getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
         }));
         getInstance().startInterestTimer();
+        if (getInstance().invoiceNotificationTask != null) {
+            final int taskId = getInstance().invoiceNotificationTask.getTaskId();
+            getInstance().getServer().getScheduler().cancelTask(taskId);
+            getInstance().invoiceNotificationTask = null;
+        }
         getInstance().setupInvoiceNotificationTimer();
     }
 
