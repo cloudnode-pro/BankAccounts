@@ -334,7 +334,7 @@ public final class BankAccounts extends JavaPlugin {
             final @NotNull Optional<@NotNull Account> account = Account.getServerAccount();
             if (account.isPresent()) return;
 
-            final @Nullable String name = getInstance().config().serverAccountName();
+            final @NotNull String name = getInstance().config().serverAccountName();
             final @NotNull Account.Type type = getInstance().config().serverAccountType();
             final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
             new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
@@ -349,8 +349,8 @@ public final class BankAccounts extends JavaPlugin {
             final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerVaultAccount();
             if (serverAccount.isPresent()) return;
 
-            final @Nullable String name = getInstance().config().integrationsVaultServerAccount();
-            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, true);
+            final @NotNull String name = getInstance().config().integrationsVaultServerAccount();
+            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, false).insert();
         }
     }
 

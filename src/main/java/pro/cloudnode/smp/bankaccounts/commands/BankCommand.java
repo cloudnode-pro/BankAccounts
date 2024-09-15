@@ -530,6 +530,9 @@ public class BankCommand extends Command {
         if (!sender.hasPermission(Permissions.TRANSFER_SELF) && to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
+        // to is server Vault account
+        if (to.get().owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) && to.get().type == Account.Type.VAULT)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferToServerVault());
 
         final @NotNull BigDecimal amount;
         try {
