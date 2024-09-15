@@ -37,7 +37,7 @@ public final class Join implements Listener {
                 player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion))
             ), 20L);
         }
-        if (player.hasPermission(Permissions.INVOICE_NOTIFY) && BankAccounts.getInstance().config().invoiceNotifyJoin()) {
+        if (player.hasPermission(Permissions.INVOICE_NOTIFY) && BankAccounts.getInstance().config().invoiceNotifyJoin() && Invoice.countUnpaid(player) > 0) {
             BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
                 final @NotNull Optional<@NotNull Component> message = BankAccounts.getInstance().config().messagesInvoiceNotify(Invoice.countUnpaid(player));
                 message.ifPresent(player::sendMessage);
