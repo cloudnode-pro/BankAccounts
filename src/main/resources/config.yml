@@ -367,6 +367,8 @@ messages:
         async-failed: "<red>(!) The request failed. See the console for details.</red>"
         # Trying to delete vault integration account
         delete-vault-account: "<red>(!) You cannot delete this account.</red>"
+        # Trying to transfer funds to the server Vault account
+        transfer-to-server-vault: "<red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>"
 
     # Account balance
     # Available placeholders:
