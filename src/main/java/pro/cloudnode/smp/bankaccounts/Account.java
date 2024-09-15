@@ -22,6 +22,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -341,9 +342,17 @@ public class Account {
      * Get the server account
      */
     public static @NotNull Optional<@NotNull Account> getServerAccount() {
-        final @NotNull Account @NotNull [] accounts = get(BankAccounts.getConsoleOfflinePlayer());
-        if (accounts.length == 0) return Optional.empty();
-        return Optional.of(accounts[0]);
+        if (!BankAccounts.getInstance().config().serverAccountEnabled()) return Optional.empty();
+        final @NotNull Optional<@NotNull Account> account = Arrays.stream(get(BankAccounts.getConsoleOfflinePlayer())).filter(a -> a.type != Type.VAULT).findFirst();
+        return account;
+    }
+
+    /**
+     * Get the server Vault account
+     */
+    public static @NotNull Optional<@NotNull Account> getServerVaultAccount() {
+        if (!BankAccounts.getInstance().config().integrationsVaultEnabled()) return Optional.empty();
+        return getVaultAccount(BankAccounts.getConsoleOfflinePlayer());
     }
 
     /**

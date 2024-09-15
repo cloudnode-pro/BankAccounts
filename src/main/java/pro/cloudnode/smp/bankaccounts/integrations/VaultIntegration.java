@@ -235,7 +235,7 @@ public final class VaultIntegration {
             if (account.isEmpty()) return new EconomyResponse(amount, 0, EconomyResponse.ResponseType.FAILURE, "Account not found");
             if (!account.get().hasFunds(BigDecimal.valueOf(amount)))
                 return new EconomyResponse(amount, Optional.ofNullable(account.get().balance).map(BigDecimal::doubleValue).orElse(Double.MAX_VALUE), EconomyResponse.ResponseType.FAILURE, "Insufficient funds");
-            final @NotNull Account serverAccount = Account.getServerAccount().orElse(new Account.ClosedAccount());
+            final @NotNull Account serverAccount = Account.getServerVaultAccount().orElse(new Account.ClosedAccount());
             // transfer funds to the server account since Vault just wants them "gone"
             account.get().transfer(serverAccount, BigDecimal.valueOf(amount), BankAccounts.getInstance().config().integrationsVaultDescription(), null);
             // remove funds from the server account without a transaction
@@ -287,7 +287,7 @@ public final class VaultIntegration {
         public @NotNull EconomyResponse depositPlayer(final @NotNull OfflinePlayer player, final double amount) {
             final @NotNull Optional<@NotNull Account> account = Account.getVaultAccount(player);
             if (account.isEmpty()) return new EconomyResponse(amount, 0, EconomyResponse.ResponseType.FAILURE, "Account not found");
-            final @NotNull Account serverAccount = Account.getServerAccount().orElse(new Account.ClosedAccount());
+            final @NotNull Account serverAccount = Account.getServerVaultAccount().orElse(new Account.ClosedAccount());
             // add money to the server account and then transfer it to the player
             serverAccount.updateBalance(BigDecimal.valueOf(amount));
             serverAccount.transfer(account.get(), BigDecimal.valueOf(amount), BankAccounts.getInstance().config().integrationsVaultDescription(), null);
