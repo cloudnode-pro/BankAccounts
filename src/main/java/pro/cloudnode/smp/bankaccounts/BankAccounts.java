@@ -4,11 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -105,6 +107,11 @@ public final class BankAccounts extends JavaPlugin {
     @Override
     public void onDisable() {
         dbSource.close();
+        if (this.invoiceNotificationTask != null) {
+            final int taskId = this.invoiceNotificationTask.getTaskId();
+            getServer().getScheduler().cancelTask(taskId);
+            this.invoiceNotificationTask = null;
+        }
     }
 
     /**
@@ -162,6 +169,7 @@ public final class BankAccounts extends JavaPlugin {
             getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
         }));
         getInstance().startInterestTimer();
+        getInstance().setupInvoiceNotificationTimer();
     }
 
     /**
@@ -245,6 +253,20 @@ public final class BankAccounts extends JavaPlugin {
                 }
             }
         }, 0L, 20L*60);
+    }
+
+    private @Nullable BukkitTask invoiceNotificationTask = null;
+
+    private void setupInvoiceNotificationTimer() {
+        if (config().invoiceNotifyInterval() <= 0) return;
+        this.invoiceNotificationTask = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            for (final @NotNull Player player : getServer().getOnlinePlayers()) {
+                final @NotNull Optional<@NotNull Component> message = BankAccounts.getInstance().config().messagesInvoiceNotify(Invoice.countUnpaid(player));
+                if (message.isEmpty()) continue;
+                if (player.hasPermission(Permissions.INVOICE_NOTIFY) && Invoice.countUnpaid(player) > 0)
+                    player.sendMessage(message.get());
+            }
+        }, config().invoiceNotifyInterval() * 20L, config().invoiceNotifyInterval() * 20L);
     }
 
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
