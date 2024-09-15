@@ -155,6 +155,7 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
+        createServerVaultAccount();
         getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
             getInstance().getLogger().warning("An update is available: " + latestVersion);
             getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
@@ -329,12 +330,28 @@ public final class BankAccounts extends JavaPlugin {
      * Create server account, if enabled in config
      */
     private static void createServerAccount() {
-        final @NotNull Account @NotNull [] accounts = Account.get(getConsoleOfflinePlayer());
-        if (accounts.length > 0) return;
-        final @Nullable String name = getInstance().config().serverAccountName();
-        final @NotNull Account.Type type = getInstance().config().serverAccountType();
-        final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
-        new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
+        if (getInstance().config().serverAccountEnabled()) {
+            final @NotNull Optional<@NotNull Account> account = Account.getServerAccount();
+            if (account.isPresent()) return;
+
+            final @Nullable String name = getInstance().config().serverAccountName();
+            final @NotNull Account.Type type = getInstance().config().serverAccountType();
+            final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
+            new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
+        }
+    }
+
+    /**
+     * Create server Vault account, if Vault enabled
+     */
+    private static void createServerVaultAccount() {
+        if (getInstance().config().integrationsVaultEnabled()) {
+            final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerVaultAccount();
+            if (serverAccount.isPresent()) return;
+
+            final @Nullable String name = getInstance().config().integrationsVaultServerAccount();
+            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, true);
+        }
     }
 
     /**

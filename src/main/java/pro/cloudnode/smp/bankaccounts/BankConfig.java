@@ -120,6 +120,11 @@ public final class BankConfig {
         return Objects.requireNonNull(config.getString("integrations.vault.description"));
     }
 
+    // integrations.vault.server-account
+    public @NotNull String integrationsVaultServerAccount() {
+        return Objects.requireNonNull(config.getString("integrations.vault.server-account"));
+    }
+
     // currency.symbol
     public @NotNull String currencySymbol() {
         return Objects.requireNonNull(config.getString("currency.symbol"));
@@ -135,6 +140,11 @@ public final class BankConfig {
         if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("false"))
             return Optional.empty();
         else return Optional.of(new BigDecimal(Objects.requireNonNull(config.getString("starting-balance"))));
+    }
+
+    // server-account.enabled
+    public boolean serverAccountEnabled() {
+        return config.getBoolean("server-account.enabled");
     }
 
     // server-account.name

@@ -43,6 +43,10 @@ integrations:
         # Transaction description for all vault operations
         description: Vault Transaction
 
+        # Name of the server Vault account
+        # All Vault transactions will appear as to/from this account.
+        server-account: Server Vault
+
 currency:
     # Currency symbol
     symbol: $
@@ -58,6 +62,9 @@ starting-balance: 0
 
 # Server account
 server-account:
+    # If enabled, when the plugin is loaded an account will be created as player with UUID 00000000-0000-0000-0000-000000000000
+    # This is required for features like interest to work.
+    enabled: true
     # Display name for the server account
     name: Central Bank
     # Account type

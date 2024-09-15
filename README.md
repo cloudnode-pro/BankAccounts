@@ -1,3 +1,5 @@
+[<img src="https://wsrv.nl/?url=https://raw.githubusercontent.com/cloudnode-pro/BankAccounts/readme-icons/icon.svg&w=128&output=webp" alt="BankAccounts logo" align="left">](https://modrinth.com/plugin/Dc8RS2En)
+
 # Bank Accounts
 [![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En) [![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper) [![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
 
@@ -76,6 +78,6 @@ If you're interested in contributing, follow these steps:
 
 ## Thanks To
 
-[<img src="https://github.com/JetBrains/logos/raw/master/web/jetbrains/jetbrains-simple.svg" alt="JetBrains logo." height="96">](https://www.jetbrains.com)
+[<img src="https://github.com/JetBrains/logos/raw/master/web/jetbrains/jetbrains-simple.svg" alt="JetBrains logo" height="96" align="left">](https://www.jetbrains.com)
 
 [JetBrains](https://www.jetbrains.com/), creators of the IntelliJ IDEA, supports BankAccounts with one of their [Open Source Licenses](https://www.jetbrains.com/opensource/). IntelliJ IDEA is the recommended IDE for working with BankAccounts.
