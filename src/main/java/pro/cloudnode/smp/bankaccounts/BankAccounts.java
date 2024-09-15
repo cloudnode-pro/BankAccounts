@@ -350,7 +350,7 @@ public final class BankAccounts extends JavaPlugin {
             if (serverAccount.isPresent()) return;
 
             final @NotNull String name = getInstance().config().integrationsVaultServerAccount();
-            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, true);
+            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, true).insert();
         }
     }
 
