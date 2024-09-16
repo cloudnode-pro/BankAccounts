@@ -617,7 +617,7 @@ messages:
         # Placeholders:
         # <unpaid> - number of unpaid invoices></yellow>."
         # <unpaid-choice> - choice placeholder for unpaid invoices; see https://docs.advntr.dev/minimessage/dynamic-replacements.html#insert-a-choice
-        notify: "<click:run_command:/invoice list><hover:show_text:'Click to view unpaid invoices'><yellow>(!) You have <gray><unpaid></gray> unpaid invoice<unpaid-choice:'0<s'>. <gray>Click to view.</gray></yellow></hover></click>"
+        notify: "<click:run_command:/invoice list><hover:show_text:'Click to view unpaid invoices'><yellow>(!) You have <gray><unpaid></gray> unpaid invoice<unpaid-choice:'1#|1<s'>. <gray>Click to view.</gray></yellow></hover></click>"
 
     # New version available
     # Placeholders:
