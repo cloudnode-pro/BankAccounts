@@ -199,7 +199,7 @@ public final class InvoiceCommand extends Command {
         invoice.insert();
 
         final @NotNull Optional<@NotNull Player> onlineRecipient = invoice.buyer().isPresent() ? Optional.ofNullable(invoice.buyer().get().getPlayer()) : Optional.empty();
-        onlineRecipient.ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice)));
+        onlineRecipient.ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoiceReceived(invoice)));
         return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice));
     }
 
