@@ -218,35 +218,43 @@ public final class BankAccounts extends JavaPlugin {
         }
     }
 
-    private final Runnable interestTask = () -> {
-        final int currentMinutes = (int) Math.floor(System.currentTimeMillis() / 60000.0);
-        final double personalRate = config().interestRate(Account.Type.PERSONAL);
-        final int personalInterval = config().interestInterval(Account.Type.PERSONAL);
-        final double businessRate = config().interestRate(Account.Type.BUSINESS);
-        final int businessInterval = config().interestInterval(Account.Type.BUSINESS);
-        if ((personalInterval <= 0 && businessInterval <= 0) || (personalRate == 0 && businessRate == 0)) return;
-        final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerAccount();
-        if (serverAccount.isEmpty() || serverAccount.get().frozen) return;
-        final @NotNull Account @NotNull [] accounts = Arrays.stream(Account.get()).filter(account -> !account.frozen && account.balance != null && account.balance.compareTo(BigDecimal.ZERO) > 0).toArray(Account[]::new);
-        if (personalInterval > 0 && personalRate != 0 && currentMinutes % personalInterval == 0) {
-            final @NotNull Account @NotNull [] personalAccounts = Arrays.stream(accounts).filter(account -> account.type == Account.Type.PERSONAL).toArray(Account[]::new);
-            for (final @NotNull Account account : personalAccounts) {
-                assert account.balance != null;
-                final @NotNull BigDecimal amount = account.balance.multiply(BigDecimal.valueOf(personalRate / 100.0)).abs().setScale(2, RoundingMode.DOWN);
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) continue;
-                interestPayment(account, amount, personalRate, serverAccount.get());
+    private @Nullable BukkitTask interestTask = null;
+
+    /**
+     * Start interest timer
+     */
+    private void startInterestTimer() {
+        if (interestTask != null) interestTask.cancel();
+        interestTask = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            final int currentMinutes = (int) Math.floor(System.currentTimeMillis() / 60000.0);
+            final double personalRate = config().interestRate(Account.Type.PERSONAL);
+            final int personalInterval = config().interestInterval(Account.Type.PERSONAL);
+            final double businessRate = config().interestRate(Account.Type.BUSINESS);
+            final int businessInterval = config().interestInterval(Account.Type.BUSINESS);
+            if ((personalInterval <= 0 && businessInterval <= 0) || (personalRate == 0 && businessRate == 0)) return;
+            final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerAccount();
+            if (serverAccount.isEmpty() || serverAccount.get().frozen) return;
+            final @NotNull Account @NotNull [] accounts = Arrays.stream(Account.get()).filter(account -> !account.frozen && account.balance != null && account.balance.compareTo(BigDecimal.ZERO) > 0).toArray(Account[]::new);
+            if (personalInterval > 0 && personalRate != 0 && currentMinutes % personalInterval == 0) {
+                final @NotNull Account @NotNull [] personalAccounts = Arrays.stream(accounts).filter(account -> account.type == Account.Type.PERSONAL).toArray(Account[]::new);
+                for (final @NotNull Account account : personalAccounts) {
+                    assert account.balance != null;
+                    final @NotNull BigDecimal amount = account.balance.multiply(BigDecimal.valueOf(personalRate / 100.0)).abs().setScale(2, RoundingMode.DOWN);
+                    if (amount.compareTo(BigDecimal.ZERO) <= 0) continue;
+                    interestPayment(account, amount, personalRate, serverAccount.get());
+                }
             }
-        }
-        if (businessInterval > 0 && businessRate != 0 && currentMinutes % businessInterval == 0) {
-            final @NotNull Account @NotNull [] businessAccounts = Arrays.stream(accounts).filter(account -> account.type == Account.Type.BUSINESS).toArray(Account[]::new);
-            for (final @NotNull Account account : businessAccounts) {
-                assert account.balance != null;
-                final @NotNull BigDecimal amount = account.balance.multiply(BigDecimal.valueOf(businessRate / 100.0)).abs().setScale(2, RoundingMode.DOWN);
-                if (amount.compareTo(BigDecimal.ZERO) <= 0) continue;
-                interestPayment(account, amount, businessRate, serverAccount.get());
+            if (businessInterval > 0 && businessRate != 0 && currentMinutes % businessInterval == 0) {
+                final @NotNull Account @NotNull [] businessAccounts = Arrays.stream(accounts).filter(account -> account.type == Account.Type.BUSINESS).toArray(Account[]::new);
+                for (final @NotNull Account account : businessAccounts) {
+                    assert account.balance != null;
+                    final @NotNull BigDecimal amount = account.balance.multiply(BigDecimal.valueOf(businessRate / 100.0)).abs().setScale(2, RoundingMode.DOWN);
+                    if (amount.compareTo(BigDecimal.ZERO) <= 0) continue;
+                    interestPayment(account, amount, businessRate, serverAccount.get());
+                }
             }
-        }
-    };
+        }, 0L, 20L*60);
+    }
 
     private @Nullable BukkitTask invoiceNotificationTask = null;
 
