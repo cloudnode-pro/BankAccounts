@@ -25,7 +25,9 @@ import java.time.temporal.TemporalAccessor;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.TimeZone;
+import java.util.regex.Pattern;
 
 public final class BankConfig {
     public @NotNull FileConfiguration config;
@@ -109,6 +111,21 @@ public final class BankConfig {
         return config.getBoolean("db.maintainTimeStats");
     }
 
+    // integrations.vault.enabled
+    public boolean integrationsVaultEnabled() {
+        return config.getBoolean("integrations.vault.enabled");
+    }
+
+    // integrations.vault.description
+    public @NotNull String integrationsVaultDescription() {
+        return Objects.requireNonNull(config.getString("integrations.vault.description"));
+    }
+
+    // integrations.vault.server-account
+    public @NotNull String integrationsVaultServerAccount() {
+        return Objects.requireNonNull(config.getString("integrations.vault.server-account"));
+    }
+
     // currency.symbol
     public @NotNull String currencySymbol() {
         return Objects.requireNonNull(config.getString("currency.symbol"));
@@ -120,15 +137,10 @@ public final class BankConfig {
     }
 
     // starting-balance
-    public @NotNull Optional<@NotNull Double> startingBalance() {
-        if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("null"))
+    public @NotNull Optional<@NotNull BigDecimal> startingBalance() {
+        if (Objects.requireNonNull(config.getString("starting-balance")).equalsIgnoreCase("false"))
             return Optional.empty();
-        else return Optional.of(config.getDouble("starting-balance"));
-    }
-
-    // prevent-close-last-personal
-    public boolean preventCloseLastPersonal() {
-        return config.getBoolean("prevent-close-last-personal");
+        else return Optional.of(new BigDecimal(Objects.requireNonNull(config.getString("starting-balance"))));
     }
 
     // server-account.enabled
@@ -147,10 +159,10 @@ public final class BankConfig {
     }
 
     // server-account.starting-balance
-    public @NotNull Optional<@NotNull Double> serverAccountStartingBalance() {
+    public @Nullable BigDecimal serverAccountStartingBalance() {
         if (Objects.requireNonNull(config.getString("server-account.starting-balance")).equalsIgnoreCase("infinity"))
-            return Optional.empty();
-        else return Optional.of(config.getDouble("server-account.starting-balance"));
+            return null;
+        else return new BigDecimal(Objects.requireNonNull(config.getString("server-account.starting-balance")));
     }
 
     // account-limits.
@@ -169,8 +181,8 @@ public final class BankConfig {
     }
 
     // transfer-confirmation.min-amount
-    public double transferConfirmationMinAmount() {
-        return config.getDouble("transfer-confirmation.min-amount");
+    public @NotNull BigDecimal transferConfirmationMinAmount() {
+        return new BigDecimal(Objects.requireNonNull(config.getString("transfer-confirmation.min-amount")));
     }
 
     // transfer-confirmation.bypass-own-accounts
@@ -442,6 +454,21 @@ public final class BankConfig {
         return config.getInt("invoice.per-page");
     }
 
+    // disallowed-regex
+    public @NotNull Pattern disallowedRegex() {
+        return Pattern.compile(Objects.requireNonNull(config.getString("disallowed-regex")));
+    }
+    
+    // invoice.notify.join
+    public boolean invoiceNotifyJoin() {
+        return config.getBoolean("invoice.notify.join");
+    }
+
+    // invoice.notify.interval
+    public int invoiceNotifyInterval() {
+        return config.getInt("invoice.notify.interval");
+    }
+
     // messages.command-usage
     public @NotNull Component messagesCommandUsage(final @NotNull String command, final @NotNull String arguments) {
         return MiniMessage.miniMessage().deserialize(
@@ -487,9 +514,9 @@ public final class BankConfig {
         );
     }
 
-    // messages.errors.rename-personal
-    public @NotNull Component messagesErrorsRenamePersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-personal")));
+    // messages.errors.rename-vault-account
+    public @NotNull Component messagesErrorsRenameVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.rename-vault-account")));
     }
 
     // messages.errors.not-account-owner
@@ -565,11 +592,6 @@ public final class BankConfig {
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
         );
-    }
-
-    // messages.errors.closing-personal
-    public @NotNull Component messagesErrorsClosingPersonal() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.closing-personal")));
     }
 
     // messages.errors.player-only
@@ -650,10 +672,10 @@ public final class BankConfig {
     }
 
     // messages.errors.disallowed-characters
-    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull String characters) {
+    public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull Set<@NotNull String> characters) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("messages.errors.disallowed-characters")),
-                Placeholder.unparsed("characters", characters)
+                Placeholder.unparsed("characters", String.join("", characters))
         );
     }
 
@@ -755,6 +777,16 @@ public final class BankConfig {
     // messages.errors.async-failed
     public @NotNull Component messagesErrorsAsyncFailed() {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.async-failed")));
+    }
+
+    // messages.errors.delete-vault-account
+    public @NotNull Component messagesErrorsDeleteVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.delete-vault-account")));
+    }
+
+    //messages.errors.transfer-to-server-vault
+    public @NotNull Component messagesErrorsTransferToServerVault() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.transfer-to-server-vault")));
     }
 
     // messages.balance
@@ -1415,6 +1447,17 @@ public final class BankConfig {
         );
     }
 
+    // messages.invoice.notify
+    public @NotNull Optional<@NotNull Component> messagesInvoiceNotify(final int unpaid) {
+        final @NotNull String message = Objects.requireNonNull(config.getString("messages.invoice.notify"));
+        if (message.isBlank()) return Optional.empty();
+        return Optional.of(MiniMessage.miniMessage().deserialize(
+                message
+                        .replace("<unpaid>", String.valueOf(unpaid)),
+                Formatter.choice("unpaid-choice", unpaid)
+        ));
+    }
+    
     // messages.change-owner.request
     public @NotNull Component messagesChangeOwnerRequest(final @NotNull Account.ChangeOwnerRequest request, final @NotNull String acceptCommand) {
         final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());

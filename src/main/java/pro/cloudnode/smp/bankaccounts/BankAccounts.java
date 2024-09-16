@@ -4,11 +4,13 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.bukkit.scheduler.BukkitTask;
@@ -23,6 +25,7 @@ import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
 import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
+import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -98,6 +101,8 @@ public final class BankAccounts extends JavaPlugin {
         } else {
             getLogger().log(Level.INFO, "PlaceholderAPI not found. Skipping integration.");
         }
+
+        VaultIntegration.setup();
     }
 
     @Override
@@ -145,35 +150,27 @@ public final class BankAccounts extends JavaPlugin {
      * Reload plugin
      */
     public static void reload() {
+        final boolean vaultConfigEnabled = getInstance().config().integrationsVaultEnabled();
         getInstance().reloadConfig();
         getInstance().config.config = getInstance().getConfig();
+        if (vaultConfigEnabled != getInstance().config().integrationsVaultEnabled())
+            getInstance().getLogger().warning("Vault integration has been " + (getInstance().config().integrationsVaultEnabled() ? "enabled" : "disabled") + " in the configuration. To activate this change, please restart the server.");
         getInstance().setupDbSource();
         getInstance().initDbWrapper();
         createServerAccount();
-        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> {
-            checkForUpdates().ifPresent(latestVersion -> {
-                getInstance().getLogger().warning("An update is available: " + latestVersion);
-                getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
-                getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
-            });
-        });
-        getInstance().minuteLoopTasks.clear();
-        getInstance().startMinuteLoop();
-        getInstance().minuteLoopTasks.add(Account.ChangeOwnerRequest.deleteExpiredLater);
-        getInstance().minuteLoopTasks.add(BankAccounts.getInstance().interestTask);
-    }
-
-    private @Nullable BukkitTask minuteLoop = null;
-    public @NotNull HashSet<@NotNull Runnable> minuteLoopTasks = new HashSet<>();
-
-    /**
-     * Start a task that runs every minute
-     */
-    private void startMinuteLoop() {
-        if (minuteLoop != null) minuteLoop.cancel();
-        minuteLoop = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
-            minuteLoopTasks.forEach(Runnable::run);
-        }, 0L, 20L * 60);
+        createServerVaultAccount();
+        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
+            getInstance().getLogger().warning("An update is available: " + latestVersion);
+            getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
+            getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
+        }));
+        getInstance().startInterestTimer();
+        if (getInstance().invoiceNotificationTask != null) {
+            final int taskId = getInstance().invoiceNotificationTask.getTaskId();
+            getInstance().getServer().getScheduler().cancelTask(taskId);
+            getInstance().invoiceNotificationTask = null;
+        }
+        getInstance().setupInvoiceNotificationTimer();
     }
 
     /**
@@ -250,6 +247,20 @@ public final class BankAccounts extends JavaPlugin {
             }
         }
     };
+
+    private @Nullable BukkitTask invoiceNotificationTask = null;
+
+    private void setupInvoiceNotificationTimer() {
+        if (config().invoiceNotifyInterval() <= 0) return;
+        this.invoiceNotificationTask = getServer().getScheduler().runTaskTimerAsynchronously(this, () -> {
+            for (final @NotNull Player player : getServer().getOnlinePlayers()) {
+                final @NotNull Optional<@NotNull Component> message = BankAccounts.getInstance().config().messagesInvoiceNotify(Invoice.countUnpaid(player));
+                if (message.isEmpty()) continue;
+                if (player.hasPermission(Permissions.INVOICE_NOTIFY) && Invoice.countUnpaid(player) > 0)
+                    player.sendMessage(message.get());
+            }
+        }, config().invoiceNotifyInterval() * 20L, config().invoiceNotifyInterval() * 20L);
+    }
 
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {
         if (account.balance == null) return;
@@ -335,12 +346,26 @@ public final class BankAccounts extends JavaPlugin {
      */
     private static void createServerAccount() {
         if (getInstance().config().serverAccountEnabled()) {
-            final @NotNull Account[] accounts = Account.get(getConsoleOfflinePlayer());
-            if (accounts.length > 0) return;
-            final @Nullable String name = getInstance().config().serverAccountName();
+            final @NotNull Optional<@NotNull Account> account = Account.getServerAccount();
+            if (account.isPresent()) return;
+
+            final @NotNull String name = getInstance().config().serverAccountName();
             final @NotNull Account.Type type = getInstance().config().serverAccountType();
-            final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance().map(BigDecimal::valueOf).orElse(null);
+            final @Nullable BigDecimal balance = getInstance().config().serverAccountStartingBalance();
             new Account(getConsoleOfflinePlayer(), type, name, balance, false).insert();
+        }
+    }
+
+    /**
+     * Create server Vault account, if Vault enabled
+     */
+    private static void createServerVaultAccount() {
+        if (getInstance().config().integrationsVaultEnabled()) {
+            final @NotNull Optional<@NotNull Account> serverAccount = Account.getServerVaultAccount();
+            if (serverAccount.isPresent()) return;
+
+            final @NotNull String name = getInstance().config().integrationsVaultServerAccount();
+            new Account(getConsoleOfflinePlayer(), Account.Type.VAULT, name, BigDecimal.ZERO, false).insert();
         }
     }
 

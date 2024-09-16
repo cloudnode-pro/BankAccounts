@@ -55,6 +55,18 @@ WHERE `world` NOT LIKE '%-%-%-%-%';
 ALTER TABLE `pos`
     CHANGE COLUMN `world` `world` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL;
 
+ALTER TABLE `bank_accounts`
+    CHANGE COLUMN `name` `name` VARCHAR(24) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL;
+
+ALTER TABLE `bank_transactions`
+    CHANGE COLUMN `description` `description` VARCHAR(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL;
+
+ALTER TABLE `pos`
+    CHANGE COLUMN `description` `description` VARCHAR(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL;
+
+ALTER TABLE `bank_invoices`
+    CHANGE COLUMN `description` `description` VARCHAR(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL;
+    
 CREATE TABLE IF NOT EXISTS `change_owner_requests`
 (
     `account`   CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,

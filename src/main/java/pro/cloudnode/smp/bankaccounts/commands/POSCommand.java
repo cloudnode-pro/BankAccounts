@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
+import java.util.Set;
 
 /**
  * Create a POS at the location the player is looking at.
@@ -39,7 +40,7 @@ public final class POSCommand extends Command {
         if (args.length < 2)
             return sendUsage(sender, label, (args.length > 0 ? args[0] : "<account>") + " <price> [description]");
 
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
 
         if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission(Permissions.POS_CREATE_PERSONAL))
@@ -53,7 +54,7 @@ public final class POSCommand extends Command {
 
         final @NotNull BigDecimal price;
         try {
-            price = BigDecimal.valueOf(Double.parseDouble(args[1])).setScale(2, RoundingMode.HALF_UP);
+            price = new BigDecimal(args[1]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
@@ -76,10 +77,11 @@ public final class POSCommand extends Command {
         if (POS.get(chest).isPresent()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosAlreadyExists());
 
         @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
-        if (description != null && description.length() > 64) description = description.substring(0, 64);
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
-        if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+        final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
+        if (!disallowedChars.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
@@ -89,12 +91,18 @@ public final class POSCommand extends Command {
     @Override
     public @NotNull ArrayList<@NotNull String> tab(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args) {
         final @NotNull ArrayList<@NotNull String> suggestions = new ArrayList<>();
-        if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof Player && args.length == 1) {
-            final @NotNull Account[] accounts = sender.hasPermission(Permissions.POS_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-            for (final @NotNull Account account : accounts) {
-                if (account.frozen || (account.type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !sender.hasPermission(Permissions.POS_CREATE_PERSONAL)))
-                    continue;
-                suggestions.add(account.id);
+        if (sender.hasPermission(Permissions.POS_CREATE) && sender instanceof final @NotNull Player player && args.length == 1) {
+            if (args[0].startsWith("@")) {
+                if (sender.hasPermission(Permissions.POS_CREATE_OTHER))
+                    suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).toList());
+                else suggestions.add("@" + player.getName());
+            }
+            else {
+                final @NotNull Account @NotNull [] accounts;
+                if (sender.hasPermission(Permissions.POS_CREATE_OTHER))
+                    accounts = Account.get();
+                else accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
+                suggestions.addAll(Arrays.stream(accounts).filter(account -> !account.frozen && (account.type != Account.Type.PERSONAL || BankAccounts.getInstance().config().posAllowPersonal() || sender.hasPermission(Permissions.POS_CREATE_PERSONAL))).map(a -> a.id).toList());
             }
         }
         return suggestions;

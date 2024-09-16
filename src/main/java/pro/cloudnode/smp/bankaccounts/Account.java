@@ -10,6 +10,7 @@ import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 
 import javax.annotation.Nullable;
@@ -21,6 +22,7 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
@@ -107,7 +109,7 @@ public class Account {
     }
 
     public final @NotNull String name() {
-        return this.name == null ? (this.type == Type.PERSONAL && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
+        return this.name == null ? (this.type == Type.VAULT && this.owner.getName() != null ? this.owner.getName() : this.id) : this.name;
     }
 
     public final @NotNull Component ownerName() {
@@ -195,8 +197,19 @@ public class Account {
     /**
      * Get account by ID
      * @param id Account ID
+     * @deprecated Use {@link #get(Account.Tag)}
      */
+    @Deprecated
     public static @NotNull Optional<@NotNull Account> get(final @NotNull String id) {
+        return getByID(id);
+    }
+
+    /**
+     * Get account by ID
+     * @param id Account ID
+     */
+    @ApiStatus.Internal
+    private static @NotNull Optional<@NotNull Account> getByID(final @NotNull String id) {
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
              final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `bank_accounts` WHERE `id` = ? LIMIT 1")) {
             stmt.setString(1, id);
@@ -207,6 +220,19 @@ public class Account {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account: " + id, e);
             return Optional.empty();
         }
+    }
+
+    /**
+     * Get account by tag
+     */
+    public static @NotNull Optional<@NotNull Account> get(final @NotNull Account.Tag tag) {
+        return switch (tag.type) {
+            case ID -> get(tag.value);
+            case USERNAME -> {
+                final @NotNull OfflinePlayer player = BankAccounts.getInstance().getServer().getOfflinePlayer(tag.value);
+                yield getVaultAccount(player);
+            }
+        };
     }
 
     /**
@@ -269,6 +295,15 @@ public class Account {
     }
 
     /**
+     * Get the Vault account of a player
+     */
+    public static @NotNull Optional<@NotNull Account> getVaultAccount(final @NotNull OfflinePlayer player) {
+        final @NotNull Account @NotNull [] accounts = get(player, Type.VAULT);
+        if (accounts.length == 0) return Optional.empty();
+        return Optional.of(accounts[0]);
+    }
+
+    /**
      * Get accounts sorted by balance
      *
      * @param limit Max number of accounts to return. If not set, all accounts are returned
@@ -309,9 +344,16 @@ public class Account {
      */
     public static @NotNull Optional<@NotNull Account> getServerAccount() {
         if (!BankAccounts.getInstance().config().serverAccountEnabled()) return Optional.empty();
-        final @NotNull Account @NotNull [] accounts = get(BankAccounts.getConsoleOfflinePlayer());
-        if (accounts.length == 0) return Optional.empty();
-        return Optional.of(accounts[0]);
+        final @NotNull Optional<@NotNull Account> account = Arrays.stream(get(BankAccounts.getConsoleOfflinePlayer())).filter(a -> a.type != Type.VAULT).findFirst();
+        return account;
+    }
+
+    /**
+     * Get the server Vault account
+     */
+    public static @NotNull Optional<@NotNull Account> getServerVaultAccount() {
+        if (!BankAccounts.getInstance().config().integrationsVaultEnabled()) return Optional.empty();
+        return getVaultAccount(BankAccounts.getConsoleOfflinePlayer());
     }
 
     /**
@@ -378,7 +420,11 @@ public class Account {
         /**
          * Account owned by a company or other corporate entity
          */
-        BUSINESS;
+        BUSINESS,
+        /**
+         * Vault integration account
+         */
+        VAULT;
 
         /**
          * Get type name (as set in config)
@@ -430,6 +476,57 @@ public class Account {
         public void delete() {}
     }
 
+    /**
+     * An account tag is a unique pointer to a specific account.
+     */
+    public record Tag(@NotNull Account.Tag.Type type, @NotNull String value) {
+        /**
+         * Create a new account ID tag
+         * @param id Account ID
+         */
+        public static @NotNull Tag id(final @NotNull String id) {
+            return new Tag(Account.Tag.Type.ID, id);
+        }
+
+        /**
+         * Create a new Vault account tag by username
+         * @param username Username of Vault account holder
+         */
+        public static @NotNull Tag username(final @NotNull String username) {
+            return new Tag(Account.Tag.Type.USERNAME, username);
+        }
+
+        /**
+         * Create account tag from string
+         * @param string Use {@code @} prefix for Vault account owner username.
+         */
+        public static @NotNull Tag from(final @NotNull String string) {
+            if (string.startsWith("@")) return username(string.substring(1));
+            return id(string);
+        }
+
+        /**
+         * Get the account that this tag points to
+         */
+        public @NotNull Optional<@NotNull Account> get() {
+            return Account.get(this);
+        }
+
+        /**
+         * Account tag type
+         */
+        public enum Type {
+            /**
+             * Account by ID
+             */
+            ID,
+            /**
+             * Vault account by username
+             */
+            USERNAME
+        }
+    }
+    
     /**
      * A request to change the owner of a bank account (sent to the new owner)
      */

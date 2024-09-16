@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -57,14 +58,18 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.BALANCE_SELF) && !sender.hasPermission(Permissions.BALANCE_OTHER))
                         return suggestions;
                     if (args.length == 2) {
-                        if (sender.hasPermission(Permissions.BALANCE_OTHER)) suggestions.add("--player");
-                        if (sender instanceof OfflinePlayer player) {
-                            final @NotNull Account @NotNull [] accounts = Account.get(player);
-                            for (Account account : accounts) suggestions.add(account.id);
+                        if (sender.hasPermission(Permissions.BALANCE_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            suggestions.add("--player");
+                            if (args[1].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else {
+                                final @NotNull Account @NotNull [] accounts = Account.get();
+                                for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                            }
                         }
                         else {
-                            final @NotNull Account @NotNull [] accounts = Account.get();
-                            for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                            final @NotNull Account @NotNull [] accounts = Account.get(player);
+                            for (Account account : accounts) suggestions.add(account.id);
                         }
                     }
                     else if (args.length == 3 && args[1].equals("--player") && sender.hasPermission(Permissions.BALANCE_OTHER))
@@ -75,6 +80,8 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.ACCOUNT_CREATE)) return suggestions;
                     if (args.length == 2) {
                         suggestions.addAll(Arrays.asList("PERSONAL", "BUSINESS"));
+                        if (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT))
+                            suggestions.add("VAULT");
                     }
                     else if (args.length == 3 && sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
                         suggestions.add("--player");
@@ -85,16 +92,27 @@ public class BankCommand extends Command {
                 case "setbal", "setbalance" -> {
                     if (!sender.hasPermission(Permissions.SET_BALANCE)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = Account.get();
-                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        if (args[1].startsWith("@"))
+                            suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                        else {
+                            final @NotNull Account @NotNull [] accounts = Account.get();
+                            for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        }
                     }
                     if (args.length == 3) suggestions.add("Infinity");
                 }
                 case "setname", "rename" -> {
                     if (!sender.hasPermission(Permissions.SET_NAME)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.SET_NAME_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        if (args[1].startsWith("@") && sender.hasPermission(Permissions.SET_NAME_VAULT)) {
+                            if (sender.hasPermission(Permissions.SET_NAME_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.add("@" + player.getName());
+                        }
+                        else {
+                            final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.SET_NAME_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
+                            for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        }
                     }
                 }
                 case "freeze", "disable", "block", "unfreeze", "enable", "unblock" -> {
@@ -105,10 +123,15 @@ public class BankCommand extends Command {
                 }
                 case "delete" -> {
                     if (!sender.hasPermission(Permissions.DELETE)) return suggestions;
-                    if (args.length == 2) suggestions.addAll(Arrays
-                            .stream(sender.hasPermission(Permissions.DELETE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
-                            .filter(account -> sender.hasPermission(Permissions.DELETE_PERSONAL) || account.type != Account.Type.PERSONAL)
-                            .map(account -> account.id).collect(Collectors.toSet()));
+                    if (args.length == 2) {
+                        if (sender.hasPermission(Permissions.DELETE_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            if (args[1].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).collect(Collectors.toSet()));
+                        }
+                        else
+                            suggestions.addAll(Arrays.stream(Account.get(player)).map(account -> account.id).collect(Collectors.toSet()));
+                    }
                 }
                 case "changeowner", "newowner", "newholder", "changeholder" -> {
                     if (!sender.hasPermission(Permissions.CHANGE_OWNER)) return suggestions;
@@ -120,27 +143,47 @@ public class BankCommand extends Command {
                     if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
                         return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        if (sender.hasPermission(Permissions.TRANSFER_FROM_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            if (args[1].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).collect(Collectors.toSet()));
+                        }
+                        else
+                            suggestions.addAll(Arrays.stream(Account.get(player)).map(account -> account.id).collect(Collectors.toSet()));
                     }
-                    else if (args.length == 3) suggestions.addAll(Arrays
-                            .stream(sender.hasPermission(Permissions.TRANSFER_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender)))
-                            .filter(account -> !account.id.equals(args[1])).map(account -> account.id)
-                            .collect(Collectors.toSet()));
+                    else if (args.length == 3) {
+                        if (sender.hasPermission(Permissions.TRANSFER_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            if (args[2].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).collect(Collectors.toSet()));
+                        }
+                        else
+                            suggestions.addAll(Arrays.stream(Account.get(player)).map(account -> account.id).collect(Collectors.toSet()));
+                    }
                 }
                 case "transactions", "history" -> {
                     if (!sender.hasPermission(Permissions.HISTORY)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.HISTORY_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        if (sender.hasPermission(Permissions.HISTORY_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            if (args[1].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).collect(Collectors.toSet()));
+                        }
+                        else
+                            suggestions.addAll(Arrays.stream(Account.get(player)).map(account -> account.id).collect(Collectors.toSet()));
                     }
                     else if (args.length == 3) suggestions.add("--all");
                 }
                 case "instrument", "card" -> {
                     if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE)) return suggestions;
                     if (args.length == 2) {
-                        final @NotNull Account @NotNull [] accounts = sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? Account.get() : Account.get(BankAccounts.getOfflinePlayer(sender));
-                        for (final @NotNull Account account : accounts) suggestions.add(account.id);
+                        if (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) || !(sender instanceof final @NotNull OfflinePlayer player)) {
+                            if (args[1].startsWith("@"))
+                                suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                            else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).collect(Collectors.toSet()));
+                        }
+                        else
+                            suggestions.addAll(Arrays.stream(Account.get(player)).map(account -> account.id).collect(Collectors.toSet()));
                     }
                     else if (args.length == 3 && sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER))
                         suggestions.addAll(BankAccounts.getInstance().getServer().getOnlinePlayers().stream()
@@ -148,8 +191,11 @@ public class BankCommand extends Command {
                 }
                 case "whois", "who", "info" -> {
                     if (!sender.hasPermission(Permissions.WHOIS)) return suggestions;
-                    if (args.length == 2)
-                        suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).toList());
+                    if (args.length == 2) {
+                        if (args[1].startsWith("@"))
+                            suggestions.addAll(sender.getServer().getOnlinePlayers().stream().map(p -> "@" + p.getName()).collect(Collectors.toSet()));
+                        else suggestions.addAll(Arrays.stream(Account.get()).map(account -> account.id).toList());
+                    }
                 }
                 case "baltop" -> {
                     if (!sender.hasPermission(Permissions.BALTOP)) return suggestions;
@@ -215,9 +261,9 @@ public class BankCommand extends Command {
         if (sender.hasPermission(Permissions.HISTORY))
             sendMessage(sender, "<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>");
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE))
-            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS></gray></green> <white>- Create a new account</click>");
+            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "></gray></green> <white>- Create a new account</click>");
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
-            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS> --player <player></gray></green> <white>- Create an account for another player</click>");
+            sendMessage(sender, "<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player></gray></green> <white>- Create an account for another player</click>");
         if (sender.hasPermission(Permissions.FREEZE)) {
             sendMessage(sender, "<click:suggest_command:/bank freeze ><green>/bank freeze <gray><account></gray></green> <white>- Freeze an account</click>");
             sendMessage(sender, "<click:suggest_command:/bank unfreeze ><green>/bank unfreeze <gray><account></gray></green> <white>- Unfreeze an account</click>");
@@ -275,7 +321,7 @@ public class BankCommand extends Command {
         else {
             if (!sender.hasPermission(Permissions.BALANCE_SELF))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
-            final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+            final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
             if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
             else if (!sender.hasPermission(Permissions.BALANCE_OTHER) && !account.get().owner.getUniqueId()
                     .equals((BankAccounts.getOfflinePlayer(sender)).getUniqueId()))
@@ -323,19 +369,19 @@ public class BankCommand extends Command {
                 int index = Arrays.asList(args).indexOf("--player");
                 // index out of bounds
                 if (index == -1 || index >= args.length - 1)
-                    return sendUsage(sender, label, "create <PERSONAL|BUSINESS> --player <player>");
+                    return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player>");
                 target = BankAccounts.getInstance().getServer().getOfflinePlayer(args[index + 1]);
             }
         }
         if (args.length == 0)
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
         // check if target is the same as sender
         if (target.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender)
                 .getUniqueId()) && !sender.hasPermission(Permissions.ACCOUNT_CREATE))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<Account.Type> optionalType = Account.Type.fromString(args[0]);
-        if (optionalType.isEmpty())
-            return sendUsage(sender, label, "create <PERSONAL|BUSINESS> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
+        if (optionalType.isEmpty() || optionalType.get() == Account.Type.VAULT && !sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT))
+            return sendUsage(sender, label, "create <PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> " + (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER) ? "[--player <player>]" : ""));
         if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_BYPASS)) {
             final @NotNull Account @NotNull [] accounts = Account.get(target, optionalType.get());
             int limit = BankAccounts.getInstance().config().accountLimits(optionalType.get());
@@ -358,12 +404,12 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setbalance " + (args.length > 0 ? args[0] : "<account>") + " <balance|Infinity>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         else {
             final @Nullable BigDecimal balance;
             try {
-                balance = args[1].equalsIgnoreCase("Infinity") ? null : BigDecimal.valueOf(Double.parseDouble(args[1]));
+                balance = args[1].equalsIgnoreCase("Infinity") ? null : new BigDecimal(args[1]);
             }
             catch (NumberFormatException e) {
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
@@ -382,20 +428,21 @@ public class BankCommand extends Command {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2)
             return sendUsage(sender, label, "setname " + (args.length > 0 ? args[0] : "<account>") + " [name]");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         else {
             if (!sender.hasPermission(Permissions.SET_NAME_OTHER) && !account.get().owner.getUniqueId()
                     .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
                 return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-            if (!sender.hasPermission(Permissions.SET_NAME_PERSONAL) && account.get().type == Account.Type.PERSONAL)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenamePersonal());
+            if (!sender.hasPermission(Permissions.SET_NAME_VAULT) && account.get().type == Account.Type.VAULT)
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsRenameVaultAccount());
             @Nullable String name = String.join(" ", Arrays.copyOfRange(args, 1, args.length)).trim();
             name = name.length() > 32 ? name.substring(0, 32) : name;
             name = name.isEmpty() ? null : name;
 
-            if (name != null && (name.contains("<") || name.contains(">")))
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+            final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(name);
+            if (!disallowedChars.isEmpty())
+                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
             account.get().name = name;
             account.get().update();
@@ -406,7 +453,7 @@ public class BankCommand extends Command {
     public static boolean freeze(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.FREEZE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "freeze <account>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.FREEZE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
@@ -421,7 +468,7 @@ public class BankCommand extends Command {
     public static boolean unfreeze(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.FREEZE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "unfreeze <account>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.FREEZE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
@@ -439,19 +486,18 @@ public class BankCommand extends Command {
     public static boolean delete(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.DELETE)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "delete <account>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.DELETE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        if (account.get().type == Account.Type.VAULT && !sender.hasPermission(Permissions.DELETE_VAULT))
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDeleteVaultAccount());
         final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
         if (balance.isPresent() && balance.get().compareTo(BigDecimal.ZERO) != 0)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingBalance(account.get()));
         if (account.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
-        if (BankAccounts.getInstance().config()
-                .preventCloseLastPersonal() && account.get().type == Account.Type.PERSONAL && !sender.hasPermission(Permissions.DELETE_PERSONAL) && Account.get(account.get().owner, Account.Type.PERSONAL).length == 1)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsClosingPersonal());
         account.get().delete();
         return sendMessage(sender, BankAccounts.getInstance().config().messagesAccountDeleted(account.get()));
     }
@@ -524,17 +570,17 @@ public class BankCommand extends Command {
         if (confirm) argsCopy = Arrays.copyOfRange(argsCopy, 1, argsCopy.length);
         if (args.length < 3)
             return sendUsage(sender, label, "transfer " + (argsCopy.length > 0 ? argsCopy[0] : "<from>") + " " + (argsCopy.length > 1 ? argsCopy[1] : "<to>") + " <amount> [description]");
-        final @NotNull Optional<@NotNull Account> from = Account.get(argsCopy[0]);
+        final @NotNull Optional<@NotNull Account> from = Account.get(Account.Tag.from(argsCopy[0]));
         // account does not exist
         if (from.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         // sender does not own account
-        if (!from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
+        if (!sender.hasPermission(Permissions.TRANSFER_FROM_OTHER) && !from.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         // account is frozen
         if (from.get().frozen)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(from.get()));
+        final @NotNull Optional<@NotNull Account> to = Account.get(Account.Tag.from(argsCopy[1]));
         // recipient does not exist
-        final @NotNull Optional<@NotNull Account> to = Account.get(argsCopy[1]);
         if (to.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         // to is same as from
         if (from.get().id.equals(to.get().id)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsSameFromTo());
@@ -550,10 +596,13 @@ public class BankCommand extends Command {
         if (!sender.hasPermission(Permissions.TRANSFER_SELF) && to.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
+        // to is server Vault account
+        if (to.get().owner.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()) && to.get().type == Account.Type.VAULT)
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferToServerVault());
 
         final @NotNull BigDecimal amount;
         try {
-            amount = BigDecimal.valueOf(Double.parseDouble(argsCopy[2])).setScale(2, RoundingMode.HALF_UP);
+            amount = new BigDecimal(argsCopy[2]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (NumberFormatException e) {
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[2]));
@@ -567,13 +616,14 @@ public class BankCommand extends Command {
 
         @Nullable String description = args.length > 3 ? String
                 .join(" ", Arrays.copyOfRange(argsCopy, 3, argsCopy.length)).trim() : null;
-        if (description != null && description.length() > 64) description = description.substring(0, 64);
+        if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
-        if (description != null && (description.contains("<") || description.contains(">")))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters("<>"));
+        final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
+        if (!disallowedChars.isEmpty())
+            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         if (!confirm && BankAccounts.getInstance().config().transferConfirmationEnabled()) {
-            final @NotNull BigDecimal minAmount = BigDecimal.valueOf(BankAccounts.getInstance().config().transferConfirmationMinAmount());
+            final @NotNull BigDecimal minAmount = BankAccounts.getInstance().config().transferConfirmationMinAmount();
             boolean bypassOwnAccounts = BankAccounts.getInstance().config().transferConfirmationBypassOwnAccounts();
             if (amount.compareTo(minAmount) >= 0 && (!bypassOwnAccounts || !from.get().owner.getUniqueId()
                     .equals(to.get().owner.getUniqueId()))) {
@@ -596,7 +646,7 @@ public class BankCommand extends Command {
     public static boolean transactions(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.HISTORY)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "transactions <account> [page=1|--all]");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.HISTORY_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
@@ -652,7 +702,7 @@ public class BankCommand extends Command {
                 .getInstance().getServer().getPlayer(args[1]) : player;
         if (target == null || !target.isOnline())
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
@@ -687,7 +737,7 @@ public class BankCommand extends Command {
     public static boolean whois(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.WHOIS)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "whois <account>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
         return account
                 .map(value -> sendMessage(sender, BankAccounts.getInstance().config().messagesWhois(value)))
                 .orElseGet(() -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound()));

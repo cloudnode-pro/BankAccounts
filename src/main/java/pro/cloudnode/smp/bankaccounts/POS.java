@@ -100,7 +100,7 @@ public final class POS {
         this.world = world.get();
         this.price = rs.getBigDecimal("price");
         this.description = rs.getString("description");
-        this.seller = Account.get(rs.getString("seller")).orElse(new Account.ClosedAccount());
+        this.seller = Account.get(Account.Tag.from(rs.getString("seller"))).orElse(new Account.ClosedAccount());
         this.created = rs.getDate("created");
     }
 
