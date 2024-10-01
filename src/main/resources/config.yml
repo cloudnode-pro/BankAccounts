@@ -162,6 +162,17 @@ instruments:
         # Level 1 is always applied.
         enchantment: unbreaking
 
+# Change account owner
+change-owner:
+    # The minimum balance an account must have to be able to be transferred to another player
+    min-balance: 0
+    # Require the account to have transaction history to be able to be transferred
+    require-history: true
+    # Require confirmation/approval by the new owner
+    confirm: true
+    # In minutes, when should an ownership change request expire
+    timeout: 15
+
 # POS
 # Note: you cannot use <hover> <click> etc. in GUIs
 pos:
@@ -378,6 +389,20 @@ messages:
         delete-vault-account: "<red>(!) You cannot delete this account.</red>"
         # Trying to transfer funds to the server Vault account
         transfer-to-server-vault: "<red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>"
+        # Account balance minimum to change owner not satisfied (placeholders same as balance)
+        # Additional placeholders:
+        # <required-balance> - required min balance, example: 123456.78
+        # <required-balance-formatted> - required min balance with formatting, example: $123,456.78
+        # <required-balance-short> - required min balance with formatting, example: $123k
+        change-owner-balance: "<red>(!) The account balance must be at least <gray><balance-formatted></gray></red>"
+        # Account must have transaction history in order to be transferred
+        change-owner-no-history: "<red>(!) You must have a transaction history in order to change the owner.</red>"
+        # The account is already owned by <player> (the new owner's username)
+        already-owns-account: "<red>(!) This account is already owned by <gray><player></gray>.</red>"
+        # Change owner request not found
+        change-owner-not-found: "<red>(!) This account ownership change request was not found.</red>"
+        # Cannot accept change owner request
+        change-owner-accept-failed: "<red>(!) Failed to accept ownership change request.</red>"
 
     # Account balance
     # Available placeholders:
@@ -426,8 +451,8 @@ messages:
     # Example: <to-account-id>, <from-balance-formatted>
     # Additional placeholders:
     # <amount> - Transfer amount without formatting, example: 123456.78
-    # <amount-formatted> - Transfer amount with formatting, example: 123,456.78
-    # <amount-short> - Transfer amount with formatting, example: 123k
+    # <amount-formatted> - Transfer amount with formatting, example: $123,456.78
+    # <amount-short> - Transfer amount with formatting, example: $123k
     # <description> - Transfer description
     # <confirm-command> - Command to run to confirm transfer
     confirm-transfer: |-
@@ -474,8 +499,8 @@ messages:
     # Same placeholders as balance (account is that of the seller).
     # Additional placeholders:
     # <price> - Price of the POS contents without formatting, example: 123456.78
-    # <price-formatted> - Price of the POS contents with formatting, example: 123,456.78
-    # <price-short> - Price of the POS contents with formatting, example: 123k
+    # <price-formatted> - Price of the POS contents with formatting, example: $123,456.78
+    # <price-short> - Price of the POS contents with formatting, example: $123k
     # <description> - Bank statement description
     # <x> - X coordinate of the chest
     # <y> - Y coordinate of the chest
@@ -618,6 +643,30 @@ messages:
         # <unpaid> - number of unpaid invoices></yellow>."
         # <unpaid-choice> - choice placeholder for unpaid invoices; see https://docs.advntr.dev/minimessage/dynamic-replacements.html#insert-a-choice
         notify: "<click:run_command:/invoice list><hover:show_text:'Click to view unpaid invoices'><yellow>(!) You have <gray><unpaid></gray> unpaid invoice<unpaid-choice:'1#|1<s'>. <gray>Click to view.</gray></yellow></hover></click>"
+    
+    # Account owner change requests
+    change-owner:
+        # You have received a request to become the new account owner
+        # Placeholders:
+        # <new-owner-uuid> - new owner UUID
+        # <new-owner> - new owner username.
+        # <accept-command> - command to accept the request
+        # <account> - Account name. Defaults to owner username or ID if not set.
+        # <account-id> - Account ID
+        # <account-type> - Account type (Personal or Business)
+        # <account-owner> - Account owner username
+        # <balance> - Account balance without formatting, example: 123456.78
+        # <balance-formatted> - Account balance with formatting, example: $123,456.78
+        # <balance-short> - Account balance with formatting, example: $123k
+        request: <green>(!) You have received a request to become the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray><newline><click:run_command:<accept-command>> <dark_gray>></dark_gray> <green><bold>ACCEPT</bold></green></click>
+
+        # You have sent an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        sent: <green>(!) You have sent a request to <gray><new-owner></gray> to become the new owner of account <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>.</green>
+
+        # You have accepted an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        accepted: <click:run_command:/bank bal <account-id>><green>(!) You are now the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>. Click to view account.</green></click>
 
     # New version available
     # Placeholders:
