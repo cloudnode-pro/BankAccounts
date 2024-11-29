@@ -26,6 +26,7 @@ import java.sql.Types;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
@@ -65,6 +66,8 @@ public final class POS {
      * Date the POS was created
      */
     public final @NotNull Date created;
+
+    public final static @NotNull HashMap<@NotNull Inventory, @NotNull POS> activePosChestGuis = new HashMap<>();
 
     /**
      * Create new POS instance
@@ -116,6 +119,15 @@ public final class POS {
      */
     public @NotNull Block getBlock() {
         return getLocation().getBlock();
+    }
+
+    /**
+     * Get POS chest
+     */
+    public @Nullable Chest getChest() {
+        if (getBlock().getState() instanceof final @NotNull Chest chest) return chest;
+        delete();
+        return null;
     }
 
     /**
@@ -263,6 +275,7 @@ public final class POS {
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
+        POS.activePosChestGuis.put(gui, pos);
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
@@ -308,6 +321,7 @@ public final class POS {
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
+        POS.activePosChestGuis.put(gui, pos);
         gui.addItem(items);
 
         final @NotNull ItemStack overview = new ItemStack(BankAccounts.getInstance().config().posInfoMaterial(), 1);
