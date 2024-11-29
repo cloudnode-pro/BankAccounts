@@ -161,11 +161,13 @@ public class GUI implements Listener {
      */
     @EventHandler(priority = EventPriority.HIGHEST)
     public void posItemsChangeWhileOpened(final @NotNull InventoryMoveItemEvent event) {
-        final @NotNull Inventory inventory = event.getSource();
+        final @NotNull Inventory source = event.getSource();
+        final @NotNull Inventory destination = event.getDestination();
         for (final @NotNull POS pos : POS.activePosChestGuis.values()) {
             final @Nullable Chest chest = pos.getChest();
             if (chest == null) continue;
-            if (inventory.equals(chest.getInventory())) {
+            final @NotNull Inventory chestInventory = chest.getInventory();
+            if (source.equals(chestInventory) || destination.equals(chestInventory)) {
                 event.setCancelled(true);
                 return;
             }
