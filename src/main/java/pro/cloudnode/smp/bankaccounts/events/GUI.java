@@ -159,7 +159,7 @@ public class GUI implements Listener {
      * Detect changes in items of POS chest while a POS GUI is opened and prevent the item change.
      * POS items can still be modified if no POS GUI is opened for that POS.
      */
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
     public void posItemsChangeWhileOpened(final @NotNull InventoryMoveItemEvent event) {
         final @NotNull Inventory source = event.getSource();
         final @NotNull Inventory destination = event.getDestination();
