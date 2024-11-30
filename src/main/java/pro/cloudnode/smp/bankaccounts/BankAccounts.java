@@ -23,7 +23,7 @@ import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
-import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
+import pro.cloudnode.smp.bankaccounts.events.POSOpen;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
 import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
@@ -89,7 +89,7 @@ public final class BankAccounts extends JavaPlugin {
         final @NotNull Listener[] events = new Listener[]{
                 new Join(),
                 new BlockBreak(),
-                new PlayerInteract(),
+                new POSOpen(),
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);

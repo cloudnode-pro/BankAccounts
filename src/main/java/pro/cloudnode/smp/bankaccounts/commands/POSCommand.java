@@ -1,10 +1,14 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.Chest;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -21,6 +25,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -73,6 +78,8 @@ public final class POSCommand extends Command {
         if (block.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAsyncFailed());
         if (!(block.get() instanceof final @NotNull Chest chest))
             return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosNotChest());
+        if (!canOpenChest(player, chest))
+            return CommandResult.DO_NOTHING;
         if (chest.getInventory() instanceof DoubleChestInventory)
             return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosDoubleChest());
         if (chest.getInventory().isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosEmpty());
@@ -88,6 +95,31 @@ public final class POSCommand extends Command {
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
         return new Message(sender, BankAccounts.getInstance().config().messagesPosCreated(pos));
+    }
+
+    private static boolean canOpenChest(final @NotNull Player player, final @NotNull Chest chest) {
+        return BankAccounts.runOnMain(() -> {
+            final @NotNull Block block = chest.getBlock();
+
+            final @NotNull PlayerInteractEvent event = new PlayerInteractEvent(
+                    player,
+                    Action.RIGHT_CLICK_BLOCK,
+                    player.getInventory().getItemInMainHand(),
+                    block,
+                    getTargetedFace(player).orElse(BlockFace.NORTH)
+            );
+
+            BankAccounts.getInstance().getServer().getPluginManager().callEvent(event);
+            return event.useInteractedBlock() != Event.Result.DENY;
+        }).orElse(false);
+    }
+
+    private static @NotNull Optional<@NotNull BlockFace> getTargetedFace(final @NotNull Player player) {
+        final @NotNull List<@NotNull Block> lastTwoTargetBlocks = player.getLastTwoTargetBlocks(null, 5);
+        if (lastTwoTargetBlocks.size() != 2 || !lastTwoTargetBlocks.get(1).getType().isOccluding()) return Optional.empty();
+        final @NotNull Block targetBlock = lastTwoTargetBlocks.get(1);
+        final @NotNull Block adjacentBlock = lastTwoTargetBlocks.get(0);
+        return Optional.ofNullable(targetBlock.getFace(adjacentBlock));
     }
 
     @Override
