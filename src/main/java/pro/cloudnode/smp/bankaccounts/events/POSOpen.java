@@ -11,6 +11,7 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.DoubleChestInventory;
 import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.POS;
@@ -22,13 +23,13 @@ public final class POSOpen implements Listener {
     @EventHandler
     public void openPOS(final @NotNull PlayerInteractEvent event) {
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
-        final @NotNull Optional<Block> block = Optional.ofNullable(event.getClickedBlock());
-        if (block.isEmpty()) return;
-        if (!(block.get().getState() instanceof final @NotNull Chest chest)) return;
+        final @Nullable Block block = event.getClickedBlock();
+        if (block == null) return;
+        if (!(block.getState() instanceof final @NotNull Chest chest)) return;
         if (chest.getInventory().isEmpty()) return;
         if (chest.getInventory() instanceof DoubleChestInventory) return;
 
-        final @NotNull Optional<POS> pos = POS.get(block.get());
+        final @NotNull Optional<POS> pos = POS.get(block);
         if (pos.isEmpty()) return;
 
         event.setUseInteractedBlock(Event.Result.DENY);
