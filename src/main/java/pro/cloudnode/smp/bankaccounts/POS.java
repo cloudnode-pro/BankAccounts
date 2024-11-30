@@ -271,7 +271,7 @@ public final class POS {
      * @param pos    The POS
      */
     public static void openOwnerGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos) {
-        final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
+        final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).map(ItemStack::clone).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
@@ -317,7 +317,7 @@ public final class POS {
      * @param pos    The POS
      */
     public static void openBuyGui(final @NotNull Player player, final @NotNull Chest chest, final @NotNull POS pos, final @NotNull Account account) {
-        final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).toArray(ItemStack[]::new);
+        final @NotNull ItemStack @NotNull [] items = Arrays.stream(chest.getInventory().getStorageContents()).filter(Objects::nonNull).map(ItemStack::clone).toArray(ItemStack[]::new);
         final int extraRows = 1;
         final int size = extraRows * 9 + items.length + 9 - items.length % 9;
         final @NotNull Inventory gui = BankAccounts.getInstance().getServer().createInventory(null, size, BankAccounts.getInstance().config().posTitle(pos));
