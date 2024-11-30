@@ -1,5 +1,7 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -123,23 +125,23 @@ public final class InvoiceCommand extends Command {
      * <p>{@code /invoice help}</p>
      */
     public static @NotNull CommandResult help(final @NotNull CommandSender sender, final @NotNull String label) {
-        sender.sendMessage("<dark_gray>---</dark_gray>");
-        sender.sendMessage("<green>Available commands:");
-        sender.sendMessage("");
+        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
+        sender.sendMessage(MiniMessage.miniMessage().deserialize("<green>Available commands:"));
+        sender.sendMessage(Component.empty());
         if (sender.hasPermission(Permissions.INVOICE_CREATE)) {
-            sender.sendMessage("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>");
-            sender.sendMessage("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>");
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>"));
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>"));
         }
         if (sender.hasPermission(Permissions.INVOICE_VIEW))
-            sender.sendMessage("<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>");
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>"));
         if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
-            sender.sendMessage("<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>");
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>"));
         if (sender.hasPermission(Permissions.INVOICE_SEND))
-            sender.sendMessage("<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>");
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>"));
         if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
-            sender.sendMessage("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>");
+            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>"));
             if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
-                sender.sendMessage("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>");
+                sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>"));
         }
         return new Message(sender, "<dark_gray>---</dark_gray>");
     }
