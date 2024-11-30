@@ -77,7 +77,7 @@ public final class POSCommand extends Command {
         if (!(block.get() instanceof final @NotNull Chest chest))
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosNotChest());
         if (!canOpenChest(player, chest))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosProtectedLand());
+            return true;
         if (chest.getInventory() instanceof DoubleChestInventory)
             return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosDoubleChest());
         if (chest.getInventory().isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosEmpty());

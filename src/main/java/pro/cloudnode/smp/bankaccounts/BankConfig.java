@@ -650,11 +650,6 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-create-business-only")));
     }
 
-    // messages.errors.pos-protected-land
-    public @NotNull Component messagesErrorsPosProtectedLand() {
-        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.pos-protected-land")));
-    }
-
     // messages.errors.disallowed-characters
     public @NotNull Component messagesErrorsDisallowedCharacters(final @NotNull Set<@NotNull String> characters) {
         return MiniMessage.miniMessage().deserialize(
