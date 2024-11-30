@@ -18,7 +18,7 @@ import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.util.Optional;
 
-public final class PlayerInteract implements Listener {
+public final class POSOpen implements Listener {
     @EventHandler
     public void openPOS(final @NotNull PlayerInteractEvent event) {
         final @NotNull Player player = event.getPlayer();
