@@ -7,6 +7,8 @@ import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Permissions;
+import pro.cloudnode.smp.bankaccounts.commands.result.CommandResult;
+import pro.cloudnode.smp.bankaccounts.commands.result.Message;
 
 import java.math.BigDecimal;
 import java.sql.Connection;
@@ -22,7 +24,7 @@ import java.util.logging.Level;
 
 public final class BaltopCommand extends Command {
     @Override
-    public boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public @NotNull CommandResult execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
         return run(sender, label, args, new String[0]);
     }
 
@@ -35,8 +37,8 @@ public final class BaltopCommand extends Command {
         return suggestions;
     }
 
-    public static boolean run(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args, final @NotNull String @NotNull [] labelArgs) {
-        if (!sender.hasPermission(Permissions.BALTOP)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+    public static @NotNull CommandResult run(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args, final @NotNull String @NotNull [] labelArgs) {
+        if (!sender.hasPermission(Permissions.BALTOP)) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         final @NotNull Optional<@NotNull String> type = args.length > 0 && (args[0].equalsIgnoreCase("personal") || args[0].equalsIgnoreCase("business") || args[0].equalsIgnoreCase("player")) ? Optional.of(args[0]) : Optional.empty();
         int page = (int) Math.min(1e9, (args.length == 1 && type.isEmpty() && isInteger(args[0])) ? Integer.parseInt(args[0]) : ((args.length > 1 && isInteger(args[1])) ? Integer.parseInt(args[1]) : 1));
         if (page < 1) page = 1;
@@ -49,19 +51,19 @@ public final class BaltopCommand extends Command {
         if (accountType != null || type.isEmpty()) {
             final @NotNull String category = accountType != null ? BankAccounts.getInstance().config().messagesTypes(accountType) : "All";
             final @NotNull Account @NotNull [] accounts = Account.getTopBalance(perPage, page, accountType);
-            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader(category, page, cmdPrev, cmdNext));
+            sender.sendMessage(BankAccounts.getInstance().config().messagesBaltopHeader(category, page, cmdPrev, cmdNext));
             for (int i = 0; i < accounts.length; ++i) {
                 final @NotNull Account account = accounts[i];
-                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntry(account, (page - 1) * perPage + i + 1));
+                sender.sendMessage(BankAccounts.getInstance().config().messagesBaltopEntry(account, (page - 1) * perPage + i + 1));
             }
         }
         else {
-            sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopHeader("Players", page, cmdPrev, cmdNext));
+            sender.sendMessage(BankAccounts.getInstance().config().messagesBaltopHeader("Players", page, cmdPrev, cmdNext));
             final @NotNull BaltopPlayer @NotNull [] players = BaltopPlayer.get(perPage, page);
             for (int i = 0; i < players.length; ++i)
-                sendMessage(sender, BankAccounts.getInstance().config().messagesBaltopEntryPlayer(players[i], (page - 1) * perPage + i + 1));
+                sender.sendMessage(BankAccounts.getInstance().config().messagesBaltopEntryPlayer(players[i], (page - 1) * perPage + i + 1));
         }
-        return true;
+        return CommandResult.DO_NOTHING;
     }
 
     public static boolean isInteger(final @NotNull String string) {

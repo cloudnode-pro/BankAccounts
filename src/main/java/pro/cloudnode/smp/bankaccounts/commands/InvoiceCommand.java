@@ -10,6 +10,8 @@ import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Invoice;
 import pro.cloudnode.smp.bankaccounts.Permissions;
+import pro.cloudnode.smp.bankaccounts.commands.result.CommandResult;
+import pro.cloudnode.smp.bankaccounts.commands.result.Message;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -23,9 +25,9 @@ import java.util.stream.Stream;
 
 public final class InvoiceCommand extends Command {
     @Override
-    public boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public @NotNull CommandResult execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
         if (!sender.hasPermission(Permissions.COMMAND))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1)
             return help(sender, label);
         return switch (args[0]) {
@@ -35,7 +37,7 @@ public final class InvoiceCommand extends Command {
             case "pay" -> pay(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "send", "remind" -> send(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "list" -> list(sender, Arrays.copyOfRange(args, 1, args.length), label);
-            default -> sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand(label));
+            default -> new Message(sender, BankAccounts.getInstance().config().messagesErrorsUnknownCommand(label));
         };
     }
 
@@ -120,35 +122,35 @@ public final class InvoiceCommand extends Command {
      * Show available commands
      * <p>{@code /invoice help}</p>
      */
-    public static boolean help(final @NotNull CommandSender sender, final @NotNull String label) {
-        sendMessage(sender, "<dark_gray>---</dark_gray>");
-        sendMessage(sender, "<green>Available commands:");
-        sendMessage(sender, "");
+    public static @NotNull CommandResult help(final @NotNull CommandSender sender, final @NotNull String label) {
+        sender.sendMessage("<dark_gray>---</dark_gray>");
+        sender.sendMessage("<green>Available commands:");
+        sender.sendMessage("");
         if (sender.hasPermission(Permissions.INVOICE_CREATE)) {
-            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>");
-            sendMessage(sender, "<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>");
         }
         if (sender.hasPermission(Permissions.INVOICE_VIEW))
-            sendMessage(sender, "<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>");
         if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
-            sendMessage(sender, "<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>");
         if (sender.hasPermission(Permissions.INVOICE_SEND))
-            sendMessage(sender, "<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>");
         if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
-            sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>");
+            sender.sendMessage("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>");
             if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
-                sendMessage(sender, "<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>");
+                sender.sendMessage("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>");
         }
-        return sendMessage(sender, "<dark_gray>---</dark_gray>");
+        return new Message(sender, "<dark_gray>---</dark_gray>");
     }
 
     /**
      * Create invoice
      * <p>{@code /invoice create <account> <amount> [description] [--player <player>]}</p>
      */
-    public static boolean create(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+    public static @NotNull CommandResult create(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.INVOICE_CREATE))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         final @NotNull Optional<@NotNull String> playerArg;
         final int playerIndex = Arrays.asList(args).indexOf("--player");
@@ -164,7 +166,7 @@ public final class InvoiceCommand extends Command {
         final @Nullable OfflinePlayer target = playerArg.map(u -> BankAccounts.getInstance().getServer().getOfflinePlayer(u)).orElse(null);
 
         if (target != null && !target.isOnline() && !target.hasPlayedBefore())
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
 
         final @NotNull String usage = "create <account> <amount> [description] [--player <player>]";
         if (argsCopy.length == 0) return sendUsage(sender, label, usage);
@@ -175,131 +177,131 @@ public final class InvoiceCommand extends Command {
             amount = new BigDecimal(argsCopy[1]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
         }
         if (amount.compareTo(BigDecimal.ZERO) <= 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNegativeInvoice());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNegativeInvoice());
 
         final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(argsCopy[0]));
         if (account.isEmpty())
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_CREATE_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         if (account.get().frozen)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
 
         @Nullable String description = argsCopy.length < 3 ? null : String.join(" ", Arrays.copyOfRange(argsCopy, 2, argsCopy.length));
         if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
         final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
         if (!disallowedChars.isEmpty())
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         final @NotNull Invoice invoice = new Invoice(account.get(), amount, description, target);
         invoice.insert();
 
         final @NotNull Optional<@NotNull Player> onlineRecipient = invoice.buyer().isPresent() ? Optional.ofNullable(invoice.buyer().get().getPlayer()) : Optional.empty();
-        onlineRecipient.ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoiceReceived(invoice)));
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice));
+        onlineRecipient.ifPresent(player -> player.sendMessage(BankAccounts.getInstance().config().messagesInvoiceReceived(invoice)));
+        return new Message(sender, BankAccounts.getInstance().config().messagesInvoiceCreated(invoice));
     }
 
     /**
      * View invoice details
      * <p>{@code /invoice details <invoice>}</p>
      */
-    public static boolean details(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+    public static @NotNull CommandResult details(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.INVOICE_VIEW))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         if (args.length < 1)
             return sendUsage(sender, label, "details <invoice>");
 
         final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
-        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (invoice.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_VIEW_OTHER)
                 && !invoice.get().buyer().map(b -> b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(true)
                 && !invoice.get().seller.owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())
-        ) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        ) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
 
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceDetails(invoice.get()));
+        return new Message(sender, BankAccounts.getInstance().config().messagesInvoiceDetails(invoice.get()));
     }
 
     /**
      * Pay invoice
      * <p>{@code /invoice pay <invoice> <account>}</p>
      */
-    public static boolean pay(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+    public static @NotNull CommandResult pay(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.TRANSFER_SELF) && !sender.hasPermission(Permissions.TRANSFER_OTHER))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         final @NotNull String usage = "pay <invoice> <account>";
         if (args.length < 1) return sendUsage(sender, label, usage);
         if (args.length < 2) return sendUsage(sender, label, usage.replace("<invoice>", args[0]));
 
         final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
-        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (invoice.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_PAY_OTHER) && invoice.get().buyer().map(b -> !b.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId())).orElse(false))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (invoice.get().transaction != null)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
 
         final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[1]));
         if (account.isEmpty())
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_PAY_ACCOUNT_OTHER) && !account.get().owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
         if (invoice.get().seller.id.equals(account.get().id))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoicePaySelf());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoicePaySelf());
         if (!sender.hasPermission(Permissions.TRANSFER_SELF) && account.get().owner.getUniqueId().equals(invoice.get().seller.owner.getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
         if (!sender.hasPermission(Permissions.TRANSFER_OTHER) && !account.get().owner.getUniqueId().equals(invoice.get().seller.owner.getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsTransferOtherOnly());
         if (account.get().frozen)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
         if (!account.get().hasFunds(invoice.get().amount))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(account.get()));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInsufficientFunds(account.get()));
 
         invoice.get().pay(account.get());
 
-        Optional.ofNullable(invoice.get().seller.owner.getPlayer()).ifPresent(player -> sendMessage(player, BankAccounts.getInstance().config().messagesInvoicePaidSeller(invoice.get())));
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoicePaidBuyer(invoice.get()));
+        Optional.ofNullable(invoice.get().seller.owner.getPlayer()).ifPresent(player -> player.sendMessage(BankAccounts.getInstance().config().messagesInvoicePaidSeller(invoice.get())));
+        return new Message(sender, BankAccounts.getInstance().config().messagesInvoicePaidBuyer(invoice.get()));
     }
 
     /**
      * Send invoice to a player
      * <p>{@code /invoice send <invoice> <player>}</p>
      */
-    public static boolean send(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+    public static @NotNull CommandResult send(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.INVOICE_SEND))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         final @NotNull String usage = "send <invoice> <player>";
         if (args.length < 1) return sendUsage(sender, label, usage);
         if (args.length < 2) return sendUsage(sender, label, usage.replace("<invoice>", args[0]));
 
         final @NotNull Optional<@NotNull Player> player = Optional.ofNullable(BankAccounts.getInstance().getServer().getPlayer(args[1]));
-        if (player.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
+        if (player.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNotFound());
 
         final @NotNull Optional<@NotNull Invoice> invoice = Invoice.get(args[0]);
-        if (invoice.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+        if (invoice.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (!sender.hasPermission(Permissions.INVOICE_SEND_OTHER) && !invoice.get().seller.owner.getUniqueId().equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceNotFound());
         if (invoice.get().buyer().isPresent() && !invoice.get().buyer().get().getUniqueId().equals(player.get().getUniqueId()) && !player.get().hasPermission(Permissions.INVOICE_VIEW_OTHER))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceCannotSend());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceCannotSend());
         if (invoice.get().transaction != null)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvoiceAlreadyPaid());
 
-        sendMessage(player.get(), BankAccounts.getInstance().config().messagesInvoiceReceived(invoice.get()));
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceSent(invoice.get()));
+        player.get().sendMessage(BankAccounts.getInstance().config().messagesInvoiceReceived(invoice.get()));
+        return new Message(sender, BankAccounts.getInstance().config().messagesInvoiceSent(invoice.get()));
     }
 
     /**
      * List invoices
      * <p>{@code /invoice list [all|sent|received] [page] [--player <player>]}</p>
      */
-    public static boolean list(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
+    public static @NotNull CommandResult list(final @NotNull CommandSender sender, @NotNull String @NotNull [] args, final @NotNull String label) {
         if (!sender.hasPermission(Permissions.INVOICE_VIEW))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         final @NotNull Optional<@NotNull String> playerArg;
         final int playerIndex = Arrays.asList(args).indexOf("--player");
@@ -314,7 +316,7 @@ public final class InvoiceCommand extends Command {
 
         final @NotNull OfflinePlayer target = playerArg.map(u -> BankAccounts.getInstance().getServer().getOfflinePlayer(u)).orElse(BankAccounts.getOfflinePlayer(sender));
         if (!target.isOnline() && !target.hasPlayedBefore() && !target.getUniqueId().equals(BankAccounts.getConsoleOfflinePlayer().getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
 
         final @NotNull String type = argsCopy.length < 1 ? "all" : argsCopy[0];
         final int page;
@@ -324,7 +326,7 @@ public final class InvoiceCommand extends Command {
                 page = Integer.parseInt(argsCopy[1]);
             }
             catch (final @NotNull NumberFormatException e) {
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
+                return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(argsCopy[1]));
             }
         }
 
@@ -346,8 +348,8 @@ public final class InvoiceCommand extends Command {
         final @NotNull String cmdPrev = "/" + label + " list " + type + " " + (page - 1) + playerArg.map(u -> " --player " + u).orElse("");
         final @NotNull String cmdNext = "/" + label + " list " + type + " " + (page + 1) + playerArg.map(u -> " --player " + u).orElse("");
         
-        sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListHeader(page, cmdPrev, cmdNext));
-        for (final @NotNull Invoice invoice : invoices) sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListEntry(invoice));
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesInvoiceListFooter(page, cmdPrev, cmdNext));
+        sender.sendMessage(BankAccounts.getInstance().config().messagesInvoiceListHeader(page, cmdPrev, cmdNext));
+        for (final @NotNull Invoice invoice : invoices) sender.sendMessage(BankAccounts.getInstance().config().messagesInvoiceListEntry(invoice));
+        return new Message(sender, BankAccounts.getInstance().config().messagesInvoiceListFooter(page, cmdPrev, cmdNext));
     }
 }
