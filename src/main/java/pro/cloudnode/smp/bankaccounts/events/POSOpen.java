@@ -21,7 +21,6 @@ import java.util.Optional;
 public final class POSOpen implements Listener {
     @EventHandler
     public void openPOS(final @NotNull PlayerInteractEvent event) {
-        final @NotNull Player player = event.getPlayer();
         if (event.getAction() != Action.RIGHT_CLICK_BLOCK) return;
         final @NotNull Optional<Block> block = Optional.ofNullable(event.getClickedBlock());
         if (block.isEmpty()) return;
@@ -34,6 +33,7 @@ public final class POSOpen implements Listener {
 
         event.setUseInteractedBlock(Event.Result.DENY);
 
+        final @NotNull Player player = event.getPlayer();
         if (player.getUniqueId().equals(pos.get().seller.owner.getUniqueId())) {
             POS.openOwnerGui(player, chest, pos.get());
             return;
