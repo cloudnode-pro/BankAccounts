@@ -180,7 +180,9 @@ public class GUI implements Listener {
     @EventHandler
     public void posGuiClosed(final @NotNull InventoryCloseEvent event) {
         if (!POS.activePosChestGuis.containsKey(event.getInventory())) return;
-        POS.activePosChestGuis.remove(event.getInventory());
+        BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
+            POS.activePosChestGuis.remove(event.getInventory());
+        }, 40L);
     }
 
     public final static @NotNull HashMap<@NotNull String, @NotNull NamespacedKey[]> keys = new HashMap<>() {{
