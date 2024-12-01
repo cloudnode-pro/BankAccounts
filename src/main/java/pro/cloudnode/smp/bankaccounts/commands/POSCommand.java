@@ -17,6 +17,8 @@ import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.POS;
 import pro.cloudnode.smp.bankaccounts.Permissions;
+import pro.cloudnode.smp.bankaccounts.commands.result.CommandResult;
+import pro.cloudnode.smp.bankaccounts.commands.result.Message;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -36,63 +38,63 @@ import java.util.Set;
  */
 public final class POSCommand extends Command {
     @Override
-    public boolean execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
+    public @NotNull CommandResult execute(final @NotNull CommandSender sender, final @NotNull String label, final @NotNull String @NotNull [] args) {
         if (!(sender instanceof final @NotNull Player player))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPlayerOnly());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPlayerOnly());
         if (!player.hasPermission(Permissions.POS_CREATE))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
 
         if (args.length < 2)
             return sendUsage(sender, label, (args.length > 0 ? args[0] : "<account>") + " <price> [description]");
 
         final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
-        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (account.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
 
         if (account.get().type == Account.Type.PERSONAL && !BankAccounts.getInstance().config().posAllowPersonal() && !player.hasPermission(Permissions.POS_CREATE_PERSONAL))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosCreateBusinessOnly());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosCreateBusinessOnly());
 
         if (account.get().frozen)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsFrozen(account.get()));
 
         if (!player.hasPermission(Permissions.POS_CREATE_OTHER) && !account.get().owner.equals(player))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
 
         final @NotNull BigDecimal price;
         try {
             price = new BigDecimal(args[1]).setScale(2, RoundingMode.HALF_UP);
         }
         catch (final @NotNull NumberFormatException e) {
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
         }
 
         if (price.compareTo(BigDecimal.ZERO) <= 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsInvalidNumber(args[1]));
 
 
         final @Nullable Block target = player.getTargetBlockExact(5);
-        if (target == null) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsBlockTooFar());
+        if (target == null) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsBlockTooFar());
 
         final @NotNull Optional<@NotNull BlockState> block = BankAccounts.runOnMain(target::getState, 5);
-        if (block.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAsyncFailed());
+        if (block.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAsyncFailed());
         if (!(block.get() instanceof final @NotNull Chest chest))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosNotChest());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosNotChest());
         if (!canOpenChest(player, chest))
-            return true;
+            return CommandResult.DO_NOTHING;
         if (chest.getInventory() instanceof DoubleChestInventory)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosDoubleChest());
-        if (chest.getInventory().isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosEmpty());
-        if (POS.get(chest).isPresent()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsPosAlreadyExists());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosDoubleChest());
+        if (chest.getInventory().isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosEmpty());
+        if (POS.get(chest).isPresent()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPosAlreadyExists());
 
         @Nullable String description = args.length > 2 ? String.join(" ", Arrays.copyOfRange(args, 2, args.length)) : null;
         if (description != null && description.length() > 64) description = description.substring(0, 63) + "…";
 
         final @NotNull Set<@NotNull String> disallowedChars = getDisallowedCharacters(description);
         if (!disallowedChars.isEmpty())
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsDisallowedCharacters(disallowedChars));
 
         final @NotNull POS pos = new POS(target.getLocation(), price, description, account.get(), new Date());
         pos.save();
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesPosCreated(pos));
+        return new Message(sender, BankAccounts.getInstance().config().messagesPosCreated(pos));
     }
 
     private static boolean canOpenChest(final @NotNull Player player, final @NotNull Chest chest) {
