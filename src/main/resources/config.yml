@@ -298,6 +298,40 @@ messages:
         # Vault integration account used to integrate payments with other plugins
         2: Checking
 
+    help:
+        # Messages in /bank help
+        bank:
+            # Shown before any commands
+            # Set to nothing, e.g. "header:" (without quotes) to disable
+            header: |
+                <dark_gray>---</dark_gray>
+                <green>Available commands:</green>
+            # Each command is only shown if the player has permission to use it.
+            # Set to nothing, e.g. "commands:" (without quotes) to disable
+            # Placeholders:
+            # - <command> - The base command name (e.g. "bank send").
+            # - <arguments> - The command usage arguments (e.g. "<from> <to> <amount> [description]").
+            commands:
+                balance: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- List your accounts and check balances.</white></click>
+                balance-other: <click:suggest_command:/<command> --player ><green>/<command></green> <gray><arguments></gray> <white>- List another player's accounts.</white></click>
+                transfer: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Transfer money to another account.</white></click>
+                history: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- List transactions.</white></click>
+                create: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Open a new bank account.</white></click>
+                create-other: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Open a new account for another player.</white></click>
+                freeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Freeze/disable an account.</white></click>
+                unfreeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Unfreeze/unblock an account.</white></click>
+                delete: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Close a bank account.</white></click>
+                instrument: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Create a payment instrument (bank card).</white></click>
+                whois: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Get information about an account.</white></click>
+                baltop: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Top balances leaderboard.</white></click>
+                pos: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Create new Point Of Sale.</white></click>
+                setbalance: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Set an account's balance.</white></click>
+                rename: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Set an account's name.</white></click>
+                reload: <click:suggest_command:/<command>><green>/<command></green> <white>- Reload the plugin configuration.</white></click>
+                invoices: <click:suggest_command:/<command>><green>/<command></green> <white>- See invoicing commands.</white></click>
+            # Shown after all commands
+            # Set to nothing, e.g. "footer:" (without quotes) to disable
+            footer: <dark_gray>---</dark_gray>
     # Errors
     errors:
         # You have no accounts
