@@ -448,6 +448,63 @@ the recipient player will receive notifications to remind them of unpaid invoice
 
 </details>
 
+## Permissions
+
+This is an exhaustive list of all permissions used by BankAccounts. The permissions enable you to adapt BankAccounts to
+any specific use-case you might have. FOr a *default* use-case that leverages all features, we have divided the
+permissions into 3 recommended groups:
+
+- Everyone — These permissions are suitable for all players.
+- Staff — Permissions that enable access to detailed information without enabling destructive actions.
+- Admin — Permissions that allow destructive actions or are used for managing the plugin.
+
+<details>
+
+| Permission                       | Description                                                                                                                                          | Recommended for   |
+|----------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
+| `bank.command`                   | Required for using any BankAccounts commands.                                                                                                        | Everyone          |
+| `bank.account.create`            | Enables you to create bank accounts using `/bank create`.                                                                                            | Everyone          |
+| `bank.delete`                    | Delete an account you own using `/bank delete`.                                                                                                      | Everyone          |
+| `bank.balance.self`              | List the accounts you own and check their balances using `/bank balance`.                                                                            | Everyone          |
+| `bank.transfer.self`             | Transfer money between your own accounts using `/bank transfer`.                                                                                     | Everyone          |
+| `bank.transfer.other`            | Transfer money to other players using `/bank transfer`.                                                                                              | Everyone          |
+| `bank.history`                   | See the transactions history for accounts you own using `/bank history`.                                                                             | Everyone          |
+| `bank.set.name`                  | Rename an account you own using `/bank rename`.                                                                                                      | Everyone          |
+| `bank.whois`                     | See basic information about an account using `/bank whois`.                                                                                          | Everyone or Staff |
+| `bank.baltop`                    | View the leaderboard for accounts with the highest balances using `/bank baltop`.                                                                    | Everyone          |
+| `bank.instrument.create`         | Create a payment instrument (bank card) using `/bank instrument`.                                                                                    | Everyone          |
+| `bank.invoice.create`            | Allows creating invoices (payment requests) using `/invoice create`.                                                                                 | Everyone          |
+| `bank.invoice.view`              | See the details of an invoice that you have sent or received using `/invoice view`.                                                                  | Everyone          |
+| `bank.invoice.send`              | Send an existing invoice to a player using `/invoice send`.                                                                                          | Everyone          |
+| `bank.invoice.notify`            | Receive periodic reminders regarding unpaid invoices.                                                                                                | Everyone          |
+| `bank.pos.create`                | Create a Point of Sale using `/pos`.                                                                                                                 | Everyone          |
+| `bank.pos.use`                   | Buy items from a Point of Sale.                                                                                                                      | Everyone          |
+| `bank.pos.use.other`             | Buy from a Point of Sale **with a (possibly stolen) bank card you do not own**.                                                                      | Everyone or Admin |
+| `bank.balance.other`             | List the accounts of another player and see the balances of accounts you don’t own using `/bank balance`.                                            | Staff             |
+| `bank.history.other`             | See the transactions history of accounts you don’t own using `/bank history`.                                                                        | Staff             |
+| `bank.account.create.other`      | Create a new bank account for (owned by) another player using `/bank create`.                                                                        | Staff             |
+| `bank.set.name.other`            | Set the name of an account you don’t own using `/bank rename`.                                                                                       | Staff             |
+| `bank.freeze`                    | Freeze and unfreeze accounts you own using `/bank freeze`.                                                                                           | Staff             |
+| `bank.freeze.other`              | Freeze and unfreeze accounts of others using `/bank freeze`.                                                                                         | Staff             |
+| `bank.invoice.view.other`        | See the details of an invoice that you did not send or receive using `/invoice view`.                                                                | Staff             |
+| `bank.invoice.send.other`        | Send an existing invoice that you *did not create* to a player using `/invoice send`.                                                                | Staff             |
+| `bank.instrument.create.other`   | Create a payment instrument (bank card) for an account you don’t own and also allows using the `[player]` argument using `/bank instrument`.         | Admin             |
+| `bank.instrument.create.bypass`  | Bypass the configuration option `instruments.require-item = true`.                                                                                   | Admin             |
+| `bank.set.balance`               | Set the balance of any account to any value, including `Infinity`, without recording a transaction, using `/bank setbalance`.                        | Admin             |
+| `bank.invoice.create.other`      | Create an invoice from an account you don’t own using `/invoice create`.                                                                             | Admin             |
+| `bank.invoice.pay.other`         | Pay an invoice not sent to you using `/invoice pay`.                                                                                                 | Admin             |
+| `bank.invoice.pay.account-other` | Pay an invoice using an account you don’t own using `/invoice pay`.                                                                                  | Admin             |
+| `bank.pos.create.other`          | Create a Point of Sale from an account you don’t own using `/pos`.                                                                                   | Admin             |
+| `bank.pos.create.personal`       | Bypass the configuration option `pos.allow-personal = false`.                                                                                        | Admin             |
+| `bank.set.name.vault`            | Rename a Vault integration account. **Not recommended!**. Vault accounts have the name of their owner (if no custom name is set).                    | Nobody or Admin   |
+| `bank.delete.vault`              | Delete Vault integration accounts. **Not recommended!**. May break Vault integration. May be automatically re-created on next join if Vault enabled. | Nobody or Admin   |
+| `bank.reload`                    | Reload the plugin configuration using `/bank reload`.                                                                                                | Admin             |
+| `bank.notify-update`             | Get notified for new BankAccounts versions when you join the server. Highly recommended.                                                             | Admin             |
+
+
+
+</details>
+
 ## Reporting Issues and Feature Requests
 
 We prioritise resolving problems and bugs to ensure the best experience for our users.
