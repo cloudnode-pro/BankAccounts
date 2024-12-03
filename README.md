@@ -9,7 +9,7 @@
 [![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/version/latest)
 [![Game Versions](https://img.shields.io/badge/game_versions-1.20.x-blue)](https://modrinth.com/plugin/Dc8RS2En/)
 [![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
-[![License: GPL-3.0](https://img.shields.io/github/license/cloudnode-pro/BankAccounts)](https://github.com/cloudnode-pro/BankAccounts/blob/master/LICENSE)
+[![Licence: GPL-3.0](https://img.shields.io/github/license/cloudnode-pro/BankAccounts)](https://github.com/cloudnode-pro/BankAccounts/blob/master/LICENSE)
 
 A Minecraft economy plugin that enables players to hold multiple bank accounts.
 
