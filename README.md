@@ -18,8 +18,6 @@ A Minecraft economy plugin that enables players to hold multiple bank accounts.
 ## Features
 
 **See also**:
-[Commands](https://github.com/cloudnode-pro/BankAccounts/wiki/Commands) ·
-[Permissions](https://github.com/cloudnode-pro/BankAccounts/wiki/Permissions)
 
 ### Multiple Accounts & Balances
 
