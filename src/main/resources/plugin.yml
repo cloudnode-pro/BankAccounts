@@ -7,8 +7,8 @@ softdepend:
     - PlaceholderAPI
     - Vault
 libraries:
-    - org.mariadb.jdbc:mariadb-java-client:3.4.0
-    - com.zaxxer:HikariCP:5.1.0
+    - org.mariadb.jdbc:mariadb-java-client:3.5.1
+    - com.zaxxer:HikariCP:6.2.1
 commands:
     bank:
         description: Bank Accounts
