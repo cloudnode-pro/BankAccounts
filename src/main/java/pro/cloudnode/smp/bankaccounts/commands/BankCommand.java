@@ -1,7 +1,5 @@
 package pro.cloudnode.smp.bankaccounts.commands;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -12,6 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 import pro.cloudnode.smp.bankaccounts.Transaction;
@@ -211,7 +210,7 @@ public class BankCommand extends Command {
         if (args.length == 0) return overview(sender);
         final @NotNull String @NotNull [] argsSubset = Arrays.copyOfRange(args, 1, args.length);
         return switch (args[0]) {
-            case "help" -> help(sender);
+            case "help" -> help(sender, label);
             case "bal", "balance", "account", "accounts" ->
                     balance(sender, Arrays.copyOfRange(args, 1, args.length), label);
             case "reload" -> reload(sender);
@@ -243,45 +242,44 @@ public class BankCommand extends Command {
     /**
      * Plugin help
      */
-    public static @NotNull Message help(final @NotNull CommandSender sender) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<green>Available commands:"));
-        sender.sendMessage(Component.empty());
+    public static @NotNull CommandResult help(final @NotNull CommandSender sender, final @NotNull String label) {
+        BankAccounts.getInstance().config().messagesHelpBankHeader().ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.BALANCE_SELF))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance ><green>/bank balance <gray>[account]</gray></green> <white>- Check your accounts</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.BALANCE, label + " balance", "[account]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.BALANCE_OTHER))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank balance --player ><green>/bank balance <gray>--player <player></gray></green> <white>- List another player's accounts</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.BALANCE, label + " balance", "--player <player>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank transfer ><green>/bank transfer <gray><from> <to> <amount> [description]</gray></green> <white>- Transfer money to another account</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.TRANSFER, label + " transfer", "<from> <to> <amount> [description]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.HISTORY))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank transactions ><green>/bank transactions <gray><account> [page=1]</gray></green> <white>- List transactions</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.HISTORY, label + " history", "<account> [page=1]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "></gray></green> <white>- Create a new account</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.CREATE, label + " create", "<PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + ">").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.ACCOUNT_CREATE_OTHER))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank create ><green>/bank create <gray><PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player></gray></green> <white>- Create an account for another player</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.CREATE, label + " create", "<PERSONAL|BUSINESS" + (sender.hasPermission(Permissions.ACCOUNT_CREATE_VAULT) ? "|VAULT" : "") + "> --player <player>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.FREEZE)) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank freeze ><green>/bank freeze <gray><account></gray></green> <white>- Freeze an account</click>"));
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank unfreeze ><green>/bank unfreeze <gray><account></gray></green> <white>- Unfreeze an account</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.FREEZE, label + " freeze", "<account>").ifPresent(sender::sendMessage);
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.UNFREEZE, label + " unfreeze", "<account>").ifPresent(sender::sendMessage);
         }
         if (sender.hasPermission(Permissions.DELETE))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank delete ><green>/bank delete <gray><account></gray></green> <white>- Delete an account</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.DELETE, label + " delete", "<account>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.INSTRUMENT_CREATE))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank instrument ><green>/bank instrument <gray><account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "") + "</gray></green> <white>- Create a new instrument</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.INSTRUMENT, label + " instrument", "<account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "")).ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.WHOIS))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank whois ><green>/bank whois <gray><account></gray></green> <white>- Get information about an account</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.WHOIS, label + " whois", "<account>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.BALTOP))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/baltop ><green>/baltop <gray>[personal|business|player] [page=1]</gray></green> <white>- Top balance leaderboard</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.BALTOP, "baltop", "[personal|business|player] [page=1]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.POS_CREATE))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/pos ><green>/pos <gray><account> <price> [description]</gray></green> <white>- Create a new point of sale</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.POS, "pos", "<account> <price> [description]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.SET_BALANCE))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setbalance ><green>/bank setbalance <gray><account> <balance|Infinity></gray></green> <white>- Set an account's balance</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.SETBALANCE, label + " setbalance", "<account> <balance|Infinity>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.SET_NAME))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank setname ><green>/bank setname <gray><account> [name]</gray></green> <white>- Set an account's name</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.RENAME, label + " setname", "<account> [name]").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.RELOAD))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/bank reload><green>/bank reload</green> <white>- Reload plugin configuration</click>"));
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.RELOAD, label + " reload", "").ifPresent(sender::sendMessage);
         if (Stream.of(Permissions.INVOICE_CREATE, Permissions.INVOICE_VIEW, Permissions.INVOICE_SEND, Permissions.TRANSFER_SELF, Permissions.TRANSFER_OTHER).anyMatch(sender::hasPermission))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/invoice help><green>/invoice help</green> <white>- See invoicing commands</click>"));
-        return new Message(sender, "<dark_gray>---</dark_gray>");
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.INVOICES, "invoice help", "").ifPresent(sender::sendMessage);
+        BankAccounts.getInstance().config().messagesHelpBankFooter().ifPresent(sender::sendMessage);
+        return CommandResult.DO_NOTHING;
     }
 
     /**
