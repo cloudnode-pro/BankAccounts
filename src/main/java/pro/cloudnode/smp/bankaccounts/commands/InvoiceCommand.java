@@ -142,7 +142,8 @@ public final class InvoiceCommand extends Command {
             if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
                 BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.LIST_OTHER, label + " list", "[all|sent|received] [page] --player <player>").ifPresent(sender::sendMessage);
         }
-        return new Message(sender, "<dark_gray>---</dark_gray>");
+        BankAccounts.getInstance().config().messagesHelpInvoiceFooter().ifPresent(sender::sendMessage);
+        return CommandResult.DO_NOTHING;
     }
 
     /**
