@@ -307,7 +307,7 @@ messages:
                 <dark_gray>---</dark_gray>
                 <green>Available commands:</green>
             # Each command is only shown if the player has permission to use it.
-            # Set to nothing, e.g. "commands:" (without quotes) to disable
+            # Set to nothing, e.g. "balance:" (without quotes) to disable a command
             # Placeholders:
             # - <command> - The base command name (e.g. "bank send").
             # - <arguments> - The command usage arguments (e.g. "<from> <to> <amount> [description]").
