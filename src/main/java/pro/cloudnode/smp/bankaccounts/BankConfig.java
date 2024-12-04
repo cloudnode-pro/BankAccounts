@@ -1433,7 +1433,7 @@ public final class BankConfig {
         );
     }
 
-    public static enum HelpCommandsBank {
+    public enum HelpCommandsBank {
         BALANCE("balance"),
         BALANCE_OTHER("balance-other"),
         TRANSFER("transfer"),
