@@ -487,6 +487,31 @@ public final class BankConfig {
         return Optional.of(MiniMessage.miniMessage().deserialize(message));
     }
 
+    // messages.help.invoice.header
+    public @NotNull Optional<@NotNull Component> messagesHelpInvoiceHeader() {
+        final @Nullable String message = config.getString("messages.help.invoice.header");
+        if (message == null || message.isEmpty()) return Optional.empty();
+        return Optional.of(MiniMessage.miniMessage().deserialize(message));
+    }
+
+    // messages.help.invoice.commands.
+    public @NotNull Optional<@NotNull Component> messagesHelpInvoiceCommands(final @NotNull HelpCommandsInvoice key, final @NotNull String command, final @NotNull String arguments) {
+        final @Nullable String message = config.getString("messages.help.invoice.commands." + key.path);
+        if (message == null || message.isEmpty()) return Optional.empty();
+        return Optional.of(MiniMessage.miniMessage().deserialize(
+                message
+                        .replace("<command>", command),
+                Placeholder.unparsed("arguments", arguments)
+        ));
+    }
+
+    // messages.help.invoice.footer
+    public @NotNull Optional<@NotNull Component> messagesHelpInvoiceFooter() {
+        final @Nullable String message = config.getString("messages.help.invoice.footer");
+        if (message == null || message.isEmpty()) return Optional.empty();
+        return Optional.of(MiniMessage.miniMessage().deserialize(message));
+    }
+
     // messages.errors.no-accounts
     public @NotNull Component messagesErrorsNoAccounts() {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.no-accounts")));
@@ -1456,6 +1481,23 @@ public final class BankConfig {
         public final @NotNull String path;
 
         HelpCommandsBank(final @NotNull String path) {
+            this.path = path;
+        }
+    }
+
+    public enum HelpCommandsInvoice {
+        CREATE("create"),
+        CREATE_PLAYER("create-player"),
+        VIEW("view"),
+        PAY("pay"),
+        SEND("send"),
+        LIST("list"),
+        LIST_OTHER("list-other"),
+        ;
+
+        public final @NotNull String path;
+
+        HelpCommandsInvoice(final @NotNull String path) {
             this.path = path;
         }
     }

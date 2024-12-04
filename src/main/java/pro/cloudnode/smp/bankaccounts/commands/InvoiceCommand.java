@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
+import pro.cloudnode.smp.bankaccounts.BankConfig;
 import pro.cloudnode.smp.bankaccounts.Command;
 import pro.cloudnode.smp.bankaccounts.Invoice;
 import pro.cloudnode.smp.bankaccounts.Permissions;
@@ -125,23 +126,21 @@ public final class InvoiceCommand extends Command {
      * <p>{@code /invoice help}</p>
      */
     public static @NotNull CommandResult help(final @NotNull CommandSender sender, final @NotNull String label) {
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<dark_gray>---</dark_gray>"));
-        sender.sendMessage(MiniMessage.miniMessage().deserialize("<green>Available commands:"));
-        sender.sendMessage(Component.empty());
+        BankAccounts.getInstance().config().messagesHelpInvoiceHeader().ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.INVOICE_CREATE)) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description]</gray></green> <white>- Create an invoice</white></click>"));
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " create ><green>/" + label + " create <gray><account> <amount> [description] --player <player></gray></green> <white>- Create and send invoice to player</white></click>"));
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.CREATE, label + " create", "<account> <amount> [description]").ifPresent(sender::sendMessage);
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.CREATE_PLAYER, label + " create", "<player> <amount> [description] --player <player>").ifPresent(sender::sendMessage);
         }
         if (sender.hasPermission(Permissions.INVOICE_VIEW))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " view ><green>/" + label + " view <gray><invoice></gray></green> <white>- View invoice details</white></click>"));
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.VIEW, label + " view", "<invoice>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.TRANSFER_SELF) || sender.hasPermission(Permissions.TRANSFER_OTHER))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " pay ><green>/" + label + " pay <gray><invoice> <account></gray></green> <white>- Pay an invoice</white></click>"));
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.PAY, label + " pay", "<invoice> <account>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.INVOICE_SEND))
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " send ><green>/" + label + " send <gray><invoice> <player></gray></green> <white>- Send an invoice to a player</white></click>"));
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.SEND, label + " send", "<invoice> <player>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.INVOICE_VIEW)) {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page]</gray></green> <white>- List invoices</white></click>"));
+            BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.LIST, label + " list", "[all|sent|received] [page]").ifPresent(sender::sendMessage);
             if (sender.hasPermission(Permissions.INVOICE_VIEW_OTHER))
-                sender.sendMessage(MiniMessage.miniMessage().deserialize("<click:suggest_command:/" + label + " list ><green>/" + label + " list <gray>[all|sent|received] [page] --player <player></gray></green> <white>- List invoices of player</white></click>"));
+                BankAccounts.getInstance().config().messagesHelpInvoiceCommands(BankConfig.HelpCommandsInvoice.LIST_OTHER, label + " list", "[all|sent|received] [page] --player <player>").ifPresent(sender::sendMessage);
         }
         return new Message(sender, "<dark_gray>---</dark_gray>");
     }
