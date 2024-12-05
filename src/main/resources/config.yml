@@ -672,7 +672,7 @@ messages:
     #   <url> → The URL where you can see the changelog and download the update.
     #   <current> → The version number of BankAccounts you are currently running.
     update-available: |-
-        <hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:<url>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new update has been released: <green><b><formatted></b></green>.</white>
+        <hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:<url>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new update has been released: <green><b><name></b></green>.</white>
         <gray>Current: <white><current></white> <dark_gray>·</dark_gray> Latest: <green><version></green></gray>
     
         <white>Please update to get the latest bug fixes and features.</white>
