@@ -668,7 +668,15 @@ messages:
     # A new version of the plugin is available.
     # Placeholders:
     #   <version> → The new BankAccounts version number, e.g. ‘1.10.1’.
-    update-available: <hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:https://modrinth.com/plugin/bankaccounts/version/<version>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new version <green><version></green> has been released.</white><newline><gray>Please update to get the latest bug fixes and features.</gray><newline> <green>> Click to view update<green></click></hover>
+    #   <name> → The name of the update, either something like ‘BankAccounts 1.10.1’, or a short description/title.
+    #   <url> → The URL where you can see the changelog and download the update.
+    #   <current> → The version number of BankAccounts you are currently running.
+    update-available: |-
+        <hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:<url>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new update has been released: <green><b><formatted></b></green>.</white>
+        <gray>Current: <white><current></white> <dark_gray>·</dark_gray> Latest: <green><version></green></gray>
+    
+        <white>Please update to get the latest bug fixes and features.</white>
+        <green>> Click to view update<green></click></hover>
 
     # Error messages.
     errors:
