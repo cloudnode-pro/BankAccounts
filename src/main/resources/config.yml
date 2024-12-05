@@ -400,80 +400,6 @@ messages:
             # Set to nothing, e.g. ‘footer:’ (without the quotes) to disable.
             footer: <dark_gray>---</dark_gray>
 
-    # Error messages.
-    errors:
-        no-accounts: <red>(!) You have no bank accounts.</red>
-        no-permission: <red>(!) You do not have permission to use this command.</red>
-        account-not-found: <red>(!) Account not found.</red>
-        unknown-command: <red>(!) Unknown command. Try <click:suggest_command:/<label> help><gray>/<label> help</gray></click>.</red>
-
-        # Placeholders:
-        #   <type> → The account type.
-        #   <limit> → The account limit for that type.
-        max-accounts: <red>(!) You cannot open more than <limit> <type> accounts.</red>
-
-        rename-vault-account: <red>(!) You cannot rename this account.</red>
-        not-account-owner: <red>(!) You are not the owner of this account.</red>
-        frozen: <gold>(!) <account-type> account <gray><account> (<account-id>)</gray> is frozen. This account cannot initiate or receive transactions.</gold>
-        same-from-to: <red>(!) The ‘from’ and ‘to’ accounts must be different.</red>
-        transfer-self-only: <red>(!) You can only make transfers between your own accounts.</red>
-        transfer-other-only: <red>(!) You cannot make a transfer between your own accounts.</red>
-
-        # Invalid number was given. Placeholder <number> is the invalid number.
-        invalid-number: <red>(!) Invalid number:</red> <gray><number></gray>
-
-        # $0 or negative transfer
-        negative-transfer: <red>(!) The amount to transfer must be greater than zero.</red>
-
-        # Insufficient funds. All placeholders from ‘messages.balance’ are available.
-        insufficient-funds: <red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>
-
-        closing-balance: <red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>
-        player-only: <red>(!) You must be a player to use this command.</red>
-        player-not-found: <red>(!) Player not found.</red>
-
-        # You must have a specific item to convert to an instrument.
-        # Placeholders:
-        #   <material> → The item type that is required (the item ID).
-        #   <material-key> → Item translation key, can be as ‘<lang:<material-key>>’.
-        instrument-requires-item: <red>(!) You must have <gray>x1 <lang:<material-key>></gray> in your inventory to create a bank card from.</red>
-
-        # Target player’s inventory is full.
-        # Placeholder <player> is the target player’s name.
-        target-inventory-full: <red>(!) The inventory of <gray><player></gray> is full.</red>
-
-        block-too-far: <red>(!) The targeted block is too far away.</red>
-        pos-already-exists: <red>(!) A POS already exists at this location.</red>
-        pos-not-chest: <red>(!) The targeted block is not a chest.</red>
-        pos-double-chest: <red>(!) The POS cannot be a double chest.</red>
-        pos-empty: <red>(!) The chest is empty. POS cancelled.</red>
-        pos-invalid-card: <red>(!) You need a valid bank card to use POS.</red>
-        pos-no-permission: <red>(!) You do not have permission to use POS.</red>
-        no-card: <red>(!) You must hold your bank card to use this.</red>
-        pos-items-changed: <red>(!) The items in the chest have changed. POS cancelled.</red>
-        pos-create-business-only: <red>(!) You can only create a POS with a business account.</red>
-
-        # Provided string includes disallowed characters
-        # Placeholder <characters> is the disallowed characters.
-        disallowed-characters: <red>(!) The provided string contains disallowed characters:</red> <gray><characters></gray>
-
-        already-frozen: <yellow>(!) This account is already frozen.</yellow>
-        not-frozen: <gold>(!) This account is not frozen.</gold>
-        negative-invoice: <red>(!) The amount to invoice must be greater than zero.</red>
-        invoice-not-found: <red>(!) Invoice not found.</red>
-        invoice-pay-self: <red>(!) You cannot pay your own invoice with the same account. You can use a different account.</red>
-        invoice-already-paid: <red>(!) This invoice has already been paid.</red>
-
-        # Cannot send this invoice to this player because either:
-        # a) the invoice has a set buyer and that’s not this player; OR
-        # b) the player does not have permission to view invoices not meant for them.
-        invoice-cannot-send: <red>(!) You cannot send this invoice to that player because they don’t have permission to view it.</red>
-
-        player-never-joined: <red>(!) This player has never joined this server.</red>
-        async-failed: <red>(!) The request failed. See the console for details.</red>
-        delete-vault-account: <red>(!) You cannot delete this account.</red>
-        transfer-to-server-vault: <red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>
-
     # Account balance.
     # Available placeholders:
     #   <account> → Account name.
@@ -743,3 +669,77 @@ messages:
     # Placeholders:
     #   <version> → The new BankAccounts version number, e.g. ‘1.10.1’.
     update-available: <hover:show_text:'<white>Click to view update</white><newline><gray> - Changelog & release notes<newline> - Download links'><click:open_url:https://modrinth.com/plugin/bankaccounts/version/<version>><dark_gray>[<green>BankAccounts</green>]</dark_gray> <white>A new version <green><version></green> has been released.</white><newline><gray>Please update to get the latest bug fixes and features.</gray><newline> <green>> Click to view update<green></click></hover>
+
+    # Error messages.
+    errors:
+        no-accounts: <red>(!) You have no bank accounts.</red>
+        no-permission: <red>(!) You do not have permission to use this command.</red>
+        account-not-found: <red>(!) Account not found.</red>
+        unknown-command: <red>(!) Unknown command. Try <click:suggest_command:/<label> help><gray>/<label> help</gray></click>.</red>
+
+        # Placeholders:
+        #   <type> → The account type.
+        #   <limit> → The account limit for that type.
+        max-accounts: <red>(!) You cannot open more than <limit> <type> accounts.</red>
+
+        rename-vault-account: <red>(!) You cannot rename this account.</red>
+        not-account-owner: <red>(!) You are not the owner of this account.</red>
+        frozen: <gold>(!) <account-type> account <gray><account> (<account-id>)</gray> is frozen. This account cannot initiate or receive transactions.</gold>
+        same-from-to: <red>(!) The ‘from’ and ‘to’ accounts must be different.</red>
+        transfer-self-only: <red>(!) You can only make transfers between your own accounts.</red>
+        transfer-other-only: <red>(!) You cannot make a transfer between your own accounts.</red>
+
+        # Invalid number was given. Placeholder <number> is the invalid number.
+        invalid-number: <red>(!) Invalid number:</red> <gray><number></gray>
+
+        # $0 or negative transfer
+        negative-transfer: <red>(!) The amount to transfer must be greater than zero.</red>
+
+        # Insufficient funds. All placeholders from ‘messages.balance’ are available.
+        insufficient-funds: <red>(!) Your account has insufficient funds. You have <gray><balance-formatted></gray></red>
+
+        closing-balance: <red>(!) You cannot close an account that has a non-zero balance. This account has <gray><balance-formatted></gray></red>
+        player-only: <red>(!) You must be a player to use this command.</red>
+        player-not-found: <red>(!) Player not found.</red>
+
+        # You must have a specific item to convert to an instrument.
+        # Placeholders:
+        #   <material> → The item type that is required (the item ID).
+        #   <material-key> → Item translation key, can be as ‘<lang:<material-key>>’.
+        instrument-requires-item: <red>(!) You must have <gray>x1 <lang:<material-key>></gray> in your inventory to create a bank card from.</red>
+
+        # Target player’s inventory is full.
+        # Placeholder <player> is the target player’s name.
+        target-inventory-full: <red>(!) The inventory of <gray><player></gray> is full.</red>
+
+        block-too-far: <red>(!) The targeted block is too far away.</red>
+        pos-already-exists: <red>(!) A POS already exists at this location.</red>
+        pos-not-chest: <red>(!) The targeted block is not a chest.</red>
+        pos-double-chest: <red>(!) The POS cannot be a double chest.</red>
+        pos-empty: <red>(!) The chest is empty. POS cancelled.</red>
+        pos-invalid-card: <red>(!) You need a valid bank card to use POS.</red>
+        pos-no-permission: <red>(!) You do not have permission to use POS.</red>
+        no-card: <red>(!) You must hold your bank card to use this.</red>
+        pos-items-changed: <red>(!) The items in the chest have changed. POS cancelled.</red>
+        pos-create-business-only: <red>(!) You can only create a POS with a business account.</red>
+
+        # Provided string includes disallowed characters
+        # Placeholder <characters> is the disallowed characters.
+        disallowed-characters: <red>(!) The provided string contains disallowed characters:</red> <gray><characters></gray>
+
+        already-frozen: <yellow>(!) This account is already frozen.</yellow>
+        not-frozen: <gold>(!) This account is not frozen.</gold>
+        negative-invoice: <red>(!) The amount to invoice must be greater than zero.</red>
+        invoice-not-found: <red>(!) Invoice not found.</red>
+        invoice-pay-self: <red>(!) You cannot pay your own invoice with the same account. You can use a different account.</red>
+        invoice-already-paid: <red>(!) This invoice has already been paid.</red>
+
+        # Cannot send this invoice to this player because either:
+        # a) the invoice has a set buyer and that’s not this player; OR
+        # b) the player does not have permission to view invoices not meant for them.
+        invoice-cannot-send: <red>(!) You cannot send this invoice to that player because they don’t have permission to view it.</red>
+
+        player-never-joined: <red>(!) This player has never joined this server.</red>
+        async-failed: <red>(!) The request failed. See the console for details.</red>
+        delete-vault-account: <red>(!) You cannot delete this account.</red>
+        transfer-to-server-vault: <red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>
