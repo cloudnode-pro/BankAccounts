@@ -36,7 +36,7 @@ public final class ModrinthUpdate {
         final @NotNull String pluginVersion = plugin.getPluginMeta().getVersion();
         try {
             final @NotNull HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.modrinth.com/v2/project/Dc8RS2En/version?game_versions=[%22" + mcVersion + "%22]"))
+                    .uri(URI.create("https://api.modrinth.com/v2/project/Dc8RS2En/version?version_type=release&game_versions=[%22" + mcVersion + "%22]"))
                     .header("User-Agent", pluginName + "/" + pluginVersion).GET().build();
             final @NotNull HttpResponse<@NotNull String> res = HttpClient.newHttpClient()
                     .send(req, HttpResponse.BodyHandlers.ofString());
