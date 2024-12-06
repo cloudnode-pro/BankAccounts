@@ -1451,10 +1451,13 @@ public final class BankConfig {
     }
 
     // messages.update-available
-    public @NotNull Component messagesUpdateAvailable(final @NotNull String version) {
+    public @NotNull Component messagesUpdateAvailable(final @NotNull ModrinthUpdate update) {
         return MiniMessage.miniMessage().deserialize(
                 Objects.requireNonNull(config.getString("messages.update-available"))
-                        .replace("<version>", version)
+                        .replace("<version>", update.version)
+                        .replace("<name>", update.name)
+                        .replace("<url>", update.url())
+                        .replace("<current>", BankAccounts.getInstance().getPluginMeta().getVersion())
         );
     }
 

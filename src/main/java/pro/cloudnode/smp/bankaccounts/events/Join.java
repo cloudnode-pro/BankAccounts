@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.Account;
 import pro.cloudnode.smp.bankaccounts.BankAccounts;
 import pro.cloudnode.smp.bankaccounts.Invoice;
+import pro.cloudnode.smp.bankaccounts.ModrinthUpdate;
 import pro.cloudnode.smp.bankaccounts.Permissions;
 
 import java.math.BigDecimal;
@@ -33,7 +34,7 @@ public final class Join implements Listener {
             }
         });
         if (player.hasPermission(Permissions.NOTIFY_UPDATE)) {
-            BankAccounts.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(BankAccounts.getInstance(), () -> BankAccounts.checkForUpdates().ifPresent(latestVersion ->
+            BankAccounts.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(BankAccounts.getInstance(), () -> ModrinthUpdate.checkForUpdates().ifPresent(latestVersion ->
                 player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion))
             ), 20L);
         }
