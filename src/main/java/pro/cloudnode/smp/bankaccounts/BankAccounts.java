@@ -23,7 +23,7 @@ import pro.cloudnode.smp.bankaccounts.commands.POSCommand;
 import pro.cloudnode.smp.bankaccounts.events.BlockBreak;
 import pro.cloudnode.smp.bankaccounts.events.GUI;
 import pro.cloudnode.smp.bankaccounts.events.Join;
-import pro.cloudnode.smp.bankaccounts.events.PlayerInteract;
+import pro.cloudnode.smp.bankaccounts.events.POSOpen;
 import pro.cloudnode.smp.bankaccounts.integrations.PAPIIntegration;
 import pro.cloudnode.smp.bankaccounts.integrations.VaultIntegration;
 
@@ -89,7 +89,7 @@ public final class BankAccounts extends JavaPlugin {
         final @NotNull Listener[] events = new Listener[]{
                 new Join(),
                 new BlockBreak(),
-                new PlayerInteract(),
+                new POSOpen(),
                 new GUI()
         };
         for (final @NotNull Listener event : events) getServer().getPluginManager().registerEvents(event, this);
@@ -158,10 +158,11 @@ public final class BankAccounts extends JavaPlugin {
         getInstance().initDbWrapper();
         createServerAccount();
         createServerVaultAccount();
-        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> checkForUpdates().ifPresent(latestVersion -> {
-            getInstance().getLogger().warning("An update is available: " + latestVersion);
+        getInstance().getServer().getScheduler().runTaskAsynchronously(getInstance(), () -> ModrinthUpdate.checkForUpdates().ifPresent(update -> {
+            getInstance().getLogger().warning("An update is available: " + update.name);
+            getInstance().getLogger().warning("You are running: " + BankAccounts.getInstance().getPluginMeta().getVersion() + " · Latest version: " + update.version);
             getInstance().getLogger().warning("Please update to the latest version to benefit from bug fixes, security patches, new features and support.");
-            getInstance().getLogger().warning("Update details: https://modrinth.com/plugin/bankaccounts/version/" + latestVersion);
+            getInstance().getLogger().warning("Update details: " + update.url());
         }));
         getInstance().startInterestTimer();
         if (getInstance().invoiceNotificationTask != null) {
@@ -392,41 +393,6 @@ public final class BankAccounts extends JavaPlugin {
      */
     public static @NotNull OfflinePlayer getOfflinePlayer(@NotNull CommandSender sender) {
         return sender instanceof OfflinePlayer ? (OfflinePlayer) sender : getConsoleOfflinePlayer();
-    }
-
-    /**
-     * Check for plugin updates using Modrinth API
-     *
-     * @return The latest version if an update is available, otherwise empty
-     */
-    public static Optional<String> checkForUpdates() {
-        final @NotNull BankAccounts plugin = BankAccounts.getInstance();
-        final @NotNull String mcVersion = plugin.getServer().getMinecraftVersion();
-        final @NotNull String pluginName = plugin.getPluginMeta().getName();
-        final @NotNull String pluginVersion = plugin.getPluginMeta().getVersion();
-        try {
-            final @NotNull HttpClient client = HttpClient.newHttpClient();
-            final @NotNull HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("https://api.modrinth.com/v2/project/Dc8RS2En/version?featured=true&game_versions=[%22" + mcVersion + "%22]"))
-                    .header("User-Agent",
-                            pluginName + "/" + pluginVersion
-                    )
-                    .GET()
-                    .build();
-            final @NotNull HttpResponse<String> res = client.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() < 400 && res.statusCode() >= 200 && res.body() != null && !(JsonParser.parseString(res.body()).getAsJsonArray().isEmpty())) {
-                final @NotNull JsonObject json = JsonParser.parseString(res.body()).getAsJsonArray().get(0).getAsJsonObject();
-                if (json.has("version_number")) {
-                    final @NotNull String latestVersion = json.get("version_number").getAsString();
-                    if (!latestVersion.equals(pluginVersion))
-                        return Optional.of(latestVersion);
-                }
-            }
-        }
-        catch (final @NotNull Exception e) {
-            plugin.getLogger().log(Level.WARNING, "Failed to check for updates", e);
-        }
-        return Optional.empty();
     }
 
     /**

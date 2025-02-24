@@ -5,10 +5,13 @@ import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.ClickType;
 import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.persistence.PersistentDataContainer;
@@ -150,6 +153,34 @@ public class GUI implements Listener {
     public void onInventoryClick(final @NotNull InventoryDragEvent event) {
         if (hasGuiItem(event.getInventory()))
             event.setCancelled(true);
+    }
+
+    /**
+     * Detect changes in items of POS chest while a POS GUI is opened and prevent the item change.
+     * POS items can still be modified if no POS GUI is opened for that POS.
+     */
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = true)
+    public void posItemsChangeWhileOpened(final @NotNull InventoryMoveItemEvent event) {
+        final @NotNull Inventory source = event.getSource();
+        final @NotNull Inventory destination = event.getDestination();
+        for (final @NotNull POS pos : POS.activePosChestGuis.values()) {
+            final @Nullable Chest chest = pos.getChest();
+            if (chest == null) continue;
+            final @NotNull Inventory chestInventory = chest.getInventory();
+            if (source.equals(chestInventory) || destination.equals(chestInventory)) {
+                event.setCancelled(true);
+                return;
+            }
+        }
+    }
+
+    /**
+     * POS GUI closed
+     */
+    @EventHandler
+    public void posGuiClosed(final @NotNull InventoryCloseEvent event) {
+        if (!POS.activePosChestGuis.containsKey(event.getInventory())) return;
+        POS.activePosChestGuis.remove(event.getInventory());
     }
 
     public final static @NotNull HashMap<@NotNull String, @NotNull NamespacedKey[]> keys = new HashMap<>() {{
