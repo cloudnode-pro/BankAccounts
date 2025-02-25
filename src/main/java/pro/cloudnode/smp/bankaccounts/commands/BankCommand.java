@@ -548,7 +548,7 @@ public class BankCommand extends Command {
             return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "acceptchangeowner <account>");
         final @NotNull Optional<Account.@NotNull ChangeOwnerRequest> request = Account.ChangeOwnerRequest.get(args[0], BankAccounts.getOfflinePlayer(sender));
-        if (request.isEmpty())
+        if (request.isEmpty() || request.get().expired())
             return new Message(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNotFound());
         final @NotNull Optional<@NotNull Account> account = request.get().account();
         if (account.isEmpty()) {

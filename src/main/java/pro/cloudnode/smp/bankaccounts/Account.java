@@ -585,7 +585,6 @@ public class Account {
          * @return Whether the change was successful
          */
         public boolean confirm() {
-            if (expired()) return false;
             final @NotNull Optional<@NotNull Account> account = this.account();
             if (account.isEmpty()) return false;
             if (account.get().frozen) return false;
