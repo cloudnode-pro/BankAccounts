@@ -272,7 +272,7 @@ public class BankCommand extends Command {
         if (sender.hasPermission(Permissions.DELETE))
             BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.DELETE, label + " delete", "<account>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.CHANGE_OWNER))
-            sendMessage(sender, "<click:suggest_command:/bank changeowner ><green>/bank changeowner <gray><account> <player></gray></green> <white>- Change account owner</click>");
+            BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.CHANGE_OWNER, label + " changeowner", "<account> <player>").ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.INSTRUMENT_CREATE))
             BankAccounts.getInstance().config().messagesHelpBankCommands(BankConfig.HelpCommandsBank.INSTRUMENT, label + " instrument", "<account>" + (sender.hasPermission(Permissions.INSTRUMENT_CREATE_OTHER) ? " [player]" : "")).ifPresent(sender::sendMessage);
         if (sender.hasPermission(Permissions.WHOIS))
@@ -507,56 +507,64 @@ public class BankCommand extends Command {
     /**
      * Change ownership of account
      */
-    public static boolean changeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission(Permissions.CHANGE_OWNER)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+    public static @NotNull CommandResult changeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.CHANGE_OWNER)) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 2) return sendUsage(sender, label, "changeowner " + (args.length > 0 ? args[0] : "<account>") + " <new-owner>");
-        final @NotNull Optional<@NotNull Account> account = Account.get(args[0]);
-        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        final @NotNull Optional<@NotNull Account> account = Account.get(Account.Tag.from(args[0]));
+        if (account.isEmpty()) return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
         if (!sender.hasPermission(Permissions.CHANGE_OWNER_OTHER) && !account.get().owner.getUniqueId()
                 .equals(BankAccounts.getOfflinePlayer(sender).getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
-        final @NotNull Optional<@NotNull BigDecimal> balance = Optional.ofNullable(account.get().balance);
-        final double requiredBalance = BankAccounts.getInstance().config().changeOwnerMinBalance();
-        if (balance.isPresent() && balance.get().compareTo(BigDecimal.valueOf(requiredBalance)) < 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerBalance(account.get(), BigDecimal.valueOf(requiredBalance)));
-        if (BankAccounts.getInstance().config().changeOwnerRequireHistory() && Transaction.count(account.get()) == 0)
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNoHistory());
-        final @NotNull OfflinePlayer newOwner = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
-        if (newOwner.getUniqueId().equals(account.get().owner.getUniqueId()))
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyOwnsAccount().replace("<player>", Optional.ofNullable(newOwner.getName()).orElse("<i>that player</i>")));
-        if (BankAccounts.getInstance().config().changeOwnerConfirm() && !sender.hasPermission(Permissions.CHANGE_OWNER_SKIP_CONFIRMATION)) {
-            final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId());
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNotAccountOwner());
+        final @NotNull OfflinePlayer recipient = BankAccounts.getInstance().getServer().getOfflinePlayer(args[1]);
+        if (!recipient.hasPlayedBefore())
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsPlayerNeverJoined());
+        if (recipient.getUniqueId().equals(account.get().owner.getUniqueId()))
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAlreadyOwnsAccount(account.get()));
+        final int limit = BankAccounts.getInstance().config().changeOwnerLimitSend();
+        if (limit >= 0 && !sender.hasPermission(Permissions.CHANGE_OWNER_BYPASS_LIMIT) && sender instanceof final @NotNull Player player) {
+            final @NotNull Account @NotNull [] accounts = Account.ChangeOwnerRequest.outgoing(player);
+            if (accounts.length >= limit)
+                return new Message(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerLimitSend());
+        }
+        final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), recipient);
+        if (BankAccounts.getInstance().config().changeOwnerConfirm() && !sender.hasPermission(Permissions.CHANGE_OWNER_BYPASS_CONFIRM)) {
             request.insert();
             final @NotNull String acceptCommand = "/" + label + " acceptchangeowner " + account.get().id;
-            sendMessage(newOwner.getPlayer(), BankAccounts.getInstance().config().messagesChangeOwnerRequest(request, acceptCommand));
-            return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
+            new Message(
+                    recipient.getPlayer(),
+                    BankAccounts.getInstance().config().messagesChangeOwnerRequest(request, acceptCommand)
+            ).send();
+            return new Message(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
         }
-        final @NotNull Account.ChangeOwnerRequest request = new Account.ChangeOwnerRequest(account.get(), newOwner.getUniqueId());
         request.confirm();
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
+        return new Message(sender, BankAccounts.getInstance().config().messagesChangeOwnerSent(request));
     }
 
     /**
      * Accept ownership change request
      */
-    public static boolean acceptChangeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
-        if (!sender.hasPermission(Permissions.CHANGE_OWNER_ACCEPT)) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
+    public static @NotNull CommandResult acceptChangeOwner(final @NotNull CommandSender sender, final @NotNull String @NotNull [] args, final @NotNull String label) {
+        if (!sender.hasPermission(Permissions.CHANGE_OWNER_ACCEPT))
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsNoPermission());
         if (args.length < 1) return sendUsage(sender, label, "acceptchangeowner <account>");
         final @NotNull Optional<Account.@NotNull ChangeOwnerRequest> request = Account.ChangeOwnerRequest.get(args[0], BankAccounts.getOfflinePlayer(sender));
-        if (request.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNotFound());
+        if (request.isEmpty())
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerNotFound());
         final @NotNull Optional<@NotNull Account> account = request.get().account();
-        if (account.isEmpty()) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        if (account.isEmpty()) {
+            request.get().delete();
+            return new Message(sender, BankAccounts.getInstance().config().messagesErrorsAccountNotFound());
+        }
 
         if (!sender.hasPermission(Permissions.ACCOUNT_CREATE_BYPASS)) {
             final @NotNull Account @NotNull [] accounts = Account.get(BankAccounts.getOfflinePlayer(sender), account.get().type);
             int limit = BankAccounts.getInstance().config().accountLimits(account.get().type);
             if (limit != -1 && accounts.length >= limit)
-                return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(account.get().type, limit));
+                return new Message(sender, BankAccounts.getInstance().config().messagesErrorsMaxAccounts(account.get().type, limit));
         }
 
-        final boolean success = request.get().confirm();
-        if (!success) return sendMessage(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerAcceptFailed());
-        return sendMessage(sender, BankAccounts.getInstance().config().messagesChangeOwnerAccepted(request.get()));
+        if (request.get().confirm()) return new Message(sender, BankAccounts.getInstance().config().messagesChangeOwnerAccepted(request.get()));
+        return new Message(sender, BankAccounts.getInstance().config().messagesErrorsChangeOwnerAcceptFailed());
     }
 
     /**

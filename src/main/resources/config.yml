@@ -184,14 +184,17 @@ instruments:
 
 # Change account owner
 change-owner:
-    # The minimum balance an account must have to be able to be transferred to another player
-    min-balance: 0
-    # Require the account to have transaction history to be able to be transferred
-    require-history: true
-    # Require confirmation/approval by the new owner
+    # Require confirmation/approval by the new owner.
+    # To bypass approval and forcefully transfer ownership, use the ‘bank.change.owner.bypass.confirm’ permission.
     confirm: true
-    # In minutes, when should an ownership change request expire
+
+    # In minutes, when should an ownership change request expire.
     timeout: 15
+
+    # The maximum number of pending sent ownership change requests that a player can have (to prevent spam).
+    # Set to ‘0’ to disable and allow unlimited ownership change requests.
+    # To bypass this limit, use the ‘bank.change.owner.bypass.limit’ permission.
+    limit-send: 5
 
 # Point of Sale.
 # This is a chest that can have any items.
@@ -372,6 +375,7 @@ messages:
                 freeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Freeze/disable an account.</white></click>
                 unfreeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Unfreeze/unblock an account.</white></click>
                 delete: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Close a bank account.</white></click>
+                change-owner: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Change account owner.</white></click>
                 instrument: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Create a payment instrument (bank card).</white></click>
                 whois: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Get information about an account.</white></click>
                 baltop: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Top balances leaderboard.</white></click>
@@ -787,17 +791,15 @@ messages:
         delete-vault-account: <red>(!) You cannot delete this account.</red>
         transfer-to-server-vault: <red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>
 
-        # Account balance minimum to change owner not satisfied (placeholders same as balance)
-        # Additional placeholders:
-        # <required-balance> - required min balance, example: 123456.78
-        # <required-balance-formatted> - required min balance with formatting, example: $123,456.78
-        # <required-balance-short> - required min balance with formatting, example: $123k
-        change-owner-balance: "<red>(!) The account balance must be at least <gray><balance-formatted></gray></red>"
-        # Account must have transaction history in order to be transferred
-        change-owner-no-history: "<red>(!) You must have a transaction history in order to change the owner.</red>"
-        # The account is already owned by <player> (the new owner's username)
-        already-owns-account: "<red>(!) This account is already owned by <gray><player></gray>.</red>"
+        # Placeholders:
+        #   <limit> → The maximum number of pending sent ownership change requests.
+        change-owner-limit-send: <red>(!) You’ve reached the limit for pending ownership change requests. You can send up to <gray><limit></gray> at a time.</red>
+
+        # Placeholders:
+        #   <player> → The name of the current account owner.
+        change-owner-same: <red>(!) The account is already owned by <gray><player></gray>.</red>
+
         # Change owner request not found
-        change-owner-not-found: "<red>(!) This account ownership change request was not found.</red>"
+        change-owner-not-found: <red>(!) The account ownership change request was not found.</red>
         # Cannot accept change owner request
-        change-owner-accept-failed: "<red>(!) Failed to accept ownership change request.</red>"
+        change-owner-accept-failed: <red>(!) Failed to accept ownership of account.</red>

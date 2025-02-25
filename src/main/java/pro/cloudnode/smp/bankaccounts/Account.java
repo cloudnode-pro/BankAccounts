@@ -29,6 +29,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Bank account
@@ -534,12 +535,12 @@ public class Account {
         /**
          * Account id
          */
-        public final @NotNull String account;
+        private final @NotNull String account;
 
         /**
          * New owner UUID
          */
-        public final @NotNull UUID newOwner;
+        public final @NotNull OfflinePlayer newOwner;
 
         /**
          * Request creation timestamp
@@ -552,7 +553,7 @@ public class Account {
          * @param account Account to transfer ownership of
          * @param newOwner The new account owner
          */
-        public ChangeOwnerRequest(final @NotNull Account account, final @NotNull UUID newOwner) {
+        public ChangeOwnerRequest(final @NotNull Account account, final @NotNull OfflinePlayer newOwner) {
             this.account = account.id;
             this.newOwner = newOwner;
             this.created = new Date();
@@ -560,7 +561,7 @@ public class Account {
 
         private ChangeOwnerRequest(final @NotNull ResultSet rs) throws SQLException {
             this.account = rs.getString("id");
-            this.newOwner = UUID.fromString(rs.getString("new_owner"));
+            this.newOwner = BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString(rs.getString("new_owner")));
             this.created = new Date(rs.getDate("created").getTime());
         }
 
@@ -569,13 +570,6 @@ public class Account {
          */
         public @NotNull Optional<@NotNull Account> account() {
             return Account.get(account);
-        }
-
-        /**
-         * Get new owner
-         */
-        public @NotNull OfflinePlayer newOwner() {
-            return BankAccounts.getInstance().getServer().getOfflinePlayer(newOwner);
         }
 
         /**
@@ -595,7 +589,7 @@ public class Account {
             final @NotNull Optional<@NotNull Account> account = this.account();
             if (account.isEmpty()) return false;
             if (account.get().frozen) return false;
-            account.get().owner = newOwner();
+            account.get().owner = newOwner;
             account.get().update();
             this.delete();
             return true;
@@ -689,14 +683,14 @@ public class Account {
         }
 
         /**
-         * Get account ownership change requests
+         * List a player's incoming (received) account ownership change requests.
          *
-         * @param newOwner New owner
+         * @param player The player whose requests to list
          */
-        public static @NotNull Account @NotNull [] get(final @NotNull OfflinePlayer newOwner) {
+        public static @NotNull Account @NotNull [] incoming(final @NotNull OfflinePlayer player) {
             try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
                  final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `new_owner` = ?")) {
-                stmt.setString(1, newOwner.getUniqueId().toString());
+                stmt.setString(1, player.getUniqueId().toString());
                 final @NotNull ResultSet rs = stmt.executeQuery();
 
                 final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
@@ -704,7 +698,31 @@ public class Account {
                 return accounts.toArray(new Account[0]);
             }
             catch (final @NotNull Exception e) {
-                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account ownership change requests. newOwner: " + newOwner.getUniqueId(), e);
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get incoming account ownership change requests. player: " + player.getUniqueId(), e);
+                return new Account[0];
+            }
+        }
+
+        /**
+         * List a player’s outgoing (sent) account ownership change requests.
+         *
+         * @param player The player whose requests to list
+         */
+        public static @NotNull Account @NotNull [] outgoing(final @NotNull OfflinePlayer player) {
+            final @NotNull String @NotNull [] ids = Arrays.stream(Account.get(player)).map(a -> a.id).toArray(String[]::new);
+            final @NotNull String placeholders = Arrays.stream(ids).map(id -> "?").collect(Collectors.joining(", "));
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `account` in (" + placeholders + ")")) {
+                for (int i = ids.length; i > 0;)
+                    stmt.setString(i, ids[--i]);
+                final @NotNull ResultSet rs = stmt.executeQuery();
+
+                final @NotNull List<@NotNull Account> accounts = new ArrayList<>();
+                while (rs.next()) accounts.add(new Account(rs));
+                return accounts.toArray(new Account[0]);
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get outgoing account ownership change requests. player: " + player.getUniqueId(), e);
                 return new Account[0];
             }
         }
