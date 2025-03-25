@@ -26,16 +26,6 @@ public final class PAPIIntegration extends PlaceholderExpansion {
         return BankAccounts.getInstance().getPluginMeta().getVersion();
     }
 
-    /**
-     *  Adds the following placeholders:
-     *  <ul>
-     *      <li>%bankaccounts_balance_&lt;accountID&gt;% - returns balance of account with specified ID</li>
-     *      <li>%bankaccounts_balance_formatted_&lt;accountID&gt;% - returns formatted balance of account with specified ID</li>
-     *      <li>%bankaccounts_owner_&lt;accountID&gt;% - returns name of the owner of account with specified ID</li>
-     *      <li>%bankaccounts_type_&lt;accountID&gt;% - returns type of account with specified ID</li>
-     *      <li>%bankaccounts_name_&lt;accountID&gt;% - returns name of account with specified ID</li>
-     *  </ul>
-    */
     @Override
     public String onRequest(final @NotNull OfflinePlayer player, final @NotNull String params) {
         final @NotNull String[] args = params.split("_");
