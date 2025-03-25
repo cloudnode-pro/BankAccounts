@@ -8,6 +8,7 @@ import pro.cloudnode.smp.bankaccounts.BankAccounts;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public final class PAPIIntegration extends PlaceholderExpansion {
     @Override
@@ -66,6 +67,18 @@ public final class PAPIIntegration extends PlaceholderExpansion {
             case "owner" -> args.length != 2 ? null : Account.get(Account.Tag.from(args[1])).map(value -> value.owner.getName()).orElse(null);
             case "type" -> args.length != 2 ? null : Account.get(Account.Tag.from(args[1])).map(value -> value.type.getName()).orElse(null);
             case "name" -> args.length != 2 ? null : Account.get(Account.Tag.from(args[1])).map(value -> value.name).orElse(null);
+            case "account" -> {
+                if (args.length == 2) {
+                    final @NotNull Account @NotNull [] accounts = Account.get(player);
+                    yield switch (args[1]) {
+                        case "list" -> Arrays.stream(accounts).map(account -> account.id).collect(Collectors.joining(", "));
+                        case "names" -> Arrays.stream(accounts).map(Account::name).collect(Collectors.joining(", "));
+                        case "count" -> String.valueOf(accounts.length);
+                        default -> null;
+                    };
+                }
+                yield null;
+            }
             default -> null;
         };
     }
