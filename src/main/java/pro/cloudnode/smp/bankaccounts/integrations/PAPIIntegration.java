@@ -51,6 +51,17 @@ public final class PAPIIntegration extends PlaceholderExpansion {
                             );
                         yield null;
                     }
+                    case "short" -> {
+                        if (args.length == 3)
+                            yield Account.get(Account.Tag.from(args[2])).map(value -> BankAccounts.formatCurrencyShort(value.balance)).orElse(null);
+                        if (args.length == 2)
+                            yield BankAccounts.formatCurrencyShort(
+                                    Arrays.stream(Account.get(player))
+                                            .map(account -> account.balance)
+                                            .reduce(BigDecimal.ZERO, BigDecimal::add)
+                            );
+                        yield null;
+                    }
                     default -> Account.get(Account.Tag.from(args[1])).map(value -> String.valueOf(value.balance)).orElse(null);
                 };
             }
