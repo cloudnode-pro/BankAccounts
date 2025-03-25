@@ -33,6 +33,11 @@ enabling compatibility with third-party plugins that support Vault.
 
 You can create a [Point of Sale](https://github.com/cloudnode-pro/BankAccounts/wiki/POS), which is a type of single-use chest shop. Players can pay using a bank card (`/bank card`).
 
+### PlaceholderAPI Support
+
+BankAccounts provides several *PlaceholderAPI* placeholders that you can use. See
+the [Placeholders Wiki](https://github.com/cloudnode-pro/BankAccounts/wiki/Placeholders) for an exhaustive list.
+
 ### Extensive Configuration
 
 All functionality is fully configurable. See [default config](https://github.com/cloudnode-pro/BankAccounts/blob/master/src/main/resources/config.yml).
