@@ -1,7 +1,11 @@
 [<img src="https://wsrv.nl/?url=https://raw.githubusercontent.com/cloudnode-pro/BankAccounts/master/icon.svg&w=128&output=webp" alt="BankAccounts logo" align="left">](https://modrinth.com/plugin/Dc8RS2En)
 
 # Bank Accounts
-[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En) [![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper) [![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)[![Won’t support Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/unsupported/spigot_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/issues/28)
+[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En)
+[![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper)
+[![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
+[![Won’t support Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/unsupported/spigot_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/issues/28)
+[![Chat with us on Matrix](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/social/matrix-plural_vector.svg)](https://matrix.to/#/#community:cloudnode.pro)
 
 [![Java CI with Maven](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yaml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yaml) [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yaml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yaml) [![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/version/latest) [![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/) [![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
 
