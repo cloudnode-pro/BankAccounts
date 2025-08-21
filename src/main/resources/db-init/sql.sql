@@ -92,3 +92,11 @@ DROP TABLE `pos`;
 ALTER TABLE `new_pos`
     RENAME TO `pos`;
 -- END OF `pos` MODIFICATION
+
+CREATE TABLE IF NOT EXISTS `change_owner_requests`
+(
+    `account` CHAR(16) NOT NULL COLLATE BINARY,
+    `new_owner` CHAR(36) NOT NULL COLLATE BINARY,
+    `created` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (`account`, `new_owner`)
+);
