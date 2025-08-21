@@ -41,6 +41,11 @@ jobs:
           version: ${{ github.event.release.tag_name }}
           changelog: ${{ github.event.release.body }}
           loaders: paper
+          dependencies: |-
+            [{
+              "project_id": "lKEzGugV",
+              "dependency_type": "optional"
+            }]
           game-versions: |-
             1.20.x
             1.21.x
