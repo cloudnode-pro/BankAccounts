@@ -1,9 +1,13 @@
 [<img src="https://wsrv.nl/?url=https://raw.githubusercontent.com/cloudnode-pro/BankAccounts/master/icon.svg&w=128&output=webp" alt="BankAccounts logo" align="left">](https://modrinth.com/plugin/Dc8RS2En)
 
 # Bank Accounts
-[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En) [![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper) [![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
+[![Available on Modrinth](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/modrinth_vector.svg)](https://modrinth.com/plugin/Dc8RS2En)
+[![Available for Paper](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/supported/paper_vector.svg)](https://papermc.io/software/paper)
+[![Available on GitHub](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/available/github_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/)
+[![Won’t support Spigot](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/unsupported/spigot_vector.svg)](https://github.com/cloudnode-pro/BankAccounts/issues/28)
+[![Chat with us on Matrix](https://cdn.jsdelivr.net/npm/@intergrav/devins-badges@3/assets/compact/social/matrix-plural_vector.svg)](https://matrix.to/#/#community:cloudnode.pro)
 
-[![Java CI with Maven](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yml) [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yml) [![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/version/latest) [![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/) [![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
+[![Java CI with Maven](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yaml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/maven.yaml) [![CodeQL](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yaml/badge.svg)](https://github.com/cloudnode-pro/BankAccounts/actions/workflows/codeql.yaml) [![Version](https://img.shields.io/modrinth/v/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/version/latest) [![Game Versions](https://img.shields.io/modrinth/game-versions/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/) [![Downloads](https://img.shields.io/modrinth/dt/Dc8RS2En)](https://modrinth.com/plugin/Dc8RS2En/)
 
 A Minecraft economy plugin that enables players to hold multiple bank accounts.
 
@@ -32,6 +36,11 @@ enabling compatibility with third-party plugins that support Vault.
 ### POS and Bank Cards
 
 You can create a [Point of Sale](https://github.com/cloudnode-pro/BankAccounts/wiki/POS), which is a type of single-use chest shop. Players can pay using a bank card (`/bank card`).
+
+### PlaceholderAPI Support
+
+BankAccounts provides several *PlaceholderAPI* placeholders that you can use. See
+the [Placeholders Wiki](https://github.com/cloudnode-pro/BankAccounts/wiki/Placeholders) for an exhaustive list.
 
 ### Extensive Configuration
 
@@ -75,9 +84,3 @@ If you're interested in contributing, follow these steps:
 4.  Commit your changes with clear and descriptive messages.
 5.  Push your changes to your fork.
 6.  Submit a pull request.
-
-## Thanks To
-
-[<img src="https://github.com/JetBrains/logos/raw/master/web/jetbrains/jetbrains-simple.svg" alt="JetBrains logo" height="96" align="left">](https://www.jetbrains.com)
-
-[JetBrains](https://www.jetbrains.com/), creators of the IntelliJ IDEA, supports BankAccounts with one of their [Open Source Licenses](https://www.jetbrains.com/opensource/). IntelliJ IDEA is the recommended IDE for working with BankAccounts.
