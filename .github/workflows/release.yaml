@@ -27,7 +27,7 @@ jobs:
         run: mvn -B clean package --file pom.xml
 
       - name: Upload to release
-        uses: cloudnode-pro/release-upload-asset@1.0.2
+        uses: cloudnode-pro/release-upload-asset@v1
         with:
           gh-token: ${{ github.token }}
           files: target/BankAccounts-${{ github.event.release.tag_name }}.jar; type=application/java-archive
