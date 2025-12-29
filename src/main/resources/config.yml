@@ -182,6 +182,20 @@ instruments:
         # BankAccounts will always use level 1 of the enchantment.
         enchantment: unbreaking
 
+# Change account owner
+change-owner:
+    # Require confirmation/approval by the new owner.
+    # To bypass approval and forcefully transfer ownership, use the ‘bank.change.owner.bypass.confirm’ permission.
+    confirm: true
+
+    # In minutes, when should an ownership change request expire.
+    timeout: 15
+
+    # The maximum number of pending sent ownership change requests that a player can have (to prevent spam).
+    # Set to ‘0’ to disable and allow unlimited ownership change requests.
+    # To bypass this limit, use the ‘bank.change.owner.bypass.limit’ permission.
+    limit-send: 5
+
 # Point of Sale.
 # This is a chest that can have any items.
 # Players can buy all the items in the POS for the specified price.
@@ -361,6 +375,7 @@ messages:
                 freeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Freeze/disable an account.</white></click>
                 unfreeze: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Unfreeze/unblock an account.</white></click>
                 delete: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Close a bank account.</white></click>
+                change-owner: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Change account owner.</white></click>
                 instrument: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Create a payment instrument (bank card).</white></click>
                 whois: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Get information about an account.</white></click>
                 baltop: <click:suggest_command:/<command> ><green>/<command></green> <gray><arguments></gray> <white>- Top balances leaderboard.</white></click>
@@ -664,6 +679,30 @@ messages:
         #   <unpaid-choice> → Choice placeholder for unpaid invoices.
         #     See: https://docs.advntr.dev/minimessage/dynamic-replacements.html#insert-a-choice
         notify: <click:run_command:/invoice list><hover:show_text:'Click to view unpaid invoices'><yellow>(!) You have <gray><unpaid></gray> unpaid invoice<unpaid-choice:'1#|1<s'>. <gray>Click to view.</gray></yellow></hover></click>
+    
+    # Account owner change requests
+    change-owner:
+        # You have received a request to become the new account owner
+        # Placeholders:
+        # <new-owner-uuid> - new owner UUID
+        # <new-owner> - new owner username.
+        # <accept-command> - command to accept the request
+        # <account> - Account name. Defaults to owner username or ID if not set.
+        # <account-id> - Account ID
+        # <account-type> - Account type (Personal or Business)
+        # <account-owner> - Account owner username
+        # <balance> - Account balance without formatting, example: 123456.78
+        # <balance-formatted> - Account balance with formatting, example: $123,456.78
+        # <balance-short> - Account balance with formatting, example: $123k
+        request: <green>(!) You have received a request to become the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray><newline><click:run_command:<accept-command>> <dark_gray>></dark_gray> <green><bold>ACCEPT</bold></green></click>
+
+        # You have sent an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        sent: <green>(!) You have sent a request to <gray><new-owner></gray> to become the new owner of account <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>.</green>
+
+        # You have accepted an account owner change request
+        # Same placeholders as details (except <accept-command>)
+        accepted: <click:run_command:/bank bal <account-id>><green>(!) You are now the new owner of <gray><hover:show_text:'<white><account></white><newline><gray><account-type><dark_gray>:</dark_gray> <green><balance-formatted></green></gray><newline><gray>Owned by <account-owner></gray><newline><gray><account-id></gray>'><account></hover></gray>. Click to view account.</green></click>
 
     # A new version of the plugin is available.
     # Placeholders:
@@ -751,3 +790,16 @@ messages:
         async-failed: <red>(!) The request failed. See the console for details.</red>
         delete-vault-account: <red>(!) You cannot delete this account.</red>
         transfer-to-server-vault: <red>(!) You cannot transfer funds to this account. This account is for internal use only.</red>
+
+        # Placeholders:
+        #   <limit> → The maximum number of pending sent ownership change requests.
+        change-owner-limit-send: <red>(!) You’ve reached the limit for pending ownership change requests. You can send up to <gray><limit></gray> at a time.</red>
+
+        # Placeholders:
+        #   <player> → The name of the current account owner.
+        change-owner-same: <red>(!) The account is already owned by <gray><player></gray>.</red>
+
+        # Change owner request not found
+        change-owner-not-found: <red>(!) The account ownership change request was not found.</red>
+        # Cannot accept change owner request
+        change-owner-accept-failed: <red>(!) Failed to accept ownership of account.</red>
