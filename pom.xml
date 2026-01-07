@@ -5,14 +5,51 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>pro.cloudnode.smp</groupId>
-    <artifactId>BankAccounts</artifactId>
+    <artifactId>bankaccounts</artifactId>
     <version>0.0.0-SNAPSHOT</version>
     <packaging>jar</packaging>
-
     <name>BankAccounts</name>
+    <description>A Minecraft economy plugin that enables players to hold multiple bank accounts.</description>
+    <url>https://github.com/cloudnode-pro/BankAccounts/</url>
+    <inceptionYear>2023</inceptionYear>
+
+    <organization>
+        <name>Cloudnode</name>
+        <url>https://cloudnode.pro</url>
+    </organization>
+
+    <issueManagement>
+        <system>GitHub</system>
+        <url>https://github.com/cloudnode-pro/BankAccounts/issues</url>
+    </issueManagement>
+
+
+    <licenses>
+        <license>
+            <name>GNU General Public License v3.0</name>
+            <url>https://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <id>cloudnode</id>
+            <name>Cloudnode</name>
+            <email>software@cloudnode.pro</email>
+        </developer>
+    </developers>
+
+    <scm>
+        <connection>scm:git:https://github.com/cloudnode-pro/BankAccounts.git</connection>
+        <developerConnection>scm:git:git@github.com:cloudnode-pro/BankAccounts.git</developerConnection>
+        <url>https://github.com/cloudnode-pro/BankAccounts</url>
+    </scm>
 
     <properties>
         <java.version>17</java.version>
+        <game.version>1.20.4</game.version>
+        <maven.compiler.release>${java.version}</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -27,19 +64,53 @@
                     <target>${java.version}</target>
                 </configuration>
             </plugin>
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.6.1</version>
+                <artifactId>maven-source-plugin</artifactId>
+                <version>3.4.0</version>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-sources</id>
                         <goals>
-                            <goal>shade</goal>
+                            <goal>jar</goal>
                         </goals>
-                        <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
-                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-javadoc-plugin</artifactId>
+                <version>3.12.0</version>
+                <configuration>
+                    <overview>${project.basedir}/README.md</overview>
+                    <source>${java.version}</source>
+                    <links>
+                        <link>https://jd.papermc.io/paper/${game.version}</link>
+                    </links>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>attach-javadocs</id>
+                        <goals>
+                            <goal>jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-gpg-plugin</artifactId>
+                <version>3.2.8</version>
+                <executions>
+                    <execution>
+                        <id>sign-artifacts</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>sign</goal>
+                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -58,10 +129,6 @@
             <url>https://repo.papermc.io/repository/maven-public/</url>
         </repository>
         <repository>
-            <id>sonatype</id>
-            <url>https://oss.sonatype.org/content/groups/public/</url>
-        </repository>
-        <repository>
             <id>placeholderapi</id>
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
@@ -75,7 +142,7 @@
         <dependency>
             <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.20.4-R0.1-SNAPSHOT</version>
+            <version>${game.version}-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -85,22 +152,18 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>org.mariadb.jdbc</groupId>
-            <artifactId>mariadb-java-client</artifactId>
-            <version>3.5.7</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.11.7</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>com.github.MilkBowl</groupId>
-            <artifactId>VaultAPI</artifactId>
-            <version>1.7.1</version>
+            <groupId>com.h2database</groupId>
+            <artifactId>h2</artifactId>
+            <version>2.4.240</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <distributionManagement>
+        <repository>
+            <id>central</id>
+            <name>Maven Central Repository</name>
+            <url>https://central.sonatype.com/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
 </project>

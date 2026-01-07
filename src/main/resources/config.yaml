@@ -1,0 +1,37 @@
+################################################################################
+# +--------------------------------------------------------------------------+ #
+# |         __                       __   __   __            ___  __         | #
+# |        |__)  /\  |\ | |__/  /\  /  ` /  ` /  \ |  | |\ |  |  /__`        | #
+# |        |__) /~~\ | \| |  \ /~~\ \__, \__, \__/ \__/ | \|  |  .__/        | #
+# |                                                                          | #
+# |                              from cloudnode                              | #
+# |                                                                          | #
+# |  Wiki:          https://github.com/cloudnode-pro/BankAccounts/wiki       | #
+# |  Report issues: https://github.com/cloudnode-pro/BankAccounts/issues     | #
+# |                                                                          | #
+# |  The configuration is documented and explained in detail here:           | #
+# |  https://github.com/cloudnode-pro/BankAccounts/wiki/Configuration        | #
+# |                                                                          | #
+# |  New options are not automatically added to your configuration file.     | #
+# |  If an option is missing, the default value will be used. You can view   | #
+# |  the latest configuration at the link above.                             | #
+# +--------------------------------------------------------------------------+ #
+################################################################################
+
+# +--------------------------------------------------------------------------+ #
+# |                                                                          | #
+# |                           FINE-TUNING OPTIONS                            | #
+# |                                                                          | #
+# | Advanced settings for adjusting behaviour. You only need to change these | #
+# |              options if you want to fine-tune BankAccounts.              | #
+# |                                                                          | #
+# +--------------------------------------------------------------------------+ #
+
+# Controls the length of generated IDs.
+# The maximum permissible length for all IDs is 32.
+# IDs are in base58, using the digits 1–9, the letters A–Z (except I and O), and
+# the letters a–z (except l).
+# The total number of IDs for any given length is calculated as 58^length.
+id-length:
+  account: 6
+  transaction: 8
