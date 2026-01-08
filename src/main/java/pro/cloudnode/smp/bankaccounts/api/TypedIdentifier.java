@@ -31,6 +31,17 @@ import java.util.stream.Collectors;
  */
 public record TypedIdentifier(@NotNull Type type, @NotNull String id) {
     /**
+     * Constructs a typed identifier from a string type.
+     *
+     * @param type the type of the resource
+     * @param id   the identifier of the resource
+     * @throws IllegalArgumentException if the type is unknown
+     */
+    public TypedIdentifier(final @NotNull String type, final @NotNull String id) {
+        this(Type.fromName(type), id);
+    }
+
+    /**
      * Parses a typed identifier from a string in the format {@code <type>:<id>}.
      *
      * @param identifier the identifier string to parse
