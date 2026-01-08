@@ -1,7 +1,8 @@
 CREATE TABLE bank_meta
 (
-    name VARCHAR(255) PRIMARY KEY NOT NULL,
-    val  VARCHAR(255)             NOT NULL
+    name VARCHAR(255) NOT NULL,
+    val  VARCHAR(255) NOT NULL,
+    PRIMARY KEY (name)
 );
 
 INSERT INTO bank_meta (name, val)

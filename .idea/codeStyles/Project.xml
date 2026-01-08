@@ -11,6 +11,10 @@
       <option name="NEW_LINE_AFTER_LPAREN_IN_RECORD_HEADER" value="true" />
       <option name="RPAREN_ON_NEW_LINE_IN_RECORD_HEADER" value="true" />
     </JavaCodeStyleSettings>
+    <SqlCodeStyleSettings version="7">
+      <option name="KEYWORD_CASE" value="2" />
+      <option name="TYPE_CASE" value="2" />
+    </SqlCodeStyleSettings>
     <codeStyleSettings language="JAVA">
       <option name="LINE_COMMENT_AT_FIRST_COLUMN" value="false" />
       <option name="BLOCK_COMMENT_AT_FIRST_COLUMN" value="false" />
@@ -373,6 +377,9 @@
           </section>
         </rules>
       </arrangement>
+    </codeStyleSettings>
+    <codeStyleSettings language="SQL">
+      <option name="KEEP_FIRST_COLUMN_COMMENT" value="false" />
     </codeStyleSettings>
     <codeStyleSettings language="yaml">
       <option name="LINE_COMMENT_AT_FIRST_COLUMN" value="false" />
