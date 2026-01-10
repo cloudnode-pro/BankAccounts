@@ -25,7 +25,7 @@ import java.util.Optional;
  * Represents a bank account.
  */
 public final class Account {
-    private final @NotNull String id;
+    private final @NotNull AccountId id;
     private final @NotNull Type type;
     private final @NotNull Instant created;
     private boolean allowNegative;
@@ -33,7 +33,7 @@ public final class Account {
     private @Nullable String name;
 
     Account(
-            final @NotNull String id,
+            final @NotNull AccountId id,
             final @NotNull Type type,
             final boolean allowNegative,
             final @NotNull Status status,
@@ -54,7 +54,7 @@ public final class Account {
      * @return the account ID
      */
     @NotNull
-    public String id() {
+    public AccountId id() {
         return id;
     }
 

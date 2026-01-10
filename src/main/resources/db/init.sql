@@ -38,3 +38,16 @@ CREATE TABLE bank_ledger_entries
 );
 
 CREATE INDEX idx_bank_ledger_entries_account_created_desc ON bank_ledger_entries (account, created DESC);
+
+CREATE TABLE bank_account_acl_entries
+(
+    subject_type VARCHAR(64) NOT NULL,
+    subject_id   VARCHAR(64) NOT NULL,
+    relation     VARCHAR(64) NOT NULL,
+    account      VARCHAR(32) NOT NULL,
+    created                  NOT NULL,
+    PRIMARY KEY (subject_type, subject_id, account),
+    FOREIGN KEY (account) REFERENCES bank_accounts (id) ON DELETE CASCADE
+);
+
+CREATE INDEX idx_bank_account_acl_entries_subject ON bank_account_acl_entries (subject_type, subject_id);

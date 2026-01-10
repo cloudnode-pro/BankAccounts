@@ -160,50 +160,6 @@
               <match>
                 <AND>
                   <FIELD>true</FIELD>
-                  <FINAL>true</FINAL>
-                  <PUBLIC>true</PUBLIC>
-                </AND>
-              </match>
-            </rule>
-          </section>
-          <section>
-            <rule>
-              <match>
-                <AND>
-                  <FIELD>true</FIELD>
-                  <FINAL>true</FINAL>
-                  <PROTECTED>true</PROTECTED>
-                </AND>
-              </match>
-            </rule>
-          </section>
-          <section>
-            <rule>
-              <match>
-                <AND>
-                  <FIELD>true</FIELD>
-                  <FINAL>true</FINAL>
-                  <PACKAGE_PRIVATE>true</PACKAGE_PRIVATE>
-                </AND>
-              </match>
-            </rule>
-          </section>
-          <section>
-            <rule>
-              <match>
-                <AND>
-                  <FIELD>true</FIELD>
-                  <FINAL>true</FINAL>
-                  <PRIVATE>true</PRIVATE>
-                </AND>
-              </match>
-            </rule>
-          </section>
-          <section>
-            <rule>
-              <match>
-                <AND>
-                  <FIELD>true</FIELD>
                   <PUBLIC>true</PUBLIC>
                 </AND>
               </match>
@@ -236,13 +192,6 @@
                   <FIELD>true</FIELD>
                   <PRIVATE>true</PRIVATE>
                 </AND>
-              </match>
-            </rule>
-          </section>
-          <section>
-            <rule>
-              <match>
-                <FIELD>true</FIELD>
               </match>
             </rule>
           </section>

@@ -74,13 +74,13 @@ public final class AccountsService extends Service {
      * @throws InternalException        if the account cannot be persisted due to an internal error
      */
     @NotNull
-    public Account create(final @NotNull String id, final @NotNull Account.Type type) throws InternalException {
-        if (id.length() > MAX_ID_LENGTH) {
+    public Account create(final @NotNull AccountId id, final @NotNull Account.Type type) throws InternalException {
+        if (id.id().length() > MAX_ID_LENGTH) {
             throw new IllegalArgumentException(String.format("Account ID cannot exceed %d characters", MAX_ID_LENGTH));
         }
 
         try {
-            if (repository.exists(id)) {
+            if (repository.exists(id.id())) {
                 throw new IllegalArgumentException(String.format("Account with ID %s already exists", id));
             }
         } catch (final Repository.RepositoryException e) {
@@ -113,7 +113,7 @@ public final class AccountsService extends Service {
             String id = IdGenerator.BASE58.random(idLength);
             try {
                 if (!repository.exists(id)) {
-                    return create(id, type);
+                    return create(new AccountId(id), type);
                 }
             } catch (final Repository.RepositoryException e) {
                 logger.log(
@@ -142,9 +142,9 @@ public final class AccountsService extends Service {
      * @throws InternalException if the account cannot be retrieved due to an internal error
      */
     @NotNull
-    public Optional<Account> get(final @NotNull String id) throws InternalException {
+    public Optional<Account> get(final @NotNull AccountId id) throws InternalException {
         try {
-            return repository.getById(id);
+            return repository.getById(id.id());
         } catch (final Repository.RepositoryException e) {
             logger.log(Level.SEVERE, String.format("Failed to retrieve account with ID: %s", id), e);
             throw new InternalException("Failed to retrieve account");
@@ -155,18 +155,18 @@ public final class AccountsService extends Service {
     /**
      * Retrieves the account with the specified ID if it is not frozen.
      *
-     * @param accountId the ID of the account to retrieve
+     * @param id the ID of the account to retrieve
      * @return the account if found and not frozen
      * @throws AccountNotFoundException if no account exists with the given ID
      * @throws AccountFrozenException   if the account is frozen
      * @throws InternalException        if the account cannot be retrieved due to an internal error
      */
     @NotNull
-    public Account getNonFrozenAccountOrThrow(String accountId)
+    public Account getNonFrozenAccountOrThrow(final @NotNull AccountId id)
             throws AccountNotFoundException, AccountFrozenException, InternalException {
-        final Account account = get(accountId).orElseThrow(() -> new AccountNotFoundException(accountId));
+        final Account account = get(id).orElseThrow(() -> new AccountNotFoundException(id));
         if (account.frozen()) {
-            throw new AccountFrozenException(accountId);
+            throw new AccountFrozenException(id);
         }
         return account;
     }
@@ -181,7 +181,7 @@ public final class AccountsService extends Service {
          * @param id the account ID
          */
         @ApiStatus.Internal
-        public AccountNotFoundException(final @NotNull String id) {
+        public AccountNotFoundException(final @NotNull AccountId id) {
             super(String.format("Account %s does not exist", id));
         }
     }
@@ -196,7 +196,7 @@ public final class AccountsService extends Service {
          * @param id the account ID
          */
         @ApiStatus.Internal
-        public AccountFrozenException(final @NotNull String id) {
+        public AccountFrozenException(final @NotNull AccountId id) {
             super(String.format("Account %s is frozen", id));
         }
     }

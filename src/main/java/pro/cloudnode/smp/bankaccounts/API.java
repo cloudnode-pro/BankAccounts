@@ -17,6 +17,7 @@ package pro.cloudnode.smp.bankaccounts;
 
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.api.account.AccountsService;
+import pro.cloudnode.smp.bankaccounts.api.acl.AclService;
 import pro.cloudnode.smp.bankaccounts.api.ledger.LedgerService;
 
 import javax.sql.DataSource;
@@ -36,6 +37,11 @@ public final class API {
      */
     public final @NotNull LedgerService ledger;
 
+    /**
+     * Service for managing access control lists (ACLs) and relations.
+     */
+    public final @NotNull AclService acl;
+
     API(
             final @NotNull Logger parentLogger,
             final @NotNull DataSource dataSource,
@@ -44,5 +50,6 @@ public final class API {
     ) {
         this.accounts = new AccountsService(parentLogger, dataSource, idLengthAccount);
         this.ledger = new LedgerService(parentLogger, dataSource, accounts, idLengthTransaction);
+        this.acl = new AclService(parentLogger, dataSource);
     }
 }
