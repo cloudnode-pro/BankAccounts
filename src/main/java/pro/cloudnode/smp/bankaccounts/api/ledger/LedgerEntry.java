@@ -17,6 +17,7 @@ package pro.cloudnode.smp.bankaccounts.api.ledger;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import pro.cloudnode.smp.bankaccounts.api.account.AccountId;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -27,26 +28,26 @@ import java.util.Optional;
  */
 public final class LedgerEntry {
     private final @NotNull String id;
-    private final @NotNull String account;
+    private final @NotNull AccountId account;
     private final @NotNull BigDecimal amount;
     private final @NotNull BigDecimal balance;
     private final @NotNull Instant created;
     private final @NotNull LedgerEntry.Initiator initiator;
     private final @NotNull String channel;
     private final @Nullable String description;
-    private final @Nullable String relatedAccount;
+    private final @Nullable AccountId relatedAccount;
     private final @Nullable String previousId;
 
     LedgerEntry(
             final @NotNull String id,
-            final @NotNull String account,
+            final @NotNull AccountId account,
             final @NotNull BigDecimal amount,
             final @NotNull BigDecimal balance,
             final @NotNull Instant created,
             final @NotNull LedgerEntry.Initiator initiator,
             final @NotNull String channel,
             final @Nullable String description,
-            final @Nullable String relatedAccount,
+            final @Nullable AccountId relatedAccount,
             final @Nullable String previousId
     ) {
         this.id = id;
@@ -77,7 +78,7 @@ public final class LedgerEntry {
      * @return the account ID
      */
     @NotNull
-    public String account() {
+    public AccountId account() {
         return account;
     }
 
@@ -149,7 +150,7 @@ public final class LedgerEntry {
      * @return the related account ID if the account exists, empty otherwise
      */
     @NotNull
-    public Optional<String> relatedAccount() {
+    public Optional<AccountId> relatedAccount() {
         return Optional.ofNullable(relatedAccount);
     }
 

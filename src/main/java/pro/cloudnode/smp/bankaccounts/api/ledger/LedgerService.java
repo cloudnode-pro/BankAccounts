@@ -22,6 +22,7 @@ import pro.cloudnode.smp.bankaccounts.api.IdGenerator;
 import pro.cloudnode.smp.bankaccounts.api.Repository;
 import pro.cloudnode.smp.bankaccounts.api.Service;
 import pro.cloudnode.smp.bankaccounts.api.account.Account;
+import pro.cloudnode.smp.bankaccounts.api.account.AccountId;
 import pro.cloudnode.smp.bankaccounts.api.account.AccountsService;
 
 import javax.sql.DataSource;
@@ -79,10 +80,10 @@ public final class LedgerService extends Service {
      * @throws InternalException if the ledger could not be queried due to an internal error
      */
     @NotNull
-    public Optional<LedgerEntry> getLast(final @NotNull String account) throws InternalException {
+    public Optional<LedgerEntry> getLast(final @NotNull AccountId account) throws InternalException {
         final List<LedgerEntry> latest;
         try {
-            latest = repository.getLatest(account, 1);
+            latest = repository.getLatest(account.id(), 1);
         } catch (final Repository.RepositoryException e) {
             logger.log(Level.SEVERE, String.format("Failed to get last ledger entry for account %s", account), e);
             throw new InternalException("Failed to get ledger entry");
@@ -103,10 +104,10 @@ public final class LedgerService extends Service {
      * entries
      * @throws InternalException if the balance could not be queried due to an internal error
      * @see LedgerEntry#balance()
-     * @see #getLast(String)
+     * @see #getLast(AccountId)
      */
     @NotNull
-    public BigDecimal getBalance(final @NotNull String account) throws InternalException {
+    public BigDecimal getBalance(final @NotNull AccountId account) throws InternalException {
         return getLast(account).map(LedgerEntry::balance).orElse(BigDecimal.ZERO);
     }
 
@@ -129,8 +130,8 @@ public final class LedgerService extends Service {
      */
     @NotNull
     public Transaction createTransfer(
-            final @NotNull String sender,
-            final @NotNull String recipient,
+            final @NotNull AccountId sender,
+            final @NotNull AccountId recipient,
             final @NotNull BigDecimal amount,
             final @NotNull LedgerEntry.Initiator initiator,
             final @NotNull String channel,
@@ -285,7 +286,7 @@ public final class LedgerService extends Service {
         /**
          * ID of the account which has insufficient funds.
          */
-        public final @NotNull String account;
+        public final @NotNull AccountId account;
 
         /**
          * Balance of the account.
@@ -298,7 +299,7 @@ public final class LedgerService extends Service {
         public final @NotNull BigDecimal amount;
 
         private InsufficientBalanceException(
-                final @NotNull String account,
+                final @NotNull AccountId account,
                 final @NotNull BigDecimal balance,
                 final @NotNull BigDecimal amount
         ) {
