@@ -15,30 +15,27 @@
 
 package pro.cloudnode.smp.bankaccounts.api;
 
-import org.bukkit.OfflinePlayer;
 import org.jetbrains.annotations.NotNull;
+import pro.cloudnode.smp.bankaccounts.Serializable;
 
-import java.util.Arrays;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 /**
- * Represents a typed identifier of a resource.
- *
- * @param type the type of the resource
- * @param id   the identifier of the resource
+ * Represents a typed identifier.
  */
-public record TypedIdentifier(@NotNull Type type, @NotNull String id) {
+public class TypedIdentifier implements Serializable {
+    private final @NotNull Type type;
+    private final @NotNull String id;
+
     /**
-     * Constructs a typed identifier from a string type.
+     * Constructs a typed identifier.
      *
-     * @param type the type of the resource
-     * @param id   the identifier of the resource
-     * @throws IllegalArgumentException if the type is unknown
+     * @param type the type
+     * @param id   the identifier
      */
-    public TypedIdentifier(final @NotNull String type, final @NotNull String id) {
-        this(Type.fromName(type), id);
+    public TypedIdentifier(final @NotNull Type type, final @NotNull String id) {
+        this.type = type;
+        this.id = id;
     }
 
     /**
@@ -49,26 +46,15 @@ public record TypedIdentifier(@NotNull Type type, @NotNull String id) {
      * @throws IllegalArgumentException if the identifier format is invalid or the type is unknown
      */
     @NotNull
-    public static TypedIdentifier fromString(final @NotNull String identifier) {
+    public static TypedIdentifier deserialize(final @NotNull String identifier) {
         final int colonIndex = identifier.indexOf(':');
         if (colonIndex == -1) {
             throw new IllegalArgumentException(String.format("Invalid identifier: %s", identifier));
         }
         return new TypedIdentifier(
-                Type.fromName(identifier.substring(0, colonIndex)),
+                Type.deserialize(identifier.substring(0, colonIndex)),
                 identifier.substring(colonIndex + 1)
         );
-    }
-
-    /**
-     * Creates a typed identifier for a player.
-     *
-     * @param player the player to create the identifier for
-     * @return the typed identifier for the player
-     */
-    @NotNull
-    public static TypedIdentifier player(final @NotNull OfflinePlayer player) {
-        return new TypedIdentifier(Type.PLAYER, player.getUniqueId().toString());
     }
 
     /**
@@ -78,54 +64,66 @@ public record TypedIdentifier(@NotNull Type type, @NotNull String id) {
      */
     @Override
     @NotNull
-    public String toString() {
-        return type.getName() + ':' + id;
+    public String serialize() {
+        return type.toString() + ':' + id;
     }
 
     /**
-     * Represents the type of resource.
+     * Returns the identifier type.
+     *
+     * @return the type
      */
-    public enum Type {
+    public @NotNull Type type() {
+        return type;
+    }
+
+    /**
+     * Returns the identifier value.
+     *
+     * @return the identifier
+     */
+    public @NotNull String id() {
+        return id;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == this) {
+            return true;
+        }
+        if (!(obj instanceof final TypedIdentifier ti)) {
+            return false;
+        }
+        return this.type == ti.type && this.id.equals(ti.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(type.serialize(), id);
+    }
+
+    /**
+     * Represents an identifier type.
+     */
+    public enum Type implements Serializable {
         /**
-         * {@link pro.cloudnode.smp.bankaccounts.api.account.Account} type.
+         * Represents an account holder.
          */
-        ACCOUNT("account"),
+        HOLDER,
 
         /**
-         * {@link org.bukkit.OfflinePlayer} type.
+         * Represents an account.
          */
-        PLAYER("player");
+        ACCOUNT;
 
-        private static final @NotNull Map<String, Type> typeMap = Arrays.stream(Type.values())
-                .collect(Collectors.toUnmodifiableMap(Type::getName, Function.identity()));
-        private final @NotNull String name;
-
-        Type(final @NotNull String name) {
-            this.name = name;
+        @NotNull
+        public static Type deserialize(final @NotNull String value) {
+            return valueOf(value.toUpperCase());
         }
 
-        /**
-         * Returns the type corresponding to the given name.
-         *
-         * @param name the name to get the type for
-         * @return the corresponding type
-         * @throws IllegalArgumentException if the name is unknown
-         */
-        public static @NotNull Type fromName(final @NotNull String name) {
-            final Type type = typeMap.get(name);
-            if (type == null) {
-                throw new IllegalArgumentException(String.format("Unknown type: %s", name));
-            }
-            return type;
-        }
-
-        /**
-         * Returns the name of this type.
-         *
-         * @return the type name
-         */
-        public final @NotNull String getName() {
-            return name;
+        @Override
+        public @NotNull String serialize() {
+            return name().toLowerCase();
         }
     }
 }
