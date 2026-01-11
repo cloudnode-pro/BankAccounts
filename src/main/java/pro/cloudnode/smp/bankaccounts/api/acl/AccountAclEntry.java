@@ -17,6 +17,7 @@ package pro.cloudnode.smp.bankaccounts.api.acl;
 
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
+import pro.cloudnode.smp.bankaccounts.api.account.AccountId;
 
 import java.time.Instant;
 
@@ -27,10 +28,10 @@ public final class AccountAclEntry extends AccessControlListEntry<AccountAclEntr
     AccountAclEntry(
             final @NotNull TypedIdentifier subject,
             final @NotNull AccountAclEntry.Role role,
-            final @NotNull String account,
+            final @NotNull AccountId account,
             final @NotNull Instant created
     ) {
-        super(subject, role, new TypedIdentifier(TypedIdentifier.Type.ACCOUNT, account), created);
+        super(subject, role, account, created);
     }
 
     /**
@@ -43,7 +44,7 @@ public final class AccountAclEntry extends AccessControlListEntry<AccountAclEntr
     public AccountAclEntry(
             final @NotNull TypedIdentifier subject,
             final @NotNull Role role,
-            final @NotNull String account
+            final @NotNull AccountId account
     ) {
         this(subject, role, account, Instant.now());
     }
@@ -54,8 +55,8 @@ public final class AccountAclEntry extends AccessControlListEntry<AccountAclEntr
      * @return the account ID
      */
     @NotNull
-    public String account() {
-        return resource().id();
+    public AccountId account() {
+        return (AccountId) resource();
     }
 
     /**
