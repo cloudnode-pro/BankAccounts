@@ -18,6 +18,8 @@ package pro.cloudnode.smp.bankaccounts.api.ledger;
 import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.api.Repository;
+import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
+import pro.cloudnode.smp.bankaccounts.api.account.AccountId;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -147,14 +149,14 @@ public final class LedgerRepository extends Repository<LedgerEntry> {
                             """,
                     Stream.of(transaction.debit(), transaction.credit()).<Binder>map((ledgerEntry) -> (stmt) -> {
                         stmt.setString(1, ledgerEntry.id());
-                        stmt.setString(2, ledgerEntry.account());
+                        stmt.setString(2, ledgerEntry.account().id());
                         stmt.setBigDecimal(3, ledgerEntry.amount());
                         stmt.setBigDecimal(4, ledgerEntry.balance());
                         stmt.setTimestamp(5, Timestamp.from(ledgerEntry.created()));
                         stmt.setInt(6, ledgerEntry.initiator().ordinal());
                         stmt.setString(7, ledgerEntry.channel());
                         stmt.setString(8, ledgerEntry.description().orElse(null));
-                        stmt.setString(9, ledgerEntry.relatedAccount().orElse(null));
+                        stmt.setString(9, ledgerEntry.relatedAccount().map(TypedIdentifier::id).orElse(null));
                         stmt.setString(10, ledgerEntry.previousId().orElse(null));
                     }).toList()
             );
@@ -172,14 +174,14 @@ public final class LedgerRepository extends Repository<LedgerEntry> {
     protected LedgerEntry map(final @NotNull ResultSet resultSet) throws SQLException {
         return new LedgerEntry(
                 resultSet.getString("id"),
-                resultSet.getString("account"),
+                new AccountId(resultSet.getString("account")),
                 resultSet.getBigDecimal("amount"),
                 resultSet.getBigDecimal("balance"),
                 resultSet.getTimestamp("created").toInstant(),
                 LedgerEntry.Initiator.values()[resultSet.getInt("initiator")],
                 resultSet.getString("channel"),
                 resultSet.getString("description"),
-                resultSet.getString("related_account"),
+                new AccountId(resultSet.getString("related_account")),
                 resultSet.getString("previous_id")
         );
     }

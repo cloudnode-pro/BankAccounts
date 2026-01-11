@@ -85,7 +85,7 @@ public final class AccountsRepository extends Repository<Account> {
                             created
                         ) VALUES (?, ?, ?, ?, ?, ?)
                         """, stmt -> {
-                    stmt.setString(1, account.id());
+                    stmt.setString(1, account.id().id());
                     stmt.setInt(2, account.type().ordinal());
                     stmt.setBoolean(3, account.allowNegative());
                     stmt.setInt(4, account.status().ordinal());
@@ -109,7 +109,7 @@ public final class AccountsRepository extends Repository<Account> {
                     stmt.setBoolean(1, account.allowNegative());
                     stmt.setInt(2, account.status().ordinal());
                     stmt.setString(3, account.name().orElse(null));
-                    stmt.setString(4, account.id());
+                    stmt.setString(4, account.id().id());
                 }
         ) > 0;
 
@@ -123,7 +123,7 @@ public final class AccountsRepository extends Repository<Account> {
     @NotNull
     protected Account map(final @NotNull ResultSet resultSet) throws SQLException {
         return new Account(
-                resultSet.getString("id"),
+                new AccountId(resultSet.getString("id")),
                 Account.Type.values()[resultSet.getInt("type")],
                 resultSet.getBoolean("allow_negative"),
                 Account.Status.values()[resultSet.getInt("status")],
