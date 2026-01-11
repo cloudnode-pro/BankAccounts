@@ -89,8 +89,20 @@ public final class AccountAclEntry extends AccessControlListEntry<AccountAclEntr
         OWNER;
 
         @Override
-        public final @NotNull String serialize() {
+        @NotNull
+        public final String serialize() {
             return name().toLowerCase();
+        }
+
+        /**
+         * Returns a role from string.
+         *
+         * @param value the string representation of the role
+         * @return the role
+         */
+        @NotNull
+        public static Role deserialize(final @NotNull String value) {
+            return valueOf(value.toUpperCase());
         }
     }
 }
