@@ -19,6 +19,7 @@ import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import pro.cloudnode.smp.bankaccounts.api.Repository;
 import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
+import pro.cloudnode.smp.bankaccounts.api.account.AccountId;
 
 import javax.sql.DataSource;
 import java.sql.ResultSet;
@@ -118,7 +119,7 @@ public final class AccountAclRepository extends Repository<AccountAclEntry> {
                     stmt.setString(1, entry.subject().type().name());
                     stmt.setString(2, entry.subject().id());
                     stmt.setString(3, entry.relation().serialize());
-                    stmt.setString(4, entry.account());
+                    stmt.setString(4, entry.account().id());
                     stmt.setTimestamp(5, Timestamp.from(entry.created()));
                 }
         );
@@ -142,7 +143,7 @@ public final class AccountAclRepository extends Repository<AccountAclEntry> {
                     stmt.setString(1, entry.relation().serialize());
                     stmt.setString(2, entry.subject().type().name());
                     stmt.setString(3, entry.subject().id());
-                    stmt.setString(4, entry.account());
+                    stmt.setString(4, entry.account().id());
                 }
         ) > 0;
 
@@ -184,7 +185,7 @@ public final class AccountAclRepository extends Repository<AccountAclEntry> {
                         resultSet.getString("subject_id")
                 ),
                 AccountAclEntry.Role.valueOf(resultSet.getString("relation").toUpperCase()),
-                resultSet.getString("account"),
+                new AccountId(resultSet.getString("account")),
                 resultSet.getTimestamp("created").toInstant()
         );
     }
