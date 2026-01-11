@@ -39,6 +39,16 @@ public class TypedIdentifier implements Serializable {
     }
 
     /**
+     * Constructs a typed identifier.
+     *
+     * @param type the type
+     * @param id   the identifier
+     */
+    public TypedIdentifier(final @NotNull Type type, final @NotNull Serializable id) {
+        this(type, id.serialize());
+    }
+
+    /**
      * Parses a typed identifier from a string in the format {@code <type>:<id>}.
      *
      * @param identifier the identifier string to parse
@@ -114,7 +124,12 @@ public class TypedIdentifier implements Serializable {
         /**
          * Represents an account.
          */
-        ACCOUNT;
+        ACCOUNT,
+
+        /**
+         * Represents a player entity.
+         */
+        PLAYER;
 
         /**
          * Returns a type from a string.
