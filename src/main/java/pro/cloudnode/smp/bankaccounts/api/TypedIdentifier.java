@@ -116,6 +116,12 @@ public class TypedIdentifier implements Serializable {
          */
         ACCOUNT;
 
+        /**
+         * Returns a type from a string.
+         *
+         * @param value the string representation of the type
+         * @return the type
+         */
         @NotNull
         public static Type deserialize(final @NotNull String value) {
             return valueOf(value.toUpperCase());
