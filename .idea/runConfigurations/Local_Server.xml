@@ -4,7 +4,8 @@
     <option name="VM_PARAMETERS" value="-Xmx8G" />
     <option name="PROGRAM_PARAMETERS" value="-nogui" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/server" />
-    <option name="ALTERNATIVE_JRE_PATH" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <option name="ALTERNATIVE_JRE_PATH" value="temurin-25" />
     <method v="2">
       <option name="BuildArtifacts" enabled="true">
         <artifact name="BankAccounts" />
