@@ -13,24 +13,25 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-package pro.cloudnode.smp.bankaccounts.api.holder;
+package pro.cloudnode.smp.bankaccounts.internal.listeners;
 
+import net.milkbowl.vault.permission.Permission;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
+import org.bukkit.event.server.ServiceRegisterEvent;
+import org.bukkit.plugin.RegisteredServiceProvider;
 import org.jetbrains.annotations.NotNull;
-import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
+import pro.cloudnode.smp.bankaccounts.internal.permission.PermissionManager;
 
-/**
- * Represents an account holder.
- *
- * @param id   the holder identifier
- * @param name the public display name of the holder
- */
-public record Holder(@NotNull HolderId id, @NotNull String name) {
-    /**
-     * Returns the identifier of the holder entity.
-     * @return the entity identifier
-     */
-    @NotNull
-    public TypedIdentifier entity() {
-        return id.entity();
+public record VaultPermissionRegisterListener(@NotNull PermissionManager manager) implements Listener {
+    @EventHandler
+    public void onRegister(final @NotNull ServiceRegisterEvent event) {
+        final RegisteredServiceProvider<?> provider = event.getProvider();
+
+        if (!provider.getService().equals(Permission.class)) {
+            return;
+        }
+
+        manager.setVault((Permission) provider.getProvider());
     }
 }

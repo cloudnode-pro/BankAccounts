@@ -89,6 +89,11 @@
                     <links>
                         <link>https://jd.papermc.io/paper/${game.version}</link>
                     </links>
+                    <show>protected</show>
+                    <sourcepath>${project.basedir}/src/main/java</sourcepath>
+                    <excludePackageNames>
+                        pro.cloudnode.smp.bankaccounts.internal*
+                    </excludePackageNames>
                 </configuration>
                 <executions>
                     <execution>
@@ -155,6 +160,12 @@
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
             <version>2.4.240</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.github.MilkBowl</groupId>
+            <artifactId>VaultAPI</artifactId>
+            <version>1.7.1</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>

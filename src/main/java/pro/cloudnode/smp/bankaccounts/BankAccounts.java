@@ -28,6 +28,7 @@ public final class BankAccounts extends JavaPlugin {
     private BankConfig config;
     private HikariDataSource dataSource;
     private API api;
+    private boolean vault;
 
     /**
      * Constructs BankAccounts.
@@ -66,7 +67,9 @@ public final class BankAccounts extends JavaPlugin {
     @ApiStatus.Internal
     @Override
     public void onDisable() {
-        dataSource.close();
+        if (dataSource != null) {
+            dataSource.close();
+        }
         dataSource = null;
         config = null;
         api = null;
@@ -74,6 +77,8 @@ public final class BankAccounts extends JavaPlugin {
 
     private void reload() {
         this.onDisable();
+
+        vault = getServer().getPluginManager().isPluginEnabled("Vault");
 
         config = new BankConfig(this);
 

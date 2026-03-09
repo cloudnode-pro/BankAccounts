@@ -13,24 +13,19 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-package pro.cloudnode.smp.bankaccounts.api.holder;
+package pro.cloudnode.smp.bankaccounts.internal.auth;
 
 import org.jetbrains.annotations.NotNull;
-import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
+import pro.cloudnode.smp.bankaccounts.api.holder.HolderId;
+
+import java.time.Instant;
 
 /**
- * Represents an account holder.
+ * Represents an API token.
  *
- * @param id   the holder identifier
- * @param name the public display name of the holder
+ * @param holder     the token subject identifier
+ * @param apiHost    the host (including port) of the API server
+ * @param expiration the token expiration time
  */
-public record Holder(@NotNull HolderId id, @NotNull String name) {
-    /**
-     * Returns the identifier of the holder entity.
-     * @return the entity identifier
-     */
-    @NotNull
-    public TypedIdentifier entity() {
-        return id.entity();
-    }
+public record Token(@NotNull HolderId holder, @NotNull String apiHost, @NotNull Instant expiration) {
 }

@@ -13,24 +13,33 @@
  * <https://www.gnu.org/licenses/>.
  */
 
-package pro.cloudnode.smp.bankaccounts.api.holder;
+package pro.cloudnode.smp.bankaccounts.internal.auth;
 
+import org.bukkit.permissions.Permission;
 import org.jetbrains.annotations.NotNull;
-import pro.cloudnode.smp.bankaccounts.api.TypedIdentifier;
 
 /**
- * Represents an account holder.
- *
- * @param id   the holder identifier
- * @param name the public display name of the holder
+ * Represents an authentication scope.
  */
-public record Holder(@NotNull HolderId id, @NotNull String name) {
+public enum Scope {
     /**
-     * Returns the identifier of the holder entity.
-     * @return the entity identifier
+     * Read-only access to accounts.
+     */
+    ACCOUNT_READ;
+
+    private final @NotNull Permission permission;
+
+    Scope() {
+        this.permission = new Permission("bank." + name().toLowerCase().replace('_', '.'));
+    }
+
+    /**
+     * Returns the Bukkit permission of this scope.
+     *
+     * @return the permission
      */
     @NotNull
-    public TypedIdentifier entity() {
-        return id.entity();
+    public final Permission permission() {
+        return permission;
     }
 }
