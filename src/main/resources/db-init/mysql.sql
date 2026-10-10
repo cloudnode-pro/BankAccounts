@@ -66,3 +66,11 @@ ALTER TABLE `pos`
 
 ALTER TABLE `bank_invoices`
     CHANGE COLUMN `description` `description` VARCHAR(64) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci DEFAULT NULL;
+    
+CREATE TABLE IF NOT EXISTS `change_owner_requests`
+(
+    `account`   CHAR(16) CHARACTER SET latin1 COLLATE latin1_general_cs NOT NULL,
+    `new_owner` CHAR(36) CHARACTER SET latin1 COLLATE latin1_general_ci NOT NULL,
+    `created`   DATETIME NOT NULL DEFAULT UTC_TIMESTAMP(),
+    KEY `id` (`account`, `new_owner`)
+);
