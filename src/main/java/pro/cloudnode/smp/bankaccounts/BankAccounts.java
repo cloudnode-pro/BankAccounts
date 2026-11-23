@@ -171,6 +171,7 @@ public final class BankAccounts extends JavaPlugin {
             getInstance().invoiceNotificationTask = null;
         }
         getInstance().setupInvoiceNotificationTimer();
+        getInstance().setupChangeOwnerCleanupTimer();
     }
 
     /**
@@ -268,6 +269,16 @@ public final class BankAccounts extends JavaPlugin {
                     player.sendMessage(message.get());
             }
         }, config().invoiceNotifyInterval() * 20L, config().invoiceNotifyInterval() * 20L);
+    }
+
+    private @Nullable BukkitTask changeOwnerCleanupTask = null;
+
+    /**
+     * Periodically delete expired account ownership change requests
+     */
+    private void setupChangeOwnerCleanupTimer() {
+        if (changeOwnerCleanupTask != null) changeOwnerCleanupTask.cancel();
+        changeOwnerCleanupTask = getServer().getScheduler().runTaskTimerAsynchronously(this, Account.ChangeOwnerRequest::deleteExpired, 0L, 20L * 60 * 5);
     }
 
     private void interestPayment(final @NotNull Account account, final @NotNull BigDecimal amount, final double rate, final @NotNull Account serverAccount) {

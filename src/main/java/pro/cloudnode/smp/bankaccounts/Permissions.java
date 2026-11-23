@@ -16,7 +16,7 @@ public final class Permissions {
     public static final @NotNull String DELETE = "bank.delete";
     public static final @NotNull String CHANGE_OWNER = "bank.change.owner";
     public static final @NotNull String CHANGE_OWNER_OTHER = "bank.change.owner.other";
-    public static final @NotNull String CHANGE_OWNER_BYPASS_CONFIRM = "bank.change.owner.bypass.confirm";
+    public static final @NotNull String CHANGE_OWNER_FORCE = "bank.change.owner.force";
     public static final @NotNull String CHANGE_OWNER_BYPASS_LIMIT = "bank.change.owner.bypass.limit";
     public static final @NotNull String CHANGE_OWNER_ACCEPT = "bank.change.owner.accept";
     public static final @NotNull String BALTOP = "bank.baltop";

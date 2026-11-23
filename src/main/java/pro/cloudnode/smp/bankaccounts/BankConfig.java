@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -807,6 +808,16 @@ public final class BankConfig {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-accept-failed")));
     }
 
+    // messages.errors.change-owner-vault-account
+    public @NotNull Component messagesErrorsChangeOwnerVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-vault-account")));
+    }
+
+    // messages.errors.change-owner-frozen
+    public @NotNull Component messagesErrorsChangeOwnerFrozen() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-frozen")));
+    }
+
     // messages.errors.async-failed
     public @NotNull Component messagesErrorsAsyncFailed() {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.async-failed")));
@@ -1525,6 +1536,39 @@ public final class BankConfig {
                         .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
                         .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
                 Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
+    // messages.change-owner.confirm and messages.change-owner.confirm-force
+    public @NotNull Component messagesChangeOwnerConfirm(final @NotNull Account account, final @NotNull OfflinePlayer newOwner, final @NotNull String confirmCommand, final boolean force) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString(force ? "messages.change-owner.confirm-force" : "messages.change-owner.confirm"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<confirm-command>", confirmCommand)
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
+    }
+
+    // messages.change-owner.transferred
+    public @NotNull Component messagesChangeOwnerTransferred(final @NotNull Account account, final @NotNull OfflinePlayer newOwner) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.transferred"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
         );
     }
 
