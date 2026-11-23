@@ -7,6 +7,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.Formatter;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Registry;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.enchantments.Enchantment;
@@ -236,6 +237,21 @@ public final class BankConfig {
     // instruments.glint.enchantment
     public @NotNull Enchantment instrumentsGlintEnchantment() {
         return Objects.requireNonNull(Registry.ENCHANTMENT.get(NamespacedKey.minecraft(Objects.requireNonNull(config.getString("instruments.glint.enchantment")))));
+    }
+
+    // change-owner.confirm
+    public boolean changeOwnerConfirm() {
+        return config.getBoolean("change-owner.confirm");
+    }
+
+    // change-owner.timeout
+    public int changeOwnerTimeout() {
+        return config.getInt("change-owner.timeout");
+    }
+
+    // change-owner.limit-send
+    public int changeOwnerLimitSend() {
+        return config.getInt("change-owner.limit-send");
     }
 
     // pos.allow-personal
@@ -764,6 +780,42 @@ public final class BankConfig {
     // messages.errors.player-never-joined
     public @NotNull Component messagesErrorsPlayerNeverJoined() {
         return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.player-never-joined")));
+    }
+
+    // messages.errors.change-owner-same
+    public @NotNull Component messagesErrorsAlreadyOwnsAccount(final @NotNull Account account) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.change-owner-same")),
+                Placeholder.parsed("player", account.ownerNameUnparsed())
+        );
+    }
+
+    // messages.errors.change-owner-limit-send
+    public @NotNull Component messagesErrorsChangeOwnerLimitSend() {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.errors.change-owner-limit-send")),
+                Placeholder.unparsed("limit", String.valueOf(this.changeOwnerLimitSend()))
+        );
+    }
+
+    // messages.errors.change-owner-not-found
+    public @NotNull Component messagesErrorsChangeOwnerNotFound() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-not-found")));
+    }
+
+    // messages.errors.change-owner-accept-failed
+    public @NotNull Component messagesErrorsChangeOwnerAcceptFailed() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-accept-failed")));
+    }
+
+    // messages.errors.change-owner-vault-account
+    public @NotNull Component messagesErrorsChangeOwnerVaultAccount() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-vault-account")));
+    }
+
+    // messages.errors.change-owner-frozen
+    public @NotNull Component messagesErrorsChangeOwnerFrozen() {
+        return MiniMessage.miniMessage().deserialize(Objects.requireNonNull(config.getString("messages.errors.change-owner-frozen")));
     }
 
     // messages.errors.async-failed
@@ -1449,6 +1501,94 @@ public final class BankConfig {
                 Formatter.choice("unpaid-choice", unpaid)
         ));
     }
+    
+    // messages.change-owner.request
+    public @NotNull Component messagesChangeOwnerRequest(final @NotNull Account.ChangeOwnerRequest request, final @NotNull String acceptCommand) {
+        final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.request"))
+                        .replace("<new-owner-uuid>", request.newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", request.newOwner.getName() == null ? "<i>unknown player</i>" : request.newOwner.getName())
+                        .replace("<accept-command>", acceptCommand)
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
+                Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
+    // messages.change-owner.sent
+    public @NotNull Component messagesChangeOwnerSent(final @NotNull Account.ChangeOwnerRequest request) {
+        final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.sent"))
+                        .replace("<new-owner-uuid>", request.newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", request.newOwner.getName() == null ? "<i>unknown player</i>" : request.newOwner.getName())
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
+                Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
+
+    // messages.change-owner.confirm and messages.change-owner.confirm-force
+    public @NotNull Component messagesChangeOwnerConfirm(final @NotNull Account account, final @NotNull OfflinePlayer newOwner, final @NotNull String confirmCommand, final boolean force) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString(force ? "messages.change-owner.confirm-force" : "messages.change-owner.confirm"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<confirm-command>", confirmCommand)
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
+    }
+
+    // messages.change-owner.transferred
+    public @NotNull Component messagesChangeOwnerTransferred(final @NotNull Account account, final @NotNull OfflinePlayer newOwner) {
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.transferred"))
+                        .replace("<new-owner-uuid>", newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", newOwner.getName() == null ? "<i>unknown player</i>" : newOwner.getName())
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance))
+        );
+    }
+
+    // messages.change-owner.accepted
+    public @NotNull Component messagesChangeOwnerAccepted(final @NotNull Account.ChangeOwnerRequest request) {
+        final @NotNull Account account = request.account().orElse(new Account.ClosedAccount());
+        return MiniMessage.miniMessage().deserialize(
+                Objects.requireNonNull(config.getString("messages.change-owner.accepted"))
+                        .replace("<new-owner-uuid>", request.newOwner.getUniqueId().toString())
+                        .replace("<new-owner>", request.newOwner.getName() == null ? "<i>unknown player</i>" : request.newOwner.getName())
+                        .replace("<account>", account.name())
+                        .replace("<account-id>", account.id)
+                        .replace("<account-type>", account.type.getName())
+                        .replace("<account-owner>", account.ownerNameUnparsed())
+                        .replace("<balance>", account.balance == null ? "∞" : account.balance.toPlainString())
+                        .replace("<balance-formatted>", BankAccounts.formatCurrency(account.balance))
+                        .replace("<balance-short>", BankAccounts.formatCurrencyShort(account.balance)),
+                Formatter.date("date", request.created.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime())
+        );
+    }
 
     // messages.update-available
     public @NotNull Component messagesUpdateAvailable(final @NotNull ModrinthUpdate update) {
@@ -1471,6 +1611,7 @@ public final class BankConfig {
         FREEZE("freeze"),
         UNFREEZE("unfreeze"),
         DELETE("delete"),
+        CHANGE_OWNER("change-owner"),
         INSTRUMENT("instrument"),
         WHOIS("whois"),
         BALTOP("baltop"),

@@ -23,11 +23,13 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * Bank account
@@ -40,7 +42,7 @@ public class Account {
     /**
      * Account owner
      */
-    public final @NotNull OfflinePlayer owner;
+    public @NotNull OfflinePlayer owner;
     /**
      * Account type
      */
@@ -381,13 +383,14 @@ public class Account {
      */
     public void update() {
         try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
-             final @NotNull PreparedStatement stmt = conn.prepareStatement("UPDATE `bank_accounts` SET `name` = ?, `balance` = ?, `frozen` = ? WHERE `id` = ?")) {
-            if (name == null) stmt.setNull(1, java.sql.Types.VARCHAR);
-            else stmt.setString(1, name);
-            if (balance == null) stmt.setNull(2, java.sql.Types.DECIMAL);
-            else stmt.setBigDecimal(2, balance);
-            stmt.setBoolean(3, frozen);
-            stmt.setString(4, id);
+             final @NotNull PreparedStatement stmt = conn.prepareStatement("UPDATE `bank_accounts` SET `owner` = ?, `name` = ?, `balance` = ?, `frozen` = ? WHERE `id` = ?")) {
+            stmt.setString(1, owner.getUniqueId().toString());
+            if (name == null) stmt.setNull(2, java.sql.Types.VARCHAR);
+            else stmt.setString(2, name);
+            if (balance == null) stmt.setNull(3, java.sql.Types.DECIMAL);
+            else stmt.setBigDecimal(3, balance);
+            stmt.setBoolean(4, frozen);
+            stmt.setString(5, id);
 
             stmt.executeUpdate();
         } catch (final @NotNull Exception e) {
@@ -406,6 +409,7 @@ public class Account {
         } catch (final @NotNull Exception e) {
             BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account: " + id, e);
         }
+        ChangeOwnerRequest.delete(id);
     }
 
     /**
@@ -523,6 +527,212 @@ public class Account {
              * Vault account by username
              */
             USERNAME
+        }
+    }
+
+    /**
+     * A request to change the owner of a bank account (sent to the new owner)
+     */
+    public final static class ChangeOwnerRequest {
+        /**
+         * Account id
+         */
+        private final @NotNull String account;
+
+        /**
+         * New owner
+         */
+        public final @NotNull OfflinePlayer newOwner;
+
+        /**
+         * Request creation timestamp
+         */
+        public final @NotNull Date created;
+
+        /**
+         * Create a new account ownership transfer request instance
+         *
+         * @param account Account to transfer ownership of
+         * @param newOwner The new account owner
+         */
+        public ChangeOwnerRequest(final @NotNull Account account, final @NotNull OfflinePlayer newOwner) {
+            this.account = account.id;
+            this.newOwner = newOwner;
+            this.created = new Date();
+        }
+
+        private ChangeOwnerRequest(final @NotNull ResultSet rs) throws SQLException {
+            this.account = rs.getString("account");
+            this.newOwner = BankAccounts.getInstance().getServer().getOfflinePlayer(UUID.fromString(rs.getString("new_owner")));
+            this.created = new Date(rs.getTimestamp("created").getTime());
+        }
+
+        /**
+         * Get account
+         */
+        public @NotNull Optional<@NotNull Account> account() {
+            return Account.get(account);
+        }
+
+        /**
+         * Check if request has expired
+         */
+        public boolean expired() {
+            return System.currentTimeMillis() - created.getTime() > BankAccounts.getInstance().config().changeOwnerTimeout() * 60_000L;
+        }
+
+        /**
+         * Confirm/accept the request
+         * <p>
+         * This also deletes any other pending requests for the same account.
+         *
+         * @return Whether the change was successful
+         */
+        public boolean confirm() {
+            final @NotNull Optional<@NotNull Account> account = this.account();
+            if (account.isEmpty()) return false;
+            if (account.get().frozen) return false;
+            account.get().owner = newOwner;
+            account.get().update();
+            ChangeOwnerRequest.delete(this.account);
+            return true;
+        }
+
+        /**
+         * Insert into database, replacing any existing request for the same account and new owner
+         */
+        public void insert() {
+            this.delete();
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("INSERT INTO `change_owner_requests` (`account`, `new_owner`, `created`) VALUES (?, ?, ?)")) {
+                stmt.setString(1, account);
+                stmt.setString(2, newOwner.getUniqueId().toString());
+                stmt.setTimestamp(3, new java.sql.Timestamp(created.getTime()));
+
+                stmt.executeUpdate();
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not save account ownership change request. account: " + account + ", newOwner: " + newOwner.getUniqueId(), e);
+            }
+        }
+
+        /**
+         * Delete from database
+         */
+        public void delete() {
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("DELETE FROM `change_owner_requests` WHERE `account` = ? AND `new_owner` = ?")) {
+                stmt.setString(1, account);
+                stmt.setString(2, newOwner.getUniqueId().toString());
+                stmt.executeUpdate();
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account ownership change request. account: " + account + ", newOwner: " + newOwner.getUniqueId(), e);
+            }
+        }
+
+        /**
+         * Delete all requests to transfer a certain account
+         *
+         * @param account Account ID
+         */
+        public static void delete(final @NotNull String account) {
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("DELETE FROM `change_owner_requests` WHERE `account` = ?")) {
+                stmt.setString(1, account);
+                stmt.executeUpdate();
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete account ownership change requests. account: " + account, e);
+            }
+        }
+
+        /**
+         * Delete expired requests
+         */
+        public static void deleteExpired() {
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("DELETE FROM `change_owner_requests` WHERE `created` < ?")) {
+                stmt.setTimestamp(1, new java.sql.Timestamp(System.currentTimeMillis() - BankAccounts.getInstance().config().changeOwnerTimeout() * 60_000L));
+                stmt.executeUpdate();
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not delete expired account ownership change requests", e);
+            }
+        }
+
+        /**
+         * Get account ownership change request
+         *
+         * @param account Account ID
+         * @param newOwner New owner
+         */
+        public static @NotNull Optional<@NotNull ChangeOwnerRequest> get(final @NotNull String account, final @NotNull OfflinePlayer newOwner) {
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `account` = ? AND `new_owner` = ? LIMIT 1")) {
+                stmt.setString(1, account);
+                stmt.setString(2, newOwner.getUniqueId().toString());
+                final @NotNull ResultSet rs = stmt.executeQuery();
+                return rs.next() ? Optional.of(new ChangeOwnerRequest(rs)) : Optional.empty();
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get account ownership change request. account: " + account + ", newOwner: " + newOwner.getUniqueId(), e);
+                return Optional.empty();
+            }
+        }
+
+        /**
+         * List a player's incoming (received) account ownership change requests that have not expired.
+         *
+         * @param player The player whose requests to list
+         */
+        public static @NotNull ChangeOwnerRequest @NotNull [] incoming(final @NotNull OfflinePlayer player) {
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `new_owner` = ?")) {
+                stmt.setString(1, player.getUniqueId().toString());
+                final @NotNull ResultSet rs = stmt.executeQuery();
+
+                final @NotNull List<@NotNull ChangeOwnerRequest> requests = new ArrayList<>();
+                while (rs.next()) {
+                    final @NotNull ChangeOwnerRequest request = new ChangeOwnerRequest(rs);
+                    if (!request.expired()) requests.add(request);
+                }
+                return requests.toArray(new ChangeOwnerRequest[0]);
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get incoming account ownership change requests. player: " + player.getUniqueId(), e);
+                return new ChangeOwnerRequest[0];
+            }
+        }
+
+        /**
+         * List a player's outgoing (sent) account ownership change requests that have not expired.
+         * <p>
+         * These are requests for accounts that the player currently owns.
+         *
+         * @param player The player whose requests to list
+         */
+        public static @NotNull ChangeOwnerRequest @NotNull [] outgoing(final @NotNull OfflinePlayer player) {
+            final @NotNull String @NotNull [] ids = Arrays.stream(Account.get(player)).map(a -> a.id).toArray(String[]::new);
+            if (ids.length == 0) return new ChangeOwnerRequest[0];
+            final @NotNull String placeholders = Arrays.stream(ids).map(id -> "?").collect(Collectors.joining(", "));
+            try (final @NotNull Connection conn = BankAccounts.getInstance().getDb().getConnection();
+                 final @NotNull PreparedStatement stmt = conn.prepareStatement("SELECT * FROM `change_owner_requests` WHERE `account` IN (" + placeholders + ")")) {
+                for (int i = 0; i < ids.length; i++)
+                    stmt.setString(i + 1, ids[i]);
+                final @NotNull ResultSet rs = stmt.executeQuery();
+
+                final @NotNull List<@NotNull ChangeOwnerRequest> requests = new ArrayList<>();
+                while (rs.next()) {
+                    final @NotNull ChangeOwnerRequest request = new ChangeOwnerRequest(rs);
+                    if (!request.expired()) requests.add(request);
+                }
+                return requests.toArray(new ChangeOwnerRequest[0]);
+            }
+            catch (final @NotNull Exception e) {
+                BankAccounts.getInstance().getLogger().log(Level.SEVERE, "Could not get outgoing account ownership change requests. player: " + player.getUniqueId(), e);
+                return new ChangeOwnerRequest[0];
+            }
         }
     }
 }

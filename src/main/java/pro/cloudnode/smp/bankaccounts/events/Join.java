@@ -38,6 +38,15 @@ public final class Join implements Listener {
                 player.sendMessage(BankAccounts.getInstance().config().messagesUpdateAvailable(latestVersion))
             ), 20L);
         }
+        if (player.hasPermission(Permissions.CHANGE_OWNER_ACCEPT)) {
+            BankAccounts.getInstance().getServer().getScheduler().runTaskLaterAsynchronously(BankAccounts.getInstance(), () -> {
+                for (final @NotNull Account.ChangeOwnerRequest request : Account.ChangeOwnerRequest.incoming(player)) {
+                    final @NotNull Optional<@NotNull Account> account = request.account();
+                    if (account.isEmpty()) continue;
+                    player.sendMessage(BankAccounts.getInstance().config().messagesChangeOwnerRequest(request, "/bank acceptchangeowner " + account.get().id));
+                }
+            }, 20L);
+        }
         if (player.hasPermission(Permissions.INVOICE_NOTIFY) && BankAccounts.getInstance().config().invoiceNotifyJoin() && Invoice.countUnpaid(player) > 0) {
             BankAccounts.getInstance().getServer().getScheduler().runTaskLater(BankAccounts.getInstance(), () -> {
                 final @NotNull Optional<@NotNull Component> message = BankAccounts.getInstance().config().messagesInvoiceNotify(Invoice.countUnpaid(player));
